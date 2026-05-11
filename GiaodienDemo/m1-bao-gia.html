@@ -6,53 +6,112 @@
   <title>Báo giá nhanh – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    /* cargo mode toggle */
-    .cargo-mode { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:14px; }
-    .cargo-mode-btn { flex:1; padding:7px 6px; font-size:12px; font-weight:600; background:white; border:none; cursor:pointer; color:var(--text-secondary); transition:all 0.15s; }
-    .cargo-mode-btn.active { background:var(--primary); color:white; }
-    /* vehicles */
-    .vehicle-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
-    @media (max-width:1024px) { .vehicle-grid { grid-template-columns:repeat(2, 1fr); } }
-    .vehicle-card { border:2px solid var(--border); border-radius:10px; padding:9px 7px; cursor:pointer; transition:all 0.13s; text-align:center; position:relative; }
-    .vehicle-card:hover { border-color:var(--primary); background:var(--primary-xlight); }
-    .vehicle-card.selected { border-color:var(--primary); background:var(--primary-xlight); }
-    .vehicle-card.suggested { border-color:#22c55e; background:#f0fdf4; }
-    .vehicle-card.suggested.selected { border-color:var(--primary); background:var(--primary-xlight); }
-    .vc-icon  { font-size:20px; margin-bottom:2px; }
-    .vc-name  { font-size:12px; font-weight:700; color:var(--text-primary); }
-    .vc-dim   { font-size:10px; color:var(--text-muted); margin-top:1px; line-height:1.3; }
-    .vc-price { font-size:11px; color:var(--primary); font-weight:600; margin-top:2px; }
-    .vc-badge { position:absolute; top:3px; right:3px; background:#16a34a; color:white; font-size:9px; font-weight:700; padding:1px 5px; border-radius:10px; }
-    /* result rows */
-    .result-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed #e2e8f0; font-size:13px; }
-    .result-row:last-of-type { border-bottom:none; }
-    .result-row .label { color:var(--text-secondary); }
-    .result-row .value { font-weight:600; }
-    .result-row.return .label, .result-row.return .value { color:#c2410c; }
-    .result-total { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--primary); border-radius:8px; color:white; margin-top:8px; }
-    .result-total .label { font-size:14px; font-weight:600; }
-    .result-total .value { font-size:22px; font-weight:800; }
-    /* addon tags */
-    .addon-tag { display:inline-flex; align-items:center; gap:4px; background:#f1f5f9; border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all 0.13s; margin:3px; }
-    .addon-tag.active { background:var(--primary-light); border-color:var(--primary); color:var(--primary); }
-    /* round-trip row */
-    .round-trip-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; padding:8px 12px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; margin-top:10px; }
-    .round-trip-row label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#c2410c; cursor:pointer; }
-    /* steps */
-    .step-indicator { display:flex; align-items:center; margin-bottom:20px; }
-    .step { display:flex; align-items:center; gap:6px; }
-    .step-num { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; background:var(--border); color:var(--text-muted); flex-shrink:0; }
-    .step.done .step-num { background:#dcfce7; color:#16a34a; }
-    .step.active .step-num { background:var(--primary); color:white; }
-    .step-label { font-size:12px; font-weight:500; color:var(--text-muted); white-space:nowrap; }
-    .step.active .step-label { color:var(--primary); font-weight:700; }
-    .step-line { flex:1; height:1px; background:var(--border); min-width:16px; }
-    @media (max-width:600px) { .step-label { display:none; } }
-    /* qty stepper */
+    /* ── layout ── */
+    .baogia-wrap { display:grid; grid-template-columns:1fr 380px; gap:18px; align-items:start; }
+    @media(max-width:1280px){ .baogia-wrap { grid-template-columns:1fr 340px; } }
+    @media(max-width:1024px){ .baogia-wrap { grid-template-columns:1fr; } }
+
+    /* ── section cards ── */
+    .bg-card { background:white; border-radius:14px; border:1px solid var(--border); padding:16px 18px; margin-bottom:14px; }
+    .bg-card-title { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+
+    /* ── customer ── */
+    .cust-search { position:relative; }
+    .cust-search input { width:100%; padding-left:36px; }
+    .cust-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); }
+
+    /* ── route ── */
+    .route-box { display:flex; flex-direction:column; gap:0; }
+    .route-input-wrap { display:flex; align-items:center; gap:10px; padding:10px 0; }
+    .route-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .route-dot.origin  { background:#22c55e; box-shadow:0 0 0 3px #dcfce7; }
+    .route-dot.dest    { background:#ef4444; box-shadow:0 0 0 3px #fee2e2; }
+    .route-line-seg { width:2px; height:22px; background:#e2e8f0; margin-left:5px; }
+    .route-input { flex:1; border:none; outline:none; font-size:14px; font-weight:500; background:transparent; color:var(--text-primary); }
+    .route-input::placeholder { color:var(--text-muted); font-weight:400; }
+    .route-sep { display:flex; align-items:center; justify-content:space-between; padding:2px 0 2px 22px; }
+    .route-swap-btn { width:28px; height:28px; border-radius:50%; border:1px solid var(--border); background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:14px; transition:all 0.15s; }
+    .route-swap-btn:hover { background:var(--primary); color:white; border-color:var(--primary); }
+    .route-dist-badge { font-size:11px; color:var(--text-muted); }
+    .route-outer { border:1px solid var(--border); border-radius:10px; padding:4px 12px; }
+
+    /* ── datetime row ── */
+    .dt-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    @media(max-width:600px){ .dt-row { grid-template-columns:1fr 1fr; } }
+
+    /* ── vehicle scroll ── */
+    .vehicle-scroll { display:flex; gap:9px; overflow-x:auto; padding-bottom:6px; scrollbar-width:none; }
+    .vehicle-scroll::-webkit-scrollbar { display:none; }
+    .vcard { flex-shrink:0; width:100px; border:2px solid var(--border); border-radius:12px; padding:10px 6px 8px; cursor:pointer; text-align:center; transition:all 0.13s; position:relative; background:white; }
+    .vcard:hover { border-color:var(--primary); }
+    .vcard.sel { border-color:var(--primary); background:#eff6ff; }
+    .vcard.fit { border-color:#22c55e; }
+    .vcard.fit.sel { border-color:var(--primary); background:#eff6ff; }
+    .vcard-icon { font-size:26px; margin-bottom:3px; }
+    .vcard-name { font-size:12px; font-weight:700; }
+    .vcard-dim  { font-size:10px; color:var(--text-muted); line-height:1.35; margin-top:2px; }
+    .vcard-price{ font-size:11px; color:var(--primary); font-weight:600; margin-top:3px; }
+    .vcard-badge{ position:absolute; top:-1px; right:-1px; background:#16a34a; color:white; font-size:9px; font-weight:700; padding:2px 5px; border-radius:0 10px 0 8px; }
+
+    /* ── cargo mode ── */
+    .mode-tabs { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:12px; }
+    .mode-tab { flex:1; padding:7px 4px; font-size:12px; font-weight:600; background:white; border:none; cursor:pointer; color:var(--text-secondary); transition:all .15s; }
+    .mode-tab.active { background:var(--primary); color:white; }
+
+    /* ── VAT toggle ── */
+    .vat-row { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; margin-bottom:4px; }
+    .vat-label { display:flex; align-items:center; gap:9px; }
+    .vat-label .icon { font-size:18px; }
+    .vat-label .txt  { font-size:13px; font-weight:700; color:#92400e; }
+    .vat-label .sub  { font-size:11px; color:#b45309; }
+    .toggle-sw { position:relative; width:42px; height:24px; cursor:pointer; }
+    .toggle-sw input { opacity:0; width:0; height:0; }
+    .toggle-track { position:absolute; inset:0; background:#cbd5e1; border-radius:12px; transition:.2s; }
+    .toggle-track:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:white; border-radius:50%; transition:.2s; }
+    .toggle-sw input:checked ~ .toggle-track { background:var(--primary); }
+    .toggle-sw input:checked ~ .toggle-track:before { transform:translateX(18px); }
+
+    /* ── surcharge list ── */
+    .sc-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f1f5f9; }
+    .sc-row:last-child { border-bottom:none; }
+    .sc-check { width:17px; height:17px; cursor:pointer; accent-color:var(--primary); flex-shrink:0; }
+    .sc-label { flex:1; font-size:13px; color:var(--text-primary); }
+    .sc-label .sc-name { font-weight:500; }
+    .sc-label .sc-desc { font-size:11px; color:var(--text-muted); }
+    .sc-right { display:flex; align-items:center; gap:4px; font-size:12px; color:var(--text-secondary); }
+    .sc-input { width:80px; padding:4px 7px; border:1px solid var(--border); border-radius:6px; font-size:12px; text-align:right; background:#f8fafc; }
+    .sc-add-btn { width:100%; padding:9px; border:1.5px dashed #f97316; border-radius:8px; background:transparent; color:#f97316; font-size:13px; font-weight:600; cursor:pointer; margin-top:6px; }
+    .sc-add-btn:hover { background:#fff7ed; }
+
+    /* ── right panel ── */
+    .right-panel { position:sticky; top:16px; display:flex; flex-direction:column; gap:14px; }
+    @media(max-width:1024px){ .right-panel { position:static; } }
+
+    /* ── map mock ── */
+    .map-mock { border-radius:12px; overflow:hidden; border:1px solid var(--border); background:#e8eef3; position:relative; height:220px; }
+    .map-mock svg { width:100%; height:100%; }
+    .map-bubble { position:absolute; background:white; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.18); padding:6px 10px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:5px; }
+    .map-bubble.dist { top:50%; left:50%; transform:translate(-50%,-50%); }
+    .map-label { position:absolute; background:white; border:2px solid var(--border); border-radius:6px; font-size:11px; font-weight:600; padding:3px 7px; }
+    .map-label.origin { top:14px; left:14px; }
+    .map-label.dest { bottom:14px; right:14px; color:var(--primary); border-color:var(--primary); }
+
+    /* ── price breakdown ── */
+    .price-row { display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px solid #f1f5f9; font-size:13px; }
+    .price-row:last-child { border-bottom:none; }
+    .price-row .pl { color:var(--text-secondary); display:flex; align-items:center; gap:6px; }
+    .price-row .pv { font-weight:600; }
+    .price-row.return .pl,.price-row.return .pv { color:#c2410c; }
+    .price-divider { height:1px; background:var(--border); margin:8px 0; }
+    .price-total-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0 2px; }
+    .price-total-lbl { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .price-total-val { font-size:24px; font-weight:800; color:var(--primary); }
+
+    /* ── qty stepper ── */
     .qty-stepper { display:inline-flex; align-items:center; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-    .qty-btn { width:32px; height:34px; background:#f1f5f9; border:none; cursor:pointer; font-size:18px; font-weight:700; color:var(--text-primary); }
+    .qty-btn { width:30px; height:32px; background:#f1f5f9; border:none; cursor:pointer; font-size:17px; font-weight:700; }
     .qty-btn:hover { background:var(--primary-light); color:var(--primary); }
-    .qty-val { width:40px; text-align:center; font-weight:700; font-size:14px; border:none; border-left:1px solid var(--border); border-right:1px solid var(--border); height:34px; }
+    .qty-val { width:38px; text-align:center; font-weight:700; font-size:14px; border:none; border-left:1px solid var(--border); border-right:1px solid var(--border); height:32px; }
   </style>
 </head>
 <body>
@@ -123,359 +182,520 @@
     </div>
   </header>
 
-  <main class="page-content">
-    <div class="page-header">
+  <main class="page-content" style="background:#f0f4f8;padding:16px;">
+    <div class="baogia-wrap">
+
+      <!-- ══════════ LEFT FORM ══════════ -->
       <div>
-        <div class="page-title">📋 Báo giá vận chuyển nhanh</div>
-        <div class="page-subtitle">Nhập thông tin để tính cước tự động theo km, loại xe và phụ phí</div>
-      </div>
-      <div class="page-actions">
-        <button class="btn btn-secondary" onclick="clearForm()">Xóa form</button>
-      </div>
-    </div>
 
-    <!-- Step indicator -->
-    <div class="step-indicator">
-      <div class="step done"><div class="step-num">✓</div><span class="step-label">Thông tin hàng hóa</span></div>
-      <div class="step-line"></div>
-      <div class="step active"><div class="step-num">2</div><span class="step-label">Chọn xe</span></div>
-      <div class="step-line"></div>
-      <div class="step"><div class="step-num">3</div><span class="step-label">Phụ phí</span></div>
-      <div class="step-line"></div>
-      <div class="step"><div class="step-num">4</div><span class="step-label">Xác nhận</span></div>
-    </div>
+        <!-- Khách hàng -->
+        <div class="bg-card">
+          <div class="bg-card-title">👤 Khách hàng</div>
+          <div class="cust-search" style="margin-bottom:10px;">
+            <span class="cust-search-icon">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+            <input class="form-control" id="custName" type="text" placeholder="Tìm hoặc nhập tên khách hàng..." style="padding-left:34px;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <input class="form-control" id="custPhone" type="tel" placeholder="📱 Số điện thoại (tự điền)">
+            <select class="form-control" id="paymentTerm">
+              <option>Thanh toán ngay</option>
+              <option selected>Thanh toán sau 30 ngày</option>
+              <option>Thanh toán sau 15 ngày</option>
+              <option>Thanh toán sau 45 ngày</option>
+            </select>
+          </div>
+        </div>
 
-    <div class="grid grid-2-1" style="gap:20px;align-items:start;">
-      <!-- LEFT: Form -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
-
-        <!-- Thông tin chuyến -->
-        <div class="card card-padded">
-          <div class="card-title mb-3">📌 Thông tin chuyến</div>
-          <div class="grid grid-2" style="gap:12px;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Khách hàng *</label>
-              <input class="form-control" type="text" placeholder="Tên / công ty khách" value="Cty TNHH Phú Hưng">
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Số điện thoại</label>
-              <input class="form-control" type="tel" placeholder="09x xxx xxxx" value="0901 234 567">
+        <!-- Tuyến đường -->
+        <div class="bg-card">
+          <div class="bg-card-title">🗺️ Tuyến đường
+            <span id="routeStatus" style="margin-left:auto;font-size:11px;font-weight:400;color:var(--text-muted);"></span>
+          </div>
+          <div class="route-outer">
+            <div class="route-box">
+              <div class="route-input-wrap">
+                <span class="route-dot origin"></span>
+                <input class="route-input" id="origin" type="text" placeholder="Điểm đi – địa chỉ lấy hàng" value="Quận 1, TP.HCM" oninput="onRouteChange()">
+              </div>
+              <div class="route-sep">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="route-line-seg"></span>
+                  <span class="route-dist-badge" id="routeDistBadge"></span>
+                </div>
+                <button class="route-swap-btn" onclick="swapRoute()" title="Đổi chiều">⇅</button>
+              </div>
+              <div class="route-input-wrap">
+                <span class="route-dot dest"></span>
+                <input class="route-input" id="dest" type="text" placeholder="Điểm đến – địa chỉ giao hàng" value="Biên Hòa, Đồng Nai" oninput="onRouteChange()">
+              </div>
             </div>
           </div>
-          <div class="grid grid-2" style="gap:12px;margin-top:12px;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Điểm đi *</label>
-              <input class="form-control" type="text" placeholder="Nhập địa chỉ lấy hàng" value="Quận 12, TP.HCM" id="origin">
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Điểm đến *</label>
-              <input class="form-control" type="text" placeholder="Nhập địa chỉ giao hàng" value="Thủ Dầu Một, Bình Dương" id="dest">
-            </div>
-          </div>
-          <div class="grid grid-2" style="gap:12px;margin-top:12px;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Ngày khởi hành</label>
+          <!-- date / time / qty row -->
+          <div class="dt-row" style="margin-top:12px;">
+            <div>
+              <label class="form-label">📅 Ngày</label>
               <input class="form-control" type="date" value="2026-05-12">
             </div>
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Giờ khởi hành</label>
+            <div>
+              <label class="form-label">🕗 Giờ xuất phát</label>
               <input class="form-control" type="time" value="08:00">
             </div>
-          </div>
-          <div class="form-group mt-3" style="margin-bottom:0;">
-            <label class="form-label">Số xe cần đặt</label>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div class="qty-stepper">
+            <div>
+              <label class="form-label">🚛 Số xe</label>
+              <div class="qty-stepper" style="width:100%;">
                 <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
-                <input class="qty-val" id="vehicleQty" type="number" value="1" min="1" max="20" onchange="updatePrice()">
+                <input class="qty-val" id="vehicleQty" type="number" value="1" min="1" max="20" onchange="updatePrice()" style="flex:1;width:auto;">
                 <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
               </div>
-              <span style="font-size:12px;color:var(--text-muted);">xe cùng loại xuất phát cùng lúc</span>
             </div>
           </div>
         </div>
 
-        <!-- Hàng hóa -->
-        <div class="card card-padded">
-          <div class="card-title mb-3">📦 Hàng hóa & Kích thước</div>
-          <!-- Mode toggle -->
-          <div class="cargo-mode">
-            <button class="cargo-mode-btn active" onclick="setCargoMode('dim',this)">📐 Nhập kích thước (D×R×C)</button>
-            <button class="cargo-mode-btn" onclick="setCargoMode('vol',this)">📦 Nhập số khối (m³)</button>
+        <!-- Loại xe / Trọng tải -->
+        <div class="bg-card">
+          <div class="bg-card-title">
+            🚚 Loại xe / Trọng tải
+            <span id="suggestHint" style="display:none;margin-left:auto;font-size:11px;font-weight:600;color:#16a34a;">✅ Xe phù hợp tô xanh</span>
           </div>
-          <!-- Mode: kích thước -->
-          <div id="modeDim">
-            <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:10px;">
-              <div class="form-group" style="margin:0;">
-                <label class="form-label">Dài (m)</label>
-                <input class="form-control" type="number" step="0.1" min="0" id="cargL" placeholder="4.0" oninput="calcCargo()">
-              </div>
-              <div class="form-group" style="margin:0;">
-                <label class="form-label">Rộng (m)</label>
-                <input class="form-control" type="number" step="0.1" min="0" id="cargW" placeholder="1.8" oninput="calcCargo()">
-              </div>
-              <div class="form-group" style="margin:0;">
-                <label class="form-label">Cao (m)</label>
-                <input class="form-control" type="number" step="0.1" min="0" id="cargH" placeholder="1.6" oninput="calcCargo()">
+          <!-- Hàng hóa nhỏ gọn -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <label class="form-label">Trọng lượng (tấn)</label>
+              <input class="form-control" type="number" step="0.5" min="0" id="weight" placeholder="VD: 3.5" oninput="calcCargo()">
+            </div>
+            <div id="volWrap">
+              <label class="form-label">Kích thước hoặc m³</label>
+              <div style="display:flex;gap:6px;">
+                <input class="form-control" type="number" step="0.1" id="cargL" placeholder="D" oninput="calcCargo()" style="width:33%;">
+                <input class="form-control" type="number" step="0.1" id="cargW" placeholder="R" oninput="calcCargo()" style="width:33%;">
+                <input class="form-control" type="number" step="0.1" id="cargH" placeholder="C" oninput="calcCargo()" style="width:33%;">
               </div>
             </div>
-            <div id="volResult" style="margin-top:7px;font-size:12px;color:var(--primary);font-weight:600;min-height:18px;"></div>
           </div>
-          <!-- Mode: số khối -->
-          <div id="modeVol" style="display:none;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Số khối (m³)</label>
-              <input class="form-control" type="number" step="0.1" min="0" id="cargVol" placeholder="Nhập số m³" oninput="calcCargo()">
-            </div>
-          </div>
-          <div class="grid grid-2" style="gap:12px;margin-top:12px;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Trọng lượng hàng (tấn)</label>
-              <input class="form-control" type="number" step="0.5" min="0" id="weight" placeholder="Ví dụ: 3.5" oninput="calcCargo()">
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Mô tả hàng hóa</label>
-              <input class="form-control" placeholder="Vật liệu, hàng hóa...">
-            </div>
-          </div>
-          <!-- Gợi ý xe -->
-          <div id="vehicleSuggest" style="display:none;margin-top:10px;padding:9px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:12px;color:var(--primary);font-weight:600;">
-            🚚 Gợi ý xe phù hợp: <span id="suggestText"></span>
-          </div>
+          <div id="cargoHint" style="font-size:11px;color:var(--primary);font-weight:600;min-height:16px;margin-bottom:10px;"></div>
+          <!-- Vehicle scroll -->
+          <div class="vehicle-scroll" id="vehicleGrid"><!-- JS rendered --></div>
         </div>
 
-        <!-- Loại xe -->
-        <div class="card card-padded">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <div class="card-title" style="margin:0;">🚚 Chọn loại xe</div>
-            <span id="suggestHint" style="font-size:11px;color:#16a34a;font-weight:600;display:none;">✅ Xe phù hợp tô xanh</span>
-          </div>
-          <div class="vehicle-grid" id="vehicleGrid"><!-- rendered by JS --></div>
-        </div>
-
-        <!-- Phụ phí -->
-        <div class="card card-padded">
-          <div class="card-title mb-3">➕ Phụ phí & Dịch vụ thêm</div>
-          <div style="display:flex;flex-wrap:wrap;" id="addonTags">
-            <div class="addon-tag active" onclick="toggleAddon(this)">🌉 Cầu đường +320.000₫</div>
-            <div class="addon-tag" onclick="toggleAddon(this)">🌙 Ban đêm +15%</div>
-            <div class="addon-tag" onclick="toggleAddon(this)">⏰ Giờ cao điểm +10%</div>
-            <div class="addon-tag active" onclick="toggleAddon(this)">📋 VAT 10%</div>
-            <div class="addon-tag" onclick="toggleAddon(this)">📦 Bốc xếp +200.000₫</div>
-            <div class="addon-tag" onclick="toggleAddon(this)">🏢 Lên tầng +150.000₫</div>
-          </div>
-          <!-- Xe 2 chiều -->
-          <div class="round-trip-row">
-            <label>
-              <input type="checkbox" id="roundTrip" onchange="updatePrice()">
-              ↩️ Xe 2 chiều (có chiều về)
+        <!-- Xuất hoá đơn VAT -->
+        <div class="bg-card" style="padding:14px 18px;">
+          <div class="vat-row">
+            <div class="vat-label">
+              <span class="icon">🧾</span>
+              <div>
+                <div class="txt">Xuất hoá đơn VAT</div>
+                <div class="sub">Cộng thêm 15% VAT vào tổng giá</div>
+              </div>
+            </div>
+            <label class="toggle-sw">
+              <input type="checkbox" id="vatToggle" onchange="updatePrice()">
+              <span class="toggle-track"></span>
             </label>
-            <span style="font-size:12px;color:var(--text-muted);">Chiều về = 40% giá cước</span>
           </div>
-          <div class="form-group mt-3" style="margin-bottom:0;">
-            <label class="form-label">Giảm giá</label>
-            <div style="display:flex;gap:8px;">
-              <select class="form-control" style="max-width:130px;">
-                <option>Theo %</option>
-                <option>Số tiền cố định</option>
-              </select>
-              <input class="form-control" type="number" placeholder="0" style="max-width:100px;">
+        </div>
+
+        <!-- Phụ phí & Dịch vụ -->
+        <div class="bg-card">
+          <div class="bg-card-title">⚡ Phụ phí &amp; Dịch vụ</div>
+          <div id="scList">
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_night" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">🌙 Ban đêm (22h–6h)</div></div>
+              <div class="sc-right">+20% giá cơ bản</div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_peak" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">🚦 Giờ cao điểm (7–9h, 17–19h)</div></div>
+              <div class="sc-right">+15% giá cơ bản</div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_wait" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">⏳ Chờ bốc/dỡ (&gt;2h)</div></div>
+              <div class="sc-right">
+                <input class="sc-input" type="number" id="sc_wait_h" value="0" min="0" placeholder="0" onchange="updatePrice()"> đ÷
+                <input class="sc-input" type="number" id="sc_wait_n" value="150000" min="0" onchange="updatePrice()" style="width:85px;"> h
+              </div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_port" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">⚓ Phí vào cảng / bến bãi</div></div>
+              <div class="sc-right">
+                <input class="sc-input" type="number" id="sc_port_v" value="200000" min="0" onchange="updatePrice()" style="width:95px;"> đ
+              </div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_return" onchange="updatePrice()">
+              <div class="sc-label">
+                <div class="sc-name">↩️ Xe rỗng chiều về</div>
+                <div class="sc-desc">Chiều về tính 40% giá cước</div>
+              </div>
+              <div class="sc-right">+40% giá cơ bản</div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_bulky" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">📦 Hàng cồng kềnh</div></div>
+              <div class="sc-right">+20% giá cơ bản</div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_carry" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">💪 Khiêng phụ</div></div>
+              <div class="sc-right">
+                <input class="sc-input" type="number" id="sc_carry_v" value="200000" min="0" onchange="updatePrice()" style="width:85px;"> đ×
+                <input class="sc-input" type="number" id="sc_carry_n" value="0" min="0" placeholder="0" onchange="updatePrice()"> ng
+              </div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_dis" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">🔧 Tháo gỡ đồ đạc</div></div>
+              <div class="sc-right">
+                <input class="sc-input" type="number" id="sc_dis_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;"> đ
+              </div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_asm" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">🔨 Lắp ráp đồ đạc</div></div>
+              <div class="sc-right">
+                <input class="sc-input" type="number" id="sc_asm_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;"> đ
+              </div>
+            </div>
+            <div class="sc-row">
+              <input class="sc-check" type="checkbox" id="sc_floor" onchange="updatePrice()">
+              <div class="sc-label"><div class="sc-name">🏢 Lên tầng (không thang máy)</div></div>
+              <div class="sc-right">
+                <input class="sc-input" type="number" id="sc_floor_v" value="50000" min="0" onchange="updatePrice()" style="width:75px;"> đ×
+                <input class="sc-input" type="number" id="sc_floor_n" value="0" min="0" placeholder="0" onchange="updatePrice()"> tầng
+              </div>
             </div>
           </div>
+          <button class="sc-add-btn" onclick="addCustomSurcharge()">+ Thêm phụ thu khác</button>
         </div>
 
         <!-- Ghi chú -->
-        <div class="card card-padded">
-          <div class="card-title mb-2">📝 Ghi chú nội bộ</div>
-          <textarea class="form-control" rows="2" placeholder="Ghi chú cho điều phối viên..."></textarea>
+        <div class="bg-card">
+          <div class="bg-card-title">📝 Ghi chú</div>
+          <textarea class="form-control" rows="2" placeholder="Ghi chú cho điều phối viên, tài xế..."></textarea>
         </div>
       </div>
 
-      <!-- RIGHT: Kết quả tính giá -->
-      <div style="position:sticky;top:16px;display:flex;flex-direction:column;gap:16px;">
-        <div class="card card-padded">
-          <div class="card-title mb-3">🧮 Kết quả tính cước</div>
+      <!-- ══════════ RIGHT PANEL ══════════ -->
+      <div class="right-panel">
 
-          <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;color:var(--text-secondary);">Khoảng cách (Google Maps)</span>
-              <span style="font-weight:700;color:var(--primary);">32 km</span>
+        <!-- Map mock -->
+        <div class="bg-card" style="padding:0;overflow:hidden;">
+          <div class="map-mock">
+            <!-- SVG map background + route -->
+            <svg viewBox="0 0 380 220" preserveAspectRatio="xMidYMid slice">
+              <!-- map tiles bg -->
+              <rect width="380" height="220" fill="#e8eef3"/>
+              <!-- roads faint -->
+              <line x1="0" y1="80"  x2="380" y2="80"  stroke="#fff" stroke-width="3" opacity=".5"/>
+              <line x1="0" y1="140" x2="380" y2="140" stroke="#fff" stroke-width="3" opacity=".5"/>
+              <line x1="95"  y1="0" x2="95"  y2="220" stroke="#fff" stroke-width="3" opacity=".5"/>
+              <line x1="200" y1="0" x2="200" y2="220" stroke="#fff" stroke-width="3" opacity=".5"/>
+              <line x1="290" y1="0" x2="290" y2="220" stroke="#fff" stroke-width="3" opacity=".5"/>
+              <!-- water (river) -->
+              <path d="M280,0 Q300,60 275,110 Q260,150 285,220" fill="none" stroke="#b3d4f5" stroke-width="10" opacity=".7"/>
+              <!-- route line shadow -->
+              <path d="M 60,175 C 100,140 160,100 230,70 L 310,45" fill="none" stroke="#1a56db" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".25"/>
+              <!-- route line -->
+              <path id="svgRoute" d="M 60,175 C 100,140 160,100 230,70 L 310,45" fill="none" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- origin marker -->
+              <circle cx="60" cy="175" r="7" fill="white" stroke="#1d4ed8" stroke-width="2.5"/>
+              <circle cx="60" cy="175" r="3" fill="#1d4ed8"/>
+              <!-- dest pin -->
+              <circle cx="310" cy="45" r="9" fill="#ef4444"/>
+              <line x1="310" y1="45" x2="310" y2="60" stroke="#ef4444" stroke-width="2.5"/>
+              <circle cx="310" cy="45" r="4" fill="white"/>
+            </svg>
+            <!-- distance bubble -->
+            <div class="map-bubble dist">
+              <svg width="14" height="14" fill="none" stroke="#1d4ed8" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/><path d="M13 10h4l3 6H13V10z"/></svg>
+              <span id="mapKm">48 km</span>
+              <span style="color:#6b7280;font-weight:400;">· ~</span>
+              <span id="mapTime">55 phút</span>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:var(--text-secondary);">Thời gian ước tính</span>
-              <span style="font-weight:600;">~45 phút</span>
-            </div>
-          </div>
-
-          <div class="result-row"><span class="label">Cước cơ bản (32km × <span id="pricePerKm">32.000</span>₫)</span><span class="value" id="baseFare">1.024.000 ₫</span></div>
-          <div class="result-row"><span class="label">Phí cầu đường</span><span class="value">320.000 ₫</span></div>
-          <div class="result-row"><span class="label">Nhiên liệu ước tính</span><span class="value">245.000 ₫</span></div>
-          <div class="result-row return" id="returnRow" style="display:none;"><span class="label">↩️ Chiều về (40% cước)</span><span class="value" id="returnFare">—</span></div>
-          <div class="result-row" id="multiRow" style="display:none;"><span class="label">× <span id="qtyLabel">1</span> xe</span><span class="value" id="multiFare">—</span></div>
-          <div class="result-row"><span class="label">Phụ phí khác</span><span class="value">0 ₫</span></div>
-          <div class="result-row"><span class="label">Tạm tính</span><span class="value font-bold" id="subTotal">1.589.000 ₫</span></div>
-          <div class="result-row"><span class="label">VAT 10%</span><span class="value" id="vatAmt">158.900 ₫</span></div>
-          <div class="result-row"><span class="label">Giảm giá</span><span class="value text-green">- 0 ₫</span></div>
-
-          <div class="result-total">
-            <span class="label">Tổng báo giá</span>
-            <span class="value" id="grandTotal">1.747.900 ₫</span>
-          </div>
-
-          <div style="margin-top:14px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;">
-            ✅ Có 2 xe 5 tấn đang rảnh có thể điều phối ngay hôm nay
+            <!-- labels -->
+            <div class="map-label origin" id="mapOriginLabel">Quận 1, TP.HCM</div>
+            <div class="map-label dest"   id="mapDestLabel">Biên Hòa, Đồng Nai</div>
           </div>
         </div>
 
-        <!-- Actions -->
-        <div class="card card-padded">
-          <div class="card-title mb-3">Thao tác</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <button class="btn btn-primary btn-lg w-full" onclick="createOrder()">📦 Tạo đơn hàng</button>
-            <button class="btn btn-secondary w-full">📄 Xuất báo giá PDF</button>
-            <button class="btn btn-secondary w-full">📧 Gửi email khách hàng</button>
+        <!-- Chi tiết báo giá -->
+        <div class="bg-card">
+          <div class="bg-card-title">💰 Chi tiết báo giá</div>
+
+          <div class="price-row">
+            <span class="pl">📏 Khoảng cách</span>
+            <span class="pv" id="dispKm">48 km</span>
           </div>
-          <div class="divider"></div>
-          <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">
-            * Giá trên đã bao gồm VAT 10%<br>
-            * Có hiệu lực trong vòng 24 giờ<br>
-            * Phụ phí phát sinh sẽ báo thêm
+          <div class="price-row">
+            <span class="pl" style="flex-direction:column;align-items:flex-start;gap:2px;">
+              <span>🚚 Cước vận chuyển</span>
+              <span id="fareFormula" style="font-size:11px;color:var(--text-muted);font-weight:400;"></span>
+            </span>
+            <span class="pv" id="baseFare">–</span>
+          </div>
+          <div class="price-row" id="tollRow">
+            <span class="pl">🛣️ Phí cầu đường</span>
+            <span class="pv" id="tollAmt">–</span>
+          </div>
+          <div class="price-row return" id="returnRow" style="display:none;">
+            <span class="pl">↩️ Chiều về (40%)</span>
+            <span class="pv" id="returnAmt">–</span>
+          </div>
+          <div class="price-row" id="multiRow" style="display:none;">
+            <span class="pl">✕ <span id="qtyLabel">1</span> xe</span>
+            <span class="pv" id="multiFare">–</span>
+          </div>
+          <div class="price-row" id="scTotalRow" style="display:none;">
+            <span class="pl">⚡ Phụ phí dịch vụ</span>
+            <span class="pv" id="scTotalAmt">–</span>
+          </div>
+
+          <div class="price-divider"></div>
+
+          <div class="price-row">
+            <span class="pl">Tạm tính</span>
+            <span class="pv" id="subTotal">–</span>
+          </div>
+          <div class="price-row" id="vatRow" style="display:none;">
+            <span class="pl">🧾 VAT 15%</span>
+            <span class="pv" id="vatAmt">–</span>
+          </div>
+
+          <div class="price-divider"></div>
+
+          <div class="price-total-row">
+            <span class="price-total-lbl">TỔNG BÁO GIÁ</span>
+            <span class="price-total-val" id="grandTotal">–</span>
+          </div>
+
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;" onclick="createOrder()">✅ Tạo đơn hàng</button>
+            <button class="btn btn-secondary" style="width:100%;" onclick="copyQuote()">📋 Sao chép báo giá</button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.7;border-top:1px solid #f1f5f9;padding-top:8px;">
+            * Báo giá có hiệu lực 24 giờ<br>
+            * Phụ phí phát sinh sẽ thông báo thêm
           </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- .baogia-wrap -->
   </main>
 </div>
 
 <script src="assets/app.js"></script>
 <script>
-  const VEHICLES = [
-    { id:'v1t',   label:'1 tấn',          tons:1,   dim:'2.6×1.4×1.4',  vol:5.1,  pricePerKm:25000, icon:'🚐' },
-    { id:'v15t',  label:'1.5 tấn',        tons:1.5, dim:'3.2×1.5×1.6',  vol:7.7,  pricePerKm:27000, icon:'🚐' },
-    { id:'v2ta',  label:'2T (4.2m)',       tons:2,   dim:'4.2×1.85×1.85',vol:14.4, pricePerKm:29000, icon:'🚛' },
-    { id:'v2tb',  label:'2T (6.0m)',       tons:2,   dim:'6.0×1.9×1.9',  vol:21.7, pricePerKm:30000, icon:'🚛' },
-    { id:'v25t',  label:'2.5 tấn',        tons:2.5, dim:'4.2×1.85×1.85',vol:14.4, pricePerKm:31000, icon:'🚛' },
-    { id:'v35ta', label:'3.5T (4.5m)',     tons:3.5, dim:'4.5×1.9×1.9',  vol:16.2, pricePerKm:33000, icon:'🚚' },
-    { id:'v35tb', label:'3.5T (6.0m)',     tons:3.5, dim:'6.0×2.0×2.0',  vol:24.0, pricePerKm:35000, icon:'🚚' },
-    { id:'v5t',   label:'5 tấn',          tons:5,   dim:'6.2×2.2×2.1',  vol:28.6, pricePerKm:38000, icon:'🚚' },
-    { id:'v8t',   label:'8 tấn',          tons:8,   dim:'7.4×2.3×2.2',  vol:37.4, pricePerKm:44000, icon:'🏗️' },
-    { id:'v10t',  label:'10 tấn',         tons:10,  dim:'7.4×2.3×2.2',  vol:37.4, pricePerKm:48000, icon:'🏗️' },
-    { id:'v15t2', label:'15 tấn',         tons:15,  dim:'9.5×2.38×2.4', vol:54.3, pricePerKm:56000, icon:'🏗️' },
-  ];
+/* ───────────────────────────────────────────────
+   DATA
+─────────────────────────────────────────────── */
+const VEHICLES = [
+  { id:'v1t',   label:'1 Tấn',    tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
+  { id:'v15t',  label:'1.5 Tấn',  tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
+  { id:'v2ta',  label:'2T (4.2m)',tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
+  { id:'v2tb',  label:'2T (6.0m)',tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
+  { id:'v25t',  label:'2.5 Tấn',  tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
+  { id:'v35ta', label:'3.5T 4.5m',tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
+  { id:'v35tb', label:'3.5T 6.0m',tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
+  { id:'v5t',   label:'5 Tấn',    tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
+  { id:'v8t',   label:'8 Tấn',    tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
+  { id:'v10t',  label:'10 Tấn',   tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
+  { id:'v15t2', label:'15 Tấn',   tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
+];
 
-  let selectedVehicle = VEHICLES[7]; // mặc định 5 tấn
-  let suggestedIds = [];
+/* ───────────────────────────────────────────────
+   STATE
+─────────────────────────────────────────────── */
+let sel = VEHICLES[7];  // default 5T
+let fitIds = [];
+let simKm = 48;
 
-  function renderVehicles() {
-    const grid = document.getElementById('vehicleGrid');
-    grid.innerHTML = VEHICLES.map(v => {
-      const isSugg = suggestedIds.includes(v.id);
-      const isSel  = v.id === selectedVehicle.id;
-      return `<div class="vehicle-card${isSel?' selected':''}${isSugg?' suggested':''}" onclick="selectVehicle('${v.id}')">
-        ${isSugg ? '<span class="vc-badge">Phù hợp</span>' : ''}
-        <div class="vc-icon">${v.icon}</div>
-        <div class="vc-name">${v.label}</div>
-        <div class="vc-dim">${v.dim} m</div>
-        <div class="vc-price">${v.pricePerKm.toLocaleString('vi-VN')}₫/km</div>
-      </div>`;
-    }).join('');
-  }
+/* ───────────────────────────────────────────────
+   VEHICLE RENDER
+─────────────────────────────────────────────── */
+function renderVehicles() {
+  const g = document.getElementById('vehicleGrid');
+  g.innerHTML = VEHICLES.map(v => {
+    const isFit = fitIds.includes(v.id);
+    const isSel = v.id === sel.id;
+    return `<div class="vcard${isSel?' sel':''}${isFit?' fit':''}" onclick="pickVehicle('${v.id}')">
+      ${isFit ? '<span class="vcard-badge">✓ Phù hợp</span>' : ''}
+      <div class="vcard-icon">${v.icon}</div>
+      <div class="vcard-name">${v.label}</div>
+      <div class="vcard-dim">${v.dim} m</div>
+      <div class="vcard-price">${v.priceBase.toLocaleString('vi-VN')}đ<br><span style="font-size:10px;">(10km) +${v.pricePerKm.toLocaleString('vi-VN')}đ/km</span></div>
+    </div>`;
+  }).join('');
+}
 
-  function selectVehicle(id) {
-    selectedVehicle = VEHICLES.find(v => v.id === id) || VEHICLES[7];
-    renderVehicles();
-    updatePrice();
-  }
-
-  function setCargoMode(mode, btn) {
-    document.querySelectorAll('.cargo-mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('modeDim').style.display = mode === 'dim' ? '' : 'none';
-    document.getElementById('modeVol').style.display = mode === 'vol' ? '' : 'none';
-    calcCargo();
-  }
-
-  function calcCargo() {
-    const isDim = document.getElementById('modeDim').style.display !== 'none';
-    let vol = 0;
-    if (isDim) {
-      const l = parseFloat(document.getElementById('cargL').value) || 0;
-      const w = parseFloat(document.getElementById('cargW').value) || 0;
-      const h = parseFloat(document.getElementById('cargH').value) || 0;
-      vol = l * w * h;
-      document.getElementById('volResult').textContent =
-        (vol > 0) ? `📐 Thể tích: ${vol.toFixed(2)} m³` : '';
-    } else {
-      vol = parseFloat(document.getElementById('cargVol').value) || 0;
-    }
-    const weight = parseFloat(document.getElementById('weight').value) || 0;
-    suggestVehicles(vol, weight);
-  }
-
-  function suggestVehicles(vol, weight) {
-    if (vol <= 0 && weight <= 0) {
-      suggestedIds = [];
-      document.getElementById('vehicleSuggest').style.display = 'none';
-      document.getElementById('suggestHint').style.display = 'none';
-      renderVehicles();
-      return;
-    }
-    suggestedIds = VEHICLES
-      .filter(v => (vol <= 0 || v.vol >= vol) && (weight <= 0 || v.tons >= weight))
-      .map(v => v.id);
-    const hint = document.getElementById('vehicleSuggest');
-    if (suggestedIds.length > 0) {
-      const names = VEHICLES.filter(v => suggestedIds.includes(v.id)).map(v => v.label).join(', ');
-      document.getElementById('suggestText').textContent = names;
-      hint.style.display = '';
-      document.getElementById('suggestHint').style.display = '';
-      // auto-select smallest matching
-      const best = VEHICLES.find(v => suggestedIds.includes(v.id));
-      if (best) selectedVehicle = best;
-    } else {
-      hint.style.display = 'none';
-      document.getElementById('suggestHint').style.display = 'none';
-    }
-    renderVehicles();
-    updatePrice();
-  }
-
-  function updatePrice() {
-    const km      = 32;
-    const base    = km * selectedVehicle.pricePerKm;
-    const isRound = document.getElementById('roundTrip').checked;
-    const qty     = Math.max(1, parseInt(document.getElementById('vehicleQty').value) || 1);
-    const returnF = isRound ? Math.round(base * 0.4) : 0;
-    const perVehicle = base + returnF + 320000 + 245000;
-    const subTotal   = perVehicle * qty;
-    const vat        = Math.round(subTotal * 0.1);
-    const grand      = subTotal + vat;
-
-    document.getElementById('pricePerKm').textContent = selectedVehicle.pricePerKm.toLocaleString('vi-VN');
-    document.getElementById('baseFare').textContent   = base.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('returnRow').style.display = isRound ? '' : 'none';
-    document.getElementById('returnFare').textContent  = returnF.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('multiRow').style.display  = qty > 1 ? '' : 'none';
-    document.getElementById('qtyLabel').textContent    = qty;
-    document.getElementById('multiFare').textContent   = perVehicle.toLocaleString('vi-VN') + ' ₫/xe';
-    document.getElementById('subTotal').textContent    = subTotal.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('vatAmt').textContent      = vat.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('grandTotal').textContent  = grand.toLocaleString('vi-VN') + ' ₫';
-  }
-
-  function changeQty(delta) {
-    const inp = document.getElementById('vehicleQty');
-    inp.value = Math.max(1, Math.min(20, (parseInt(inp.value) || 1) + delta));
-    updatePrice();
-  }
-
-  function toggleAddon(el) { el.classList.toggle('active'); updatePrice(); }
-  function clearForm() { if (confirm('Xóa toàn bộ thông tin form?')) location.reload(); }
-  function createOrder() { window.location.href = 'm1-don-hang.html'; }
-
-  // khởi tạo
+function pickVehicle(id) {
+  sel = VEHICLES.find(v => v.id === id) || sel;
   renderVehicles();
   updatePrice();
+}
+
+/* ───────────────────────────────────────────────
+   CARGO → SUGGEST VEHICLES
+─────────────────────────────────────────────── */
+function calcCargo() {
+  const l = parseFloat(document.getElementById('cargL').value) || 0;
+  const w = parseFloat(document.getElementById('cargW').value) || 0;
+  const h = parseFloat(document.getElementById('cargH').value) || 0;
+  const wt = parseFloat(document.getElementById('weight').value) || 0;
+  const vol = l * w * h;
+  const hint = document.getElementById('cargoHint');
+  if (vol > 0) hint.textContent = `📐 Thể tích: ${vol.toFixed(2)} m³`;
+  else if (wt > 0) hint.textContent = '';
+  else { hint.textContent = ''; }
+
+  fitIds = VEHICLES
+    .filter(v => (vol <= 0 || v.vol >= vol) && (wt <= 0 || v.tons >= wt))
+    .map(v => v.id);
+
+  document.getElementById('suggestHint').style.display = fitIds.length ? '' : 'none';
+  if (fitIds.length) {
+    const best = VEHICLES.find(v => fitIds.includes(v.id));
+    if (best) sel = best;
+  }
+  renderVehicles();
+  updatePrice();
+}
+
+/* ───────────────────────────────────────────────
+   ROUTE
+─────────────────────────────────────────────── */
+function onRouteChange() {
+  const o = document.getElementById('origin').value.trim();
+  const d = document.getElementById('dest').value.trim();
+  // simulate km from text length (demo only)
+  simKm = Math.max(5, Math.min(300, (o.length + d.length) * 2 + 10));
+  document.getElementById('mapOriginLabel').textContent = o || 'Điểm đi';
+  document.getElementById('mapDestLabel').textContent   = d || 'Điểm đến';
+  document.getElementById('mapKm').textContent   = simKm + ' km';
+  document.getElementById('mapTime').textContent  = Math.round(simKm * 1.4) + ' phút';
+  document.getElementById('dispKm').textContent   = simKm + ' km';
+  document.getElementById('routeDistBadge').textContent = simKm + ' km';
+  updatePrice();
+}
+
+function swapRoute() {
+  const o = document.getElementById('origin');
+  const d = document.getElementById('dest');
+  [o.value, d.value] = [d.value, o.value];
+  onRouteChange();
+}
+
+/* ───────────────────────────────────────────────
+   SURCHARGES
+─────────────────────────────────────────────── */
+function getSurcharges(base) {
+  let total = 0;
+  const get  = id => document.getElementById(id);
+  const on   = id => get(id) && get(id).checked;
+  const val  = id => parseFloat((get(id)||{}).value || 0) || 0;
+
+  if (on('sc_night'))  total += base * 0.20;
+  if (on('sc_peak'))   total += base * 0.15;
+  if (on('sc_wait'))   total += val('sc_wait_n')  * val('sc_wait_h');
+  if (on('sc_port'))   total += val('sc_port_v');
+  if (on('sc_return')) total += base * 0.40;
+  if (on('sc_bulky'))  total += base * 0.20;
+  if (on('sc_carry'))  total += val('sc_carry_v') * val('sc_carry_n');
+  if (on('sc_dis'))    total += val('sc_dis_v');
+  if (on('sc_asm'))    total += val('sc_asm_v');
+  if (on('sc_floor'))  total += val('sc_floor_v') * val('sc_floor_n');
+
+  // custom rows
+  document.querySelectorAll('.sc-custom-check').forEach((cb,i)=>{
+    if (cb.checked) {
+      const inp = document.querySelectorAll('.sc-custom-val')[i];
+      if (inp) total += parseFloat(inp.value) || 0;
+    }
+  });
+  return Math.round(total);
+}
+
+function addCustomSurcharge() {
+  const list = document.getElementById('scList');
+  const row = document.createElement('div');
+  row.className = 'sc-row';
+  row.innerHTML = `
+    <input class="sc-check sc-custom-check" type="checkbox" checked onchange="updatePrice()">
+    <div class="sc-label"><input type="text" class="form-control" placeholder="Tên phụ thu..." style="border:none;padding:0;font-size:13px;background:transparent;" oninput="updatePrice()"></div>
+    <div class="sc-right">
+      <input class="sc-input sc-custom-val" type="number" value="0" min="0" onchange="updatePrice()" style="width:100px;"> đ
+      <button onclick="this.closest('.sc-row').remove();updatePrice();" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;margin-left:4px;">✕</button>
+    </div>`;
+  list.appendChild(row);
+}
+
+/* ───────────────────────────────────────────────
+   PRICE CALCULATION
+─────────────────────────────────────────────── */
+function fmt(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+
+function updatePrice() {
+  const km    = simKm;
+  const base  = sel.priceBase + Math.max(0, km - 10) * sel.pricePerKm;
+  const toll  = sel.toll;
+  const isRet = document.getElementById('sc_return') && document.getElementById('sc_return').checked;
+  const qty   = Math.max(1, parseInt(document.getElementById('vehicleQty').value) || 1);
+  const scAmt = getSurcharges(base);
+  const retAmt= isRet ? Math.round(base * 0.4) : 0;
+  const perVeh= base + toll + scAmt;
+  const beforeMulti = perVeh * qty;
+  const subT  = beforeMulti;
+  const hasVAT= document.getElementById('vatToggle').checked;
+  const vatAmt= hasVAT ? Math.round(subT * 0.15) : 0;
+  const grand = subT + vatAmt;
+
+  // fare formula string
+  document.getElementById('fareFormula').textContent =
+    `${sel.priceBase.toLocaleString('vi-VN')}đ (10km đầu) + ${Math.max(0,km-10)}km × ${sel.pricePerKm.toLocaleString('vi-VN')}đ`;
+
+  document.getElementById('baseFare').textContent  = fmt(base);
+  document.getElementById('tollAmt').textContent   = fmt(toll);
+  document.getElementById('returnRow').style.display = isRet ? '' : 'none';
+  document.getElementById('returnAmt').textContent  = fmt(retAmt);
+  document.getElementById('multiRow').style.display = qty > 1 ? '' : 'none';
+  document.getElementById('qtyLabel').textContent   = qty;
+  document.getElementById('multiFare').textContent  = fmt(perVeh) + '/xe';
+  document.getElementById('scTotalRow').style.display = scAmt > 0 ? '' : 'none';
+  document.getElementById('scTotalAmt').textContent  = fmt(scAmt);
+  document.getElementById('subTotal').textContent   = fmt(subT);
+  document.getElementById('vatRow').style.display   = hasVAT ? '' : 'none';
+  document.getElementById('vatAmt').textContent     = fmt(vatAmt);
+  document.getElementById('grandTotal').textContent = fmt(grand);
+
+  // map bubble
+  document.getElementById('mapKm').textContent  = km + ' km';
+  document.getElementById('mapTime').textContent = Math.round(km * 1.4) + ' phút';
+  document.getElementById('dispKm').textContent  = km + ' km';
+}
+
+function changeQty(d) {
+  const inp = document.getElementById('vehicleQty');
+  inp.value = Math.max(1, Math.min(20, (parseInt(inp.value)||1) + d));
+  updatePrice();
+}
+
+function copyQuote() {
+  const g = document.getElementById('grandTotal').textContent;
+  const o = document.getElementById('origin').value;
+  const de= document.getElementById('dest').value;
+  const txt = `Báo giá vận chuyển VanChuyển Pro\n${o} → ${de}\nLoại xe: ${sel.label}\nTổng: ${g}`;
+  navigator.clipboard.writeText(txt).then(()=>alert('Đã sao chép báo giá!')).catch(()=>alert(txt));
+}
+
+function clearForm() { if(confirm('Xóa toàn bộ form?')) location.reload(); }
+function createOrder() { window.location.href = 'm1-don-hang.html'; }
+
+// ── init ──
+renderVehicles();
+onRouteChange();
 </script>
 </body>
 </html>

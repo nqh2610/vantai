@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="assets/style.css">
   <style>
     /* ── layout ── */
-    .baogia-wrap { display:grid; grid-template-columns:1fr 380px; gap:18px; align-items:start; }
-    @media(max-width:1280px){ .baogia-wrap { grid-template-columns:1fr 340px; } }
+    .baogia-wrap { display:grid; grid-template-columns:1fr 400px; gap:18px; align-items:start; }
+    @media(max-width:1280px){ .baogia-wrap { grid-template-columns:1fr 360px; } }
     @media(max-width:1024px){ .baogia-wrap { grid-template-columns:1fr; } }
 
     /* ── section cards ── */
@@ -108,10 +108,31 @@
     .price-total-val { font-size:24px; font-weight:800; color:var(--primary); }
 
     /* ── qty stepper ── */
-    .qty-stepper { display:inline-flex; align-items:center; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-    .qty-btn { width:30px; height:32px; background:#f1f5f9; border:none; cursor:pointer; font-size:17px; font-weight:700; }
-    .qty-btn:hover { background:var(--primary-light); color:var(--primary); }
-    .qty-val { width:38px; text-align:center; font-weight:700; font-size:14px; border:none; border-left:1px solid var(--border); border-right:1px solid var(--border); height:32px; }
+    .qty-stepper { display:inline-flex; align-items:center; border:1.5px solid #d1d5db; border-radius:8px; overflow:hidden; }
+    .qty-btn { width:32px; height:36px; background:#f1f5f9; border:none; cursor:pointer; font-size:18px; font-weight:700; color:#374151; }
+    .qty-btn:hover { background:#dbeafe; color:var(--primary); }
+    .qty-val { width:40px; text-align:center; font-weight:700; font-size:14px; border:none; border-left:1.5px solid #d1d5db; border-right:1.5px solid #d1d5db; height:36px; }
+    /* ── form control clarity override ── */
+    .bg-card .form-control { font-size:14px; font-weight:500; border:1.5px solid #d1d5db; background:white; color:#111827; border-radius:8px; padding:9px 12px; height:auto; line-height:1.4; }
+    .bg-card .form-control::placeholder { color:#9ca3af; font-weight:400; font-size:13px; }
+    .bg-card .form-control:focus { border-color:var(--primary); box-shadow:0 0 0 3px #dbeafe; outline:none; }
+    .bg-card select.form-control { padding-right:28px; }
+    .bg-card .form-label { font-size:12px; font-weight:700; color:#374151; margin-bottom:5px; display:block; letter-spacing:.01em; }
+    /* ── sc-input clarity ── */
+    .sc-input { padding:6px 8px; border:1.5px solid #d1d5db; border-radius:7px; font-size:13px; font-weight:600; text-align:right; background:white; color:#111827; }
+    .sc-input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 2px #dbeafe; }
+    .sc-unit { font-size:11px; font-weight:700; color:#9ca3af; white-space:nowrap; }
+    .sc-right { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+    /* ── discount ── */
+    .disc-outer { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:14px 16px; }
+    .disc-tabs { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+    .disc-tab { padding:8px 0; font-size:13px; font-weight:600; border:1.5px solid #d1d5db; border-radius:8px; background:white; cursor:pointer; color:#6b7280; transition:all .15s; }
+    .disc-tab.active { border-color:#16a34a; background:#dcfce7; color:#15803d; }
+    .disc-input-wrap { position:relative; }
+    .disc-input-wrap .form-control { padding-right:36px; font-size:16px; font-weight:700; color:#15803d; }
+    .disc-suffix { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:14px; font-weight:800; color:#16a34a; pointer-events:none; }
+    .disc-preview { font-size:14px; font-weight:800; color:#15803d; white-space:nowrap; }
+    .price-row.discount .pl, .price-row.discount .pv { color:#16a34a !important; }
   </style>
 </head>
 <body>
@@ -314,15 +335,18 @@
               <input class="sc-check" type="checkbox" id="sc_wait" onchange="updatePrice()">
               <div class="sc-label"><div class="sc-name">⏳ Chờ bốc/dỡ (&gt;2h)</div></div>
               <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_wait_h" value="0" min="0" placeholder="0" onchange="updatePrice()"> đ÷
-                <input class="sc-input" type="number" id="sc_wait_n" value="150000" min="0" onchange="updatePrice()" style="width:85px;"> h
+                <input class="sc-input" type="number" id="sc_wait_h" value="0" min="0" placeholder="0" onchange="updatePrice()" style="width:52px;">
+                <span class="sc-unit">h ×</span>
+                <input class="sc-input" type="number" id="sc_wait_n" value="150000" min="0" onchange="updatePrice()" style="width:80px;">
+                <span class="sc-unit">đ/h</span>
               </div>
             </div>
             <div class="sc-row">
               <input class="sc-check" type="checkbox" id="sc_port" onchange="updatePrice()">
               <div class="sc-label"><div class="sc-name">⚓ Phí vào cảng / bến bãi</div></div>
               <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_port_v" value="200000" min="0" onchange="updatePrice()" style="width:95px;"> đ
+                <input class="sc-input" type="number" id="sc_port_v" value="200000" min="0" onchange="updatePrice()" style="width:95px;">
+                <span class="sc-unit">đ</span>
               </div>
             </div>
             <div class="sc-row">
@@ -342,34 +366,59 @@
               <input class="sc-check" type="checkbox" id="sc_carry" onchange="updatePrice()">
               <div class="sc-label"><div class="sc-name">💪 Khiêng phụ</div></div>
               <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_carry_v" value="200000" min="0" onchange="updatePrice()" style="width:85px;"> đ×
-                <input class="sc-input" type="number" id="sc_carry_n" value="0" min="0" placeholder="0" onchange="updatePrice()"> ng
+                <input class="sc-input" type="number" id="sc_carry_n" value="0" min="0" placeholder="0" onchange="updatePrice()" style="width:50px;">
+                <span class="sc-unit">ng ×</span>
+                <input class="sc-input" type="number" id="sc_carry_v" value="200000" min="0" onchange="updatePrice()" style="width:80px;">
+                <span class="sc-unit">đ/ng</span>
               </div>
             </div>
             <div class="sc-row">
               <input class="sc-check" type="checkbox" id="sc_dis" onchange="updatePrice()">
               <div class="sc-label"><div class="sc-name">🔧 Tháo gỡ đồ đạc</div></div>
               <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_dis_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;"> đ
+                <input class="sc-input" type="number" id="sc_dis_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;">
+                <span class="sc-unit">đ</span>
               </div>
             </div>
             <div class="sc-row">
               <input class="sc-check" type="checkbox" id="sc_asm" onchange="updatePrice()">
               <div class="sc-label"><div class="sc-name">🔨 Lắp ráp đồ đạc</div></div>
               <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_asm_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;"> đ
+                <input class="sc-input" type="number" id="sc_asm_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;">
+                <span class="sc-unit">đ</span>
               </div>
             </div>
             <div class="sc-row">
               <input class="sc-check" type="checkbox" id="sc_floor" onchange="updatePrice()">
               <div class="sc-label"><div class="sc-name">🏢 Lên tầng (không thang máy)</div></div>
               <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_floor_v" value="50000" min="0" onchange="updatePrice()" style="width:75px;"> đ×
-                <input class="sc-input" type="number" id="sc_floor_n" value="0" min="0" placeholder="0" onchange="updatePrice()"> tầng
+                <input class="sc-input" type="number" id="sc_floor_n" value="0" min="0" placeholder="0" onchange="updatePrice()" style="width:50px;">
+                <span class="sc-unit">tầng ×</span>
+                <input class="sc-input" type="number" id="sc_floor_v" value="50000" min="0" onchange="updatePrice()" style="width:75px;">
+                <span class="sc-unit">đ/tầng</span>
               </div>
             </div>
           </div>
           <button class="sc-add-btn" onclick="addCustomSurcharge()">+ Thêm phụ thu khác</button>
+        </div>
+
+        <!-- Giảm giá -->
+        <div class="bg-card">
+          <div class="bg-card-title">🏷️ Giảm giá cho khách</div>
+          <div class="disc-outer">
+            <div class="disc-tabs">
+              <button class="disc-tab active" id="discPctBtn" onclick="setDiscMode('pct')">% Phần trăm</button>
+              <button class="disc-tab" id="discAmtBtn" onclick="setDiscMode('amt')">₫ Số tiền cố định</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+              <div class="disc-input-wrap" style="flex:1;">
+                <input class="form-control" type="number" id="discValue" min="0" step="1" placeholder="0" oninput="updatePrice()">
+                <span class="disc-suffix" id="discUnit">%</span>
+              </div>
+              <div class="disc-preview" id="discPreview">—</div>
+            </div>
+            <input class="form-control" type="text" id="discReason" placeholder="Lý do: khách quen, hợp đồng dài hạn..." style="font-size:12px;color:#374151;">
+          </div>
         </div>
 
         <!-- Ghi chú -->
@@ -463,6 +512,10 @@
           <div class="price-row" id="vatRow" style="display:none;">
             <span class="pl">🧾 VAT 15%</span>
             <span class="pv" id="vatAmt">–</span>
+          </div>
+          <div class="price-row discount" id="discRow" style="display:none;">
+            <span class="pl" style="color:#16a34a;">🏷️ Giảm giá</span>
+            <span class="pv" id="discAmtDisp" style="color:#16a34a;">–</span>
           </div>
 
           <div class="price-divider"></div>
@@ -618,6 +671,19 @@ function getSurcharges(base) {
   return Math.round(total);
 }
 
+function setDiscMode(mode) {
+  const isPct = mode === 'pct';
+  document.getElementById('discPctBtn').classList.toggle('active', isPct);
+  document.getElementById('discAmtBtn').classList.toggle('active', !isPct);
+  document.getElementById('discUnit').textContent = isPct ? '%' : '₫';
+  const inp = document.getElementById('discValue');
+  inp.max = isPct ? 100 : '';
+  inp.step = isPct ? 1 : 10000;
+  inp.placeholder = isPct ? 'VD: 5' : 'VD: 100000';
+  inp.value = '';
+  updatePrice();
+}
+
 function addCustomSurcharge() {
   const list = document.getElementById('scList');
   const row = document.createElement('div');
@@ -648,9 +714,14 @@ function updatePrice() {
   const perVeh= base + toll + scAmt;
   const beforeMulti = perVeh * qty;
   const subT  = beforeMulti;
-  const hasVAT= document.getElementById('vatToggle').checked;
-  const vatAmt= hasVAT ? Math.round(subT * 0.15) : 0;
-  const grand = subT + vatAmt;
+  const hasVAT  = document.getElementById('vatToggle').checked;
+  const vatAmt  = hasVAT ? Math.round(subT * 0.15) : 0;
+  const afterVAT= subT + vatAmt;
+  // discount
+  const discV   = parseFloat(document.getElementById('discValue').value) || 0;
+  const isPctDisc = document.getElementById('discPctBtn').classList.contains('active');
+  const discAmt = discV > 0 ? (isPctDisc ? Math.round(afterVAT * Math.min(discV,100) / 100) : Math.min(discV, afterVAT)) : 0;
+  const grand   = afterVAT - discAmt;
 
   // fare formula string
   document.getElementById('fareFormula').textContent =
@@ -668,6 +739,9 @@ function updatePrice() {
   document.getElementById('subTotal').textContent   = fmt(subT);
   document.getElementById('vatRow').style.display   = hasVAT ? '' : 'none';
   document.getElementById('vatAmt').textContent     = fmt(vatAmt);
+  document.getElementById('discRow').style.display  = discAmt > 0 ? '' : 'none';
+  document.getElementById('discAmtDisp').textContent= discAmt > 0 ? '- ' + fmt(discAmt) : '–';
+  document.getElementById('discPreview').textContent= discAmt > 0 ? '- ' + fmt(discAmt) : (discV > 0 ? '...' : '—');
   document.getElementById('grandTotal').textContent = fmt(grand);
 
   // map bubble

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng nhập – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; background: #f1f5f9; height: 100vh; overflow: auto; }
+    .login-wrapper { width: 100%; max-width: 420px; padding: 24px; }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo-icon {
+      width: 56px; height: 56px; background: var(--primary); border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
+    }
+    .login-logo-name { font-size: 22px; font-weight: 800; color: #1e3a8a; }
+    .login-logo-sub  { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+    .login-card { background: white; border-radius: 16px; border: 1px solid var(--border); padding: 28px; }
+    .login-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .login-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; }
+    .login-footer { text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted); }
+    .role-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+    .role-tab {
+      padding: 9px 8px; border-radius: 8px; border: 2px solid var(--border);
+      background: white; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; text-align: center; transition: all 0.13s;
+    }
+    .role-tab.active { border-color: var(--primary); background: var(--primary-xlight); color: var(--primary); }
+    .role-tab:hover:not(.active) { border-color: #cbd5e1; }
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap .icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 15px; pointer-events: none;
+    }
+    .input-icon-wrap .form-control { padding-left: 34px; }
+    .forgot { font-size: 12px; color: var(--primary); text-decoration: none; float: right; }
+    .forgot:hover { text-decoration: underline; }
+    .btn-login {
+      width: 100%; padding: 11px; background: var(--primary); color: white;
+      border: none; border-radius: 9px; font-size: 14px; font-weight: 700;
+      cursor: pointer; margin-top: 6px; transition: background 0.13s;
+    }
+    .btn-login:hover { background: var(--primary-dark); }
+    .divider-or { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: var(--text-muted); font-size: 12px; }
+    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .demo-accounts { display: grid; gap: 6px; }
+    .demo-acc {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.13s;
+    }
+    .demo-acc:hover { background: #f8fafc; border-color: var(--primary); }
+    .demo-acc-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .demo-acc-name { font-size: 12px; font-weight: 600; }
+    .demo-acc-role { font-size: 11px; color: var(--text-muted); }
+    .demo-acc-arrow { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="login-logo-name">VanChuyển Pro</div>
+      <div class="login-logo-sub">Phần mềm quản lý vận tải thông minh</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-title">Đăng nhập hệ thống</div>
+      <div class="login-subtitle">Nhập thông tin tài khoản để tiếp tục</div>
+
+      <div class="role-tabs">
+        <div class="role-tab active" onclick="setRole(this, 'admin')">🏢 Chủ / Admin</div>
+        <div class="role-tab" onclick="setRole(this, 'dispatch')">🎯 Điều phối viên</div>
+      </div>
+
+      <form onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email hoặc tên đăng nhập</label>
+          <div class="input-icon-wrap">
+            <span class="icon">✉</span>
+            <input type="email" class="form-control" placeholder="admin@vanchuyenpro.vn" id="email" value="admin@vanchuyenpro.vn">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            Mật khẩu
+            <a href="#" class="forgot">Quên mật khẩu?</a>
+          </label>
+          <div class="input-icon-wrap">
+            <span class="icon">🔒</span>
+            <input type="password" class="form-control" placeholder="••••••••" id="password" value="demo1234">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <input type="checkbox" id="remember" checked style="accent-color: var(--primary); width:14px; height:14px;">
+          <label for="remember" style="font-size:12px;color:var(--text-secondary);cursor:pointer;">Ghi nhớ đăng nhập</label>
+        </div>
+        <button type="submit" class="btn-login">Đăng nhập →</button>
+      </form>
+
+      <div class="divider-or">hoặc thử nhanh với</div>
+
+      <div class="demo-accounts">
+        <a href="index.html" class="demo-acc">
+          <div class="demo-acc-avatar" style="background:#dbeafe;color:#1d4ed8;">A</div>
+          <div>
+            <div class="demo-acc-name">Admin – Chủ doanh nghiệp</div>
+            <div class="demo-acc-role">Toàn quyền truy cập</div>
+          </div>
+          <div class="demo-acc-arrow">→</div>
+        </a>
+        <a href="m2-dieu-phoi.html" class="demo-acc">
+          <div class="demo-acc-avatar" style="background:#ffedd5;color:#c2410c;">D</div>
+          <div>
+            <div class="demo-acc-name">Điều phối viên</div>
+            <div class="demo-acc-role">Quản lý đơn hàng & chuyến</div>
+          </div>
+          <div class="demo-acc-arrow">→</div>
+        </a>
+        <a href="m8-app-tai-xe.html" class="demo-acc">
+          <div class="demo-acc-avatar" style="background:#dcfce7;color:#15803d;">T</div>
+          <div>
+            <div class="demo-acc-name">Tài xế – App Mobile</div>
+            <div class="demo-acc-role">Nhận chuyến & cập nhật trạng thái</div>
+          </div>
+          <div class="demo-acc-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="login-footer">LogiSoft Vietnam &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; v2.4.1</div>
+  </div>
+
+  <script>
+    function setRole(el, role) {
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+    function doLogin(e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

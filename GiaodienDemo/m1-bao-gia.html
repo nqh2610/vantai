@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo giá nhanh – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .result-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 13px; }
+    .result-row:last-of-type { border-bottom: none; }
+    .result-row .label { color: var(--text-secondary); }
+    .result-row .value { font-weight: 600; }
+    .result-total { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--primary); border-radius: 8px; color: white; margin-top: 8px; }
+    .result-total .label { font-size: 14px; font-weight: 600; }
+    .result-total .value { font-size: 22px; font-weight: 800; }
+    .vehicle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .vehicle-card {
+      border: 2px solid var(--border); border-radius: 10px; padding: 10px;
+      cursor: pointer; transition: all 0.13s; text-align: center;
+    }
+    .vehicle-card:hover { border-color: var(--primary); background: var(--primary-xlight); }
+    .vehicle-card.selected { border-color: var(--primary); background: var(--primary-xlight); }
+    .vehicle-card .vc-icon { font-size: 22px; margin-bottom: 4px; }
+    .vehicle-card .vc-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+    .vehicle-card .vc-price { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .surcharge-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+    .surcharge-item label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+    .addon-tag { display: inline-flex; align-items: center; gap: 4px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.13s; }
+    .addon-tag.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+    .step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 20px; }
+    .step { display: flex; align-items: center; gap: 8px; }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: var(--border); color: var(--text-muted); }
+    .step.done .step-num { background: #dcfce7; color: #16a34a; }
+    .step.active .step-num { background: var(--primary); color: white; }
+    .step-label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    .step.active .step-label { color: var(--primary); font-weight: 700; }
+    .step-line { flex: 1; height: 1px; background: var(--border); min-width: 24px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item active"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 1 – Báo giá</span><span class="sep">›</span>
+      <span class="current">Báo giá nhanh</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        <span class="notif-badge">4</span>
+      </button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">📋 Báo giá vận chuyển nhanh</div>
+        <div class="page-subtitle">Nhập thông tin để tính cước tự động theo km, loại xe và phụ phí</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="clearForm()">Xóa form</button>
+      </div>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step done"><div class="step-num">✓</div><span class="step-label">Thông tin hàng hóa</span></div>
+      <div class="step-line"></div>
+      <div class="step active"><div class="step-num">2</div><span class="step-label">Chọn xe</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">3</div><span class="step-label">Phụ phí</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">4</div><span class="step-label">Xác nhận</span></div>
+    </div>
+
+    <div class="grid grid-2-1" style="gap:20px;align-items:start;">
+      <!-- LEFT: Form -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Thông tin chuyến -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">📌 Thông tin chuyến</div>
+          <div class="grid grid-2" style="gap:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Khách hàng *</label>
+              <input class="form-control" type="text" placeholder="Tên / công ty khách" value="Cty TNHH Phú Hưng">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Số điện thoại</label>
+              <input class="form-control" type="tel" placeholder="09x xxx xxxx" value="0901 234 567">
+            </div>
+          </div>
+          <div class="grid grid-2" style="gap:12px;margin-top:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Điểm đi *</label>
+              <input class="form-control" type="text" placeholder="Nhập địa chỉ lấy hàng" value="Quận 12, TP.HCM" id="origin">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Điểm đến *</label>
+              <input class="form-control" type="text" placeholder="Nhập địa chỉ giao hàng" value="Thủ Dầu Một, Bình Dương" id="dest">
+            </div>
+          </div>
+          <div class="grid grid-2" style="gap:12px;margin-top:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Ngày khởi hành</label>
+              <input class="form-control" type="date" value="2026-05-12">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Giờ khởi hành</label>
+              <input class="form-control" type="time" value="08:00">
+            </div>
+          </div>
+        </div>
+
+        <!-- Hàng hóa -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">📦 Hàng hóa</div>
+          <div class="grid grid-2" style="gap:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Mô tả hàng hóa</label>
+              <input class="form-control" value="Vật liệu xây dựng">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Khối lượng (tấn)</label>
+              <input class="form-control" type="number" value="4.5" id="weight">
+            </div>
+          </div>
+          <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Dài (m)</label>
+              <input class="form-control" type="number" placeholder="3.0">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Rộng (m)</label>
+              <input class="form-control" type="number" placeholder="1.5">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Cao (m)</label>
+              <input class="form-control" type="number" placeholder="1.2">
+            </div>
+          </div>
+        </div>
+
+        <!-- Loại xe -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">🚚 Chọn loại xe</div>
+          <div class="vehicle-grid" id="vehicleGrid">
+            <div class="vehicle-card" onclick="selectVehicle(this, 1)">
+              <div class="vc-icon">🚐</div>
+              <div class="vc-name">1 tấn</div>
+              <div class="vc-price">25.000₫/km</div>
+            </div>
+            <div class="vehicle-card" onclick="selectVehicle(this, 2)">
+              <div class="vc-icon">🚛</div>
+              <div class="vc-name">2.5 tấn</div>
+              <div class="vc-price">28.000₫/km</div>
+            </div>
+            <div class="vehicle-card selected" onclick="selectVehicle(this, 5)">
+              <div class="vc-icon">🚚</div>
+              <div class="vc-name">5 tấn</div>
+              <div class="vc-price">32.000₫/km</div>
+            </div>
+            <div class="vehicle-card" onclick="selectVehicle(this, 7)">
+              <div class="vc-icon">🚛</div>
+              <div class="vc-name">7 tấn</div>
+              <div class="vc-price">36.000₫/km</div>
+            </div>
+            <div class="vehicle-card" onclick="selectVehicle(this, 10)">
+              <div class="vc-icon">🏗️</div>
+              <div class="vc-name">10 tấn</div>
+              <div class="vc-price">42.000₫/km</div>
+            </div>
+            <div class="vehicle-card" onclick="selectVehicle(this, 15)">
+              <div class="vc-icon">🏗️</div>
+              <div class="vc-name">15 tấn</div>
+              <div class="vc-price">52.000₫/km</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phụ phí -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">➕ Phụ phí & Dịch vụ thêm</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;" id="addonTags">
+            <div class="addon-tag active" onclick="toggleAddon(this)">🌉 Cầu đường +320.000₫</div>
+            <div class="addon-tag" onclick="toggleAddon(this)">🌙 Ban đêm +15%</div>
+            <div class="addon-tag" onclick="toggleAddon(this)">⏰ Giờ cao điểm +10%</div>
+            <div class="addon-tag active" onclick="toggleAddon(this)">📋 VAT 10%</div>
+            <div class="addon-tag" onclick="toggleAddon(this)">📦 Bốc xếp +200.000₫</div>
+            <div class="addon-tag" onclick="toggleAddon(this)">🏢 Lên tầng +150.000₫</div>
+            <div class="addon-tag" onclick="toggleAddon(this)">↩️ Xe rỗng chiều về</div>
+          </div>
+          <div class="form-group mt-3" style="margin-bottom:0;">
+            <label class="form-label">Giảm giá</label>
+            <div style="display:flex;gap:8px;">
+              <select class="form-control" style="max-width:130px;">
+                <option>Theo %</option>
+                <option>Số tiền cố định</option>
+              </select>
+              <input class="form-control" type="number" placeholder="0" style="max-width:100px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Ghi chú -->
+        <div class="card card-padded">
+          <div class="card-title mb-2">📝 Ghi chú nội bộ</div>
+          <textarea class="form-control" rows="2" placeholder="Ghi chú cho điều phối viên..."></textarea>
+        </div>
+      </div>
+
+      <!-- RIGHT: Kết quả tính giá -->
+      <div style="position:sticky;top:16px;display:flex;flex-direction:column;gap:16px;">
+        <div class="card card-padded">
+          <div class="card-title mb-3">🧮 Kết quả tính cước</div>
+
+          <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--text-secondary);">Khoảng cách (Google Maps)</span>
+              <span style="font-weight:700;color:var(--primary);">32 km</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text-secondary);">Thời gian ước tính</span>
+              <span style="font-weight:600;">~45 phút</span>
+            </div>
+          </div>
+
+          <div class="result-row"><span class="label">Cước cơ bản (32km × 32.000₫)</span><span class="value">1.024.000 ₫</span></div>
+          <div class="result-row"><span class="label">Phí cầu đường</span><span class="value">320.000 ₫</span></div>
+          <div class="result-row"><span class="label">Nhiên liệu ước tính</span><span class="value">245.000 ₫</span></div>
+          <div class="result-row"><span class="label">Phụ phí khác</span><span class="value">0 ₫</span></div>
+          <div class="result-row"><span class="label">Tạm tính</span><span class="value font-bold">1.589.000 ₫</span></div>
+          <div class="result-row"><span class="label">VAT 10%</span><span class="value">158.900 ₫</span></div>
+          <div class="result-row"><span class="label">Giảm giá</span><span class="value text-green">- 0 ₫</span></div>
+
+          <div class="result-total">
+            <span class="label">Tổng báo giá</span>
+            <span class="value">1.747.900 ₫</span>
+          </div>
+
+          <div style="margin-top:14px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;">
+            ✅ Có 2 xe 5 tấn đang rảnh có thể điều phối ngay hôm nay
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">Thao tác</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary btn-lg w-full" onclick="createOrder()">📦 Tạo đơn hàng</button>
+            <button class="btn btn-secondary w-full">📄 Xuất báo giá PDF</button>
+            <button class="btn btn-secondary w-full">📧 Gửi email khách hàng</button>
+          </div>
+          <div class="divider"></div>
+          <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">
+            * Giá trên đã bao gồm VAT 10%<br>
+            * Có hiệu lực trong vòng 24 giờ<br>
+            * Phụ phí phát sinh sẽ báo thêm
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function selectVehicle(el, tons) {
+    document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function toggleAddon(el) { el.classList.toggle('active'); }
+  function clearForm() { if(confirm('Xóa toàn bộ thông tin form?')) location.reload(); }
+  function createOrder() { window.location.href = 'm1-don-hang.html'; }
+</script>
+</body>
+</html>

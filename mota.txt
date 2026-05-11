@@ -1,0 +1,365 @@
+1. Mục tiêu chính của phần mềm
+
+Phần mềm cần giải quyết 5 bài toán:
+
+Báo giá vận chuyển nhanh
+Điều phối xe/tài xế
+Theo dõi doanh thu – chi phí – lợi nhuận
+Tính lương tài xế tự động
+Theo dõi trạng thái xe theo thời gian thực
+2. Các vai trò trong hệ thống
+2.1 Chủ doanh nghiệp (Admin)
+
+Quản lí toàn bộ:
+
+Báo giá
+Đơn hàng
+Thu chi
+Xe
+Tài xế
+Công nợ
+Lương
+Hoa hồng
+Theo dõi vị trí xe
+2.2 Nhân viên điều phối
+Nhận cuộc gọi khách
+Tạo đơn vận chuyển
+Báo giá
+Giao chuyến cho tài xế
+Theo dõi trạng thái xe
+2.3 Tài xế công ty
+
+App điện thoại:
+
+Nhận chuyến
+Bật trạng thái rảnh/bận
+Xem lương tạm tính
+Xem lịch sử chuyến
+Check-in vị trí GPS
+Upload ảnh biên nhận
+2.4 Tài xế tự do / đối tác
+Bật xanh = sẵn sàng nhận xe
+Bật đỏ = đang bận
+Nhận chuyến
+Hệ thống tự tính hoa hồng
+3. Quy trình hoạt động thực tế
+Bước 1: Khách gọi điện
+
+Nhân viên nhập:
+
+Điểm đi
+Điểm đến
+Loại xe
+Có xuất hoá đơn hay không
+Bước 2: Hệ thống tự tính
+3.2.1 Khoảng cách
+
+Tính km bằng Google Maps API.
+
+Ví dụ:
+
+TP.HCM → Bình Dương
+Khoảng cách: 32km
+3.2.2 Tính phí cầu đường
+
+Lấy từ:
+
+API bản đồ
+hoặc
+bảng phí nội bộ
+3.2.3 Ước lượng xăng dầu
+
+Ví dụ:
+
+Xe	Km/lít
+1 tấn	10km/l
+5 tấn	6km/l
+15 tấn	3km/l
+
+Công thức:
+
+Tiền xăng =
+(km / định mức tiêu hao)
+× giá dầu hiện tại
+3.2.4 Báo giá
+
+Ví dụ:
+
+Giá cơ bản: 25,000/km
+32km = 800,000
+
++ phí cầu đường
++ VAT nếu xuất hóa đơn
++ phụ phí ban đêm
+
+Hệ thống ra:
+
+Tổng báo giá: 1,050,000
+4. Phần quản lí đơn vận chuyển
+
+Mỗi chuyến xe gồm:
+
+Thông tin	Nội dung
+Mã chuyến	CX0001
+Khách hàng	Công ty A
+Điểm đi	TP.HCM
+Điểm đến	Đồng Nai
+Xe	5 tấn
+Tài xế	Nguyễn Văn A
+Giá thu	3 triệu
+Chi phí	1 triệu
+Lợi nhuận	2 triệu
+Trạng thái	Đang đi / Hoàn thành
+5. Bài toán tính lương tài xế
+
+Đây là phần quan trọng nhất.
+
+Bạn đang có 3 mô hình.
+
+5.1 Lương cố định
+
+Ví dụ:
+
+15 triệu/tháng
+
+Có thể cộng:
+
+phụ cấp
+thưởng chuyến
+thưởng doanh thu
+5.2 Ăn chia theo chuyến
+
+Ví dụ:
+
+Giá thu: 5 triệu
+
+Chi phí:
+- xăng: 1 triệu
+- cầu đường: 500k
+- VAT: 300k
+
+Lợi nhuận còn:
+3.2 triệu
+
+Tài xế hưởng 40%
+= 1.28 triệu
+
+Hệ thống tự tính.
+
+5.3 Lương cơ bản + hoa hồng
+
+Ví dụ:
+
+Lương cơ bản: 8 triệu
+
+Hoa hồng:
+5% doanh thu chuyến
+6. Bài toán tài xế tự do
+
+Đây là tính năng rất hay.
+
+Bạn gần như đang xây:
+
+“Grab cho xe tải”
+Tài xế đối tác có:
+App điện thoại
+Nút bật:
+🟢 rảnh
+🔴 bận
+Khi có đơn:
+
+Hệ thống gửi:
+
+Có chuyến:
+TPHCM → Bình Dương
+3 triệu
+
+Tài xế nhận hoặc từ chối.
+
+Cuối tháng
+
+Hệ thống tính:
+
+Tiền chuyến
+- hoa hồng công ty
+= tiền nhận
+
+Ví dụ:
+
+20 triệu
+- 15% hoa hồng
+= 17 triệu
+7. Theo dõi vị trí xe
+
+Có 2 cách:
+
+Cách 1 — GPS điện thoại
+
+Dễ làm nhất.
+
+App tài xế gửi vị trí mỗi:
+
+30 giây
+hoặc
+1 phút
+
+Admin thấy:
+
+xe đang ở đâu
+đang chạy hay dừng
+Cách 2 — Gắn thiết bị GPS
+
+Chuyên nghiệp hơn nhưng tốn tiền.
+
+8. Thu chi – kế toán
+
+Hệ thống cần quản lí:
+
+Thu
+tiền khách trả
+công nợ khách
+Chi
+xăng dầu
+lương
+bảo dưỡng
+cầu đường
+VAT
+sửa xe
+Báo cáo
+doanh thu tháng
+lợi nhuận
+xe nào lời nhiều nhất
+tài xế nào hiệu quả nhất
+9. Những tính năng bạn chưa nhắc nhưng rất cần
+9.1 Công nợ khách hàng
+
+Khách doanh nghiệp thường:
+
+tháng sau mới thanh toán
+
+Cần:
+
+theo dõi nợ
+ngày đến hạn
+9.2 Bảo dưỡng xe
+thay nhớt
+đăng kiểm
+bảo hiểm
+lốp xe
+9.3 Quản lí giấy tờ
+bằng lái
+đăng kiểm
+bảo hiểm xe
+
+Có cảnh báo hết hạn.
+
+9.4 Nhật ký chuyến xe
+đi lúc nào
+tới lúc nào
+ai giao hàng
+ảnh biên nhận
+10. Kiến trúc phần mềm nên làm
+Frontend
+Mobile app:
+React Native
+hoặc
+Flutter
+Web admin:
+Next.js
+Backend
+Node.js + NestJS
+hoặc
+Laravel
+Database
+PostgreSQL
+Bản đồ
+Google Maps API
+11. Các API quan trọng
+Google Maps Distance Matrix API
+
+Để tính:
+
+km
+thời gian
+tuyến đường
+Google Directions API
+
+Để:
+
+xem xe đang đi
+tuyến đường
+12. Các màn hình chính
+Admin
+Dashboard
+Đơn hàng
+Báo giá
+Tài xế
+Xe
+Thu chi
+Lương
+Bản đồ GPS
+Tài xế
+Nhận chuyến
+Trạng thái rảnh/bận
+Lương tạm tính
+Lịch sử chuyến
+13. Điểm khó nhất của hệ thống
+Không phải code.
+
+Mà là:
+
+quy tắc tính tiền.
+
+Ví dụ:
+
+Xe rỗng tính sao?
+Quay đầu tính sao?
+Ban đêm phụ thu?
+Kẹt xe?
+Đợi bốc hàng?
+Phí vào cảng?
+VAT tính trước hay sau?
+
+Bạn cần chuẩn hoá công thức trước.
+
+1T (2.6x1x4x1.4) 
+1.5T (3.2x1.5x1.6)
+2T (4.2x1.85x1.85)
+2T (6.0x1.9x1.9)
+2.5T (4.2x1.85x1.85)
+3.5T (4.5x1.9x1.9)
+3.5T (6.0x2.0x2.0)
+5T (6.2x2.2x2.1)
+8T (7.4x2.3x2.2)
+10T (7.4x2.3x2.2)
+15T (9.5x2.38x2.4)
+Kích thước 
+Báo giá
+	    2 lựa chọn nhập: Kích thước (Dài, rộng, cao) hoặc số khối 
+	    Trọng lượng
+	Gợi ý xe phù hợp chạy được 	     
+Form cho khách hàng tự điền vào (Video đi kèm)
+Xe 2 chiều (Chiều về thường lấy 40% giá cước)
+Đặt nhiều xe 1 lúc
+Thời gian xuất phát
+Điều phối xe
+	
+Quản lí tài xế 
+-	Tài xế lương cố định
+-	Tài xế lương ăn %
+-	Tài xế lương cơ + %
+-	Tài xế đối tác % ( Tên, Hinh, CCCD, Phone, Bang Lai, Hinh anh xe, Thông số thùng xe, Trọng tải) 
+o	Xanh: Nhận chở
+o	Đỏ: Bận
+Lương tài xế:
+	
+			
+Thu Chi nhập tay theo từng tài xế theo ngày (Tài xế tự nhập=> Chủ duyệt hoặc chủ nhập)
+Doanh thu: Nhập thủ công
+	Chi phí:
+			Nhập thủ công
+A Nhập thu Chi
+
+Công nợ: 
+-	Xong chuyến mới thu tiền. 
+Người thu: 

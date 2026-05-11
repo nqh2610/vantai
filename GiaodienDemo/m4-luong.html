@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng lương – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .salary-mode { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .mode-fixed  { background: #dbeafe; color: #1d4ed8; }
+    .mode-share  { background: #dcfce7; color: #15803d; }
+    .mode-combo  { background: #f3e8ff; color: #7e22ce; }
+    .salary-row-name { font-weight: 700; font-size: 13px; }
+    .salary-row-vehicle { font-size: 11px; color: var(--text-muted); }
+    .month-selector { display: flex; align-items: center; gap: 8px; }
+    .progress-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; width: 80px; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; }
+    .advance-badge { font-size: 11px; color: #dc2626; font-weight: 600; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 114 0zM19 17a2 2 0 11-4 0 2 2 0 114 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item active"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 4</span><span class="sep">›</span><span class="current">Bảng lương tài xế</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">💵 Bảng lương tài xế</div>
+        <div class="page-subtitle">Tính lương tự động · 3 chế độ: Cố định / Ăn chia / Hoa hồng</div>
+      </div>
+      <div class="page-actions">
+        <div class="month-selector">
+          <button class="btn btn-secondary btn-sm">◀</button>
+          <select class="form-control" style="width:130px;">
+            <option>Tháng 5 / 2026</option>
+            <option>Tháng 4 / 2026</option>
+            <option>Tháng 3 / 2026</option>
+          </select>
+          <button class="btn btn-secondary btn-sm">▶</button>
+        </div>
+        <button class="btn btn-secondary">⬇ Xuất Excel</button>
+        <button class="btn btn-primary">✅ Duyệt & Chốt lương</button>
+      </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dbeafe;">💵</div>
+        <div class="stat-card-label">Tổng quỹ lương T5</div>
+        <div class="stat-card-value" style="font-size:20px;">62.4M</div>
+        <div class="stat-card-change" style="color:var(--text-secondary);">8 tài xế</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dcfce7;">✅</div>
+        <div class="stat-card-label">Đã thanh toán</div>
+        <div class="stat-card-value" style="font-size:20px;">0M</div>
+        <div class="stat-card-change" style="color:var(--text-muted);">Chưa chốt lương</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fef9c3;">💸</div>
+        <div class="stat-card-label">Tổng tạm ứng</div>
+        <div class="stat-card-value" style="font-size:20px;">8.5M</div>
+        <div class="stat-card-change" style="color:#dc2626;">Sẽ trừ vào lương</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fee2e2;">⏳</div>
+        <div class="stat-card-label">Chi phí chờ duyệt</div>
+        <div class="stat-card-value" style="font-size:20px;">2.1M</div>
+        <div class="stat-card-change" style="color:#c2410c;">Cần xét duyệt</div>
+      </div>
+    </div>
+
+    <!-- Salary table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Chi tiết bảng lương – Tháng 05/2026</span>
+        <div style="display:flex;gap:6px;">
+          <span class="salary-mode mode-fixed">Cố định</span>
+          <span class="salary-mode mode-share">Ăn chia</span>
+          <span class="salary-mode mode-combo">Cơ bản + HH</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tài xế / Xe</th>
+              <th>Chế độ lương</th>
+              <th style="text-align:center;">Số chuyến</th>
+              <th style="text-align:center;">Km</th>
+              <th style="text-align:right;">Doanh thu</th>
+              <th style="text-align:right;">Lương tính</th>
+              <th style="text-align:right;">Phụ cấp</th>
+              <th style="text-align:right;">Tạm ứng</th>
+              <th style="text-align:right;color:var(--primary);">Thực nhận</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">A</div>
+                  <div><div class="salary-row-name">Nguyễn Văn An</div><div class="salary-row-vehicle">51C-12345 · 5 tấn</div></div>
+                </div>
+              </td>
+              <td><span class="salary-mode mode-fixed">Cố định</span></td>
+              <td style="text-align:center;font-weight:700;">24</td>
+              <td style="text-align:center;">1,248</td>
+              <td style="text-align:right;">76.800.000</td>
+              <td style="text-align:right;font-weight:700;">15.000.000</td>
+              <td style="text-align:right;color:#16a34a;">+2.400.000</td>
+              <td style="text-align:right;"><span class="advance-badge">- 2.000.000</span></td>
+              <td style="text-align:right;font-weight:800;color:var(--primary);">15.400.000</td>
+              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
+              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#dbeafe;color:#1d4ed8;">K</div>
+                  <div><div class="salary-row-name">Trần Minh Khoa</div><div class="salary-row-vehicle">51D-56789 · 10 tấn</div></div>
+                </div>
+              </td>
+              <td><span class="salary-mode mode-share">Ăn chia 40%</span></td>
+              <td style="text-align:center;font-weight:700;">19</td>
+              <td style="text-align:center;">1,056</td>
+              <td style="text-align:right;">95.000.000</td>
+              <td style="text-align:right;font-weight:700;">18.240.000</td>
+              <td style="text-align:right;color:#16a34a;">+1.200.000</td>
+              <td style="text-align:right;"><span class="advance-badge">- 3.000.000</span></td>
+              <td style="text-align:right;font-weight:800;color:var(--primary);">16.440.000</td>
+              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
+              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#fef9c3;color:#854d0e;">V</div>
+                  <div><div class="salary-row-name">Nguyễn Văn Khánh</div><div class="salary-row-vehicle">51H-45678 · 7 tấn</div></div>
+                </div>
+              </td>
+              <td><span class="salary-mode mode-combo">Cơ bản + HH 5%</span></td>
+              <td style="text-align:center;font-weight:700;">14</td>
+              <td style="text-align:center;">842</td>
+              <td style="text-align:right;">58.400.000</td>
+              <td style="text-align:right;font-weight:700;">10.920.000</td>
+              <td style="text-align:right;color:#16a34a;">+800.000</td>
+              <td style="text-align:right;">-</td>
+              <td style="text-align:right;font-weight:800;color:var(--primary);">11.720.000</td>
+              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
+              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">H</div>
+                  <div><div class="salary-row-name">Phạm Quốc Hùng</div><div class="salary-row-vehicle">51E-90123 · 15 tấn</div></div>
+                </div>
+              </td>
+              <td><span class="salary-mode mode-share">Ăn chia 35%</span></td>
+              <td style="text-align:center;font-weight:700;">11</td>
+              <td style="text-align:center;">2,134</td>
+              <td style="text-align:right;">110.000.000</td>
+              <td style="text-align:right;font-weight:700;">21.000.000</td>
+              <td style="text-align:right;color:#16a34a;">+1.500.000</td>
+              <td style="text-align:right;"><span class="advance-badge">- 2.000.000</span></td>
+              <td style="text-align:right;font-weight:800;color:var(--primary);">20.500.000</td>
+              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
+              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#f3e8ff;color:#7e22ce;">B</div>
+                  <div><div class="salary-row-name">Lê Văn Bình</div><div class="salary-row-vehicle">51F-23456 · 3 tấn</div></div>
+                </div>
+              </td>
+              <td><span class="salary-mode mode-fixed">Cố định</span></td>
+              <td style="text-align:center;font-weight:700;">16</td>
+              <td style="text-align:center;">756</td>
+              <td style="text-align:right;">44.800.000</td>
+              <td style="text-align:right;font-weight:700;">12.000.000</td>
+              <td style="text-align:right;color:#16a34a;">+600.000</td>
+              <td style="text-align:right;"><span class="advance-badge">- 1.500.000</span></td>
+              <td style="text-align:right;font-weight:800;color:var(--primary);">11.100.000</td>
+              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
+              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr style="background:#f8fafc;font-weight:700;">
+              <td colspan="5" style="padding:10px 12px;font-size:13px;">Tổng cộng</td>
+              <td style="text-align:right;padding:10px 12px;color:var(--primary);font-size:14px;">77.160.000</td>
+              <td style="text-align:right;padding:10px 12px;color:#16a34a;">+6.500.000</td>
+              <td style="text-align:right;padding:10px 12px;color:#dc2626;">- 8.500.000</td>
+              <td style="text-align:right;padding:10px 12px;color:var(--primary);font-size:15px;">75.160.000</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài xế & Xe đối tác – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .partner-card {
+      background: white; border-radius: 12px; border: 1px solid var(--border);
+      overflow: hidden; transition: all 0.13s;
+    }
+    .partner-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .partner-head { padding: 14px 16px; }
+    .partner-body { padding: 10px 16px; border-top: 1px solid var(--border-light); }
+    .partner-foot { padding: 10px 16px; border-top: 1px solid var(--border-light); display:flex; gap:6px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .status-free { background: #dcfce7; color: #15803d; }
+    .status-busy { background: #fee2e2; color: #dc2626; }
+    .status-offline { background: #f1f5f9; color: #64748b; }
+    .stars { color: #fbbf24; font-size: 12px; }
+    .commission-info { background: #f8fafc; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item active"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 5</span><span class="sep">›</span><span class="current">Tài xế & Xe đối tác</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">🤝 Tài xế & Xe đối tác</div>
+        <div class="page-subtitle">Quản lý xe tự do / đối tác · Phân công chuyến · Tính hoa hồng</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">Cấu hình hoa hồng</button>
+        <button class="btn btn-primary">+ Thêm đối tác</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dbeafe;">🤝</div>
+        <div class="stat-card-label">Tổng đối tác</div>
+        <div class="stat-card-value">12</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dcfce7;">🟢</div>
+        <div class="stat-card-label">Đang rảnh</div>
+        <div class="stat-card-value">4</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fee2e2;">🔴</div>
+        <div class="stat-card-label">Đang bận</div>
+        <div class="stat-card-value">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fef9c3;">💰</div>
+        <div class="stat-card-label">Phải trả tháng 5</div>
+        <div class="stat-card-value" style="font-size:20px;">38.5M</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'all')">Tất cả (12)</button>
+      <button class="tab-btn" onclick="switchTab(this,'free')">🟢 Đang rảnh (4)</button>
+      <button class="tab-btn" onclick="switchTab(this,'busy')">🔴 Đang bận (3)</button>
+      <button class="tab-btn" onclick="switchTab(this,'offline')">⚫ Offline (5)</button>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tên, biển số...">
+      <select class="form-control"><option>Tất cả loại xe</option><option>1 tấn</option><option>3 tấn</option><option>5 tấn</option><option>10 tấn</option></select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <!-- Partner 1 - Free -->
+      <div class="partner-card">
+        <div class="partner-head">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="position:relative;">
+              <div class="avatar avatar-lg" style="background:#dcfce7;color:#15803d;">M</div>
+              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;">
+                <div style="font-weight:700;font-size:14px;">Nguyễn Thành Minh</div>
+                <span class="status-pill status-free">🟢 Rảnh</span>
+              </div>
+              <div class="text-xs text-muted">📞 0911 222 333 · Đối tác tự do</div>
+              <div class="stars mt-1">★★★★★ <span style="color:var(--text-muted);font-size:11px;">4.9 (47 chuyến)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="partner-body">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span class="badge badge-gray">🚚 5 tấn · Thùng kín</span>
+            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51K-11111</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">📍 Vị trí: Quận 12, TP.HCM</div>
+          <div class="commission-info">
+            <div style="display:flex;justify-content:space-between;font-weight:600;">
+              <span>Hoa hồng công ty</span><span style="color:var(--primary);">15%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
+              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">8.500.000 ₫</span>
+            </div>
+          </div>
+        </div>
+        <div class="partner-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Giao chuyến</button>
+        </div>
+      </div>
+
+      <!-- Partner 2 - Busy -->
+      <div class="partner-card">
+        <div class="partner-head">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="position:relative;">
+              <div class="avatar avatar-lg" style="background:#fee2e2;color:#dc2626;">D</div>
+              <span class="status-dot dot-red" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;">
+                <div style="font-weight:700;font-size:14px;">Trần Văn Đức</div>
+                <span class="status-pill status-busy">🔴 Đang bận</span>
+              </div>
+              <div class="text-xs text-muted">📞 0922 444 555 · Đối tác xe tải</div>
+              <div class="stars mt-1">★★★★☆ <span style="color:var(--text-muted);font-size:11px;">4.6 (32 chuyến)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="partner-body">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span class="badge badge-gray">🏗️ 10 tấn · Thùng mui bạt</span>
+            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51L-22222</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+            📦 Đang chạy: CX-0528 · HCM → Vũng Tàu<br>
+            ⏱ Hoàn thành lúc ~14:30
+          </div>
+          <div class="commission-info">
+            <div style="display:flex;justify-content:space-between;font-weight:600;">
+              <span>Hoa hồng công ty</span><span style="color:var(--primary);">12%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
+              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">6.200.000 ₫</span>
+            </div>
+          </div>
+        </div>
+        <div class="partner-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">GPS</button>
+        </div>
+      </div>
+
+      <!-- Partner 3 - Free -->
+      <div class="partner-card">
+        <div class="partner-head">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="position:relative;">
+              <div class="avatar avatar-lg" style="background:#f3e8ff;color:#7e22ce;">L</div>
+              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;">
+                <div style="font-weight:700;font-size:14px;">Lê Quang Linh</div>
+                <span class="status-pill status-free">🟢 Rảnh</span>
+              </div>
+              <div class="text-xs text-muted">📞 0933 666 777 · Đối tác tự do</div>
+              <div class="stars mt-1">★★★★★ <span style="color:var(--text-muted);font-size:11px;">4.8 (28 chuyến)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="partner-body">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span class="badge badge-gray">🚐 1 tấn · Xe lạnh</span>
+            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51M-33333</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">📍 Vị trí: Bình Thạnh, TP.HCM</div>
+          <div class="commission-info">
+            <div style="display:flex;justify-content:space-between;font-weight:600;">
+              <span>Hoa hồng công ty</span><span style="color:var(--primary);">15%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
+              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">4.100.000 ₫</span>
+            </div>
+          </div>
+        </div>
+        <div class="partner-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Giao chuyến</button>
+        </div>
+      </div>
+
+      <!-- Partner 4 - Offline -->
+      <div class="partner-card" style="opacity:0.7;">
+        <div class="partner-head">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="position:relative;">
+              <div class="avatar avatar-lg" style="background:#f1f5f9;color:#475569;">P</div>
+              <span class="status-dot dot-gray" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;">
+                <div style="font-weight:700;font-size:14px;">Phạm Hữu Phúc</div>
+                <span class="status-pill status-offline">⚫ Offline</span>
+              </div>
+              <div class="text-xs text-muted">📞 0944 888 999 · Đối tác xe tải</div>
+              <div class="stars mt-1">★★★★☆ <span style="color:var(--text-muted);font-size:11px;">4.4 (19 chuyến)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="partner-body">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span class="badge badge-gray">🚛 3 tấn · Thùng kín</span>
+            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51N-44444</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">📴 Offline từ 2 giờ trước</div>
+          <div class="commission-info">
+            <div style="display:flex;justify-content:space-between;font-weight:600;">
+              <span>Hoa hồng công ty</span><span style="color:var(--primary);">15%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
+              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">2.800.000 ₫</span>
+            </div>
+          </div>
+        </div>
+        <div class="partner-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;" disabled>Giao chuyến</button>
+        </div>
+      </div>
+
+      <!-- Add new -->
+      <div class="partner-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:260px;cursor:pointer;" onclick="alert('Thêm đối tác mới')">
+        <div style="font-size:32px;color:var(--text-muted);">+</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Thêm đối tác mới</div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  function switchTab(el, type) {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

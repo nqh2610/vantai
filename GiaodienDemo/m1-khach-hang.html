@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khách hàng – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .customer-card {
+      background: white; border-radius: 12px; border: 1px solid var(--border);
+      padding: 16px; transition: all 0.13s; cursor: pointer;
+    }
+    .customer-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(29,78,216,0.08); }
+    .debt-bar { height: 4px; border-radius: 2px; background: #fee2e2; margin-top: 4px; overflow: hidden; }
+    .debt-bar-fill { height: 100%; background: #ef4444; border-radius: 2px; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item active"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 1</span><span class="sep">›</span><span class="current">Khách hàng</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">👥 Hồ sơ khách hàng</div>
+        <div class="page-subtitle">Quản lý thông tin, lịch sử đơn hàng và công nợ từng khách hàng</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">⬇ Xuất Excel</button>
+        <button class="btn btn-primary" onclick="alert('Mở form thêm khách hàng')">+ Thêm khách hàng</button>
+      </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dbeafe;">👥</div>
+        <div class="stat-card-label">Tổng khách hàng</div>
+        <div class="stat-card-value">38</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dcfce7;">⭐</div>
+        <div class="stat-card-label">Khách thường xuyên</div>
+        <div class="stat-card-value">15</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fee2e2;">⚠️</div>
+        <div class="stat-card-label">Có công nợ quá hạn</div>
+        <div class="stat-card-value" style="color:#dc2626;">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fef9c3;">💰</div>
+        <div class="stat-card-label">Tổng công nợ phải thu</div>
+        <div class="stat-card-value" style="font-size:20px;">48M ₫</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tên, điện thoại, email...">
+      <select class="form-control"><option>Tất cả loại</option><option>Doanh nghiệp</option><option>Cá nhân</option></select>
+      <select class="form-control"><option>Tất cả trạng thái</option><option>Hoạt động</option><option>Có nợ quá hạn</option></select>
+      <div style="margin-left:auto;display:flex;gap:4px;">
+        <button class="btn-icon" title="Dạng lưới" onclick="setView('grid')">⊞</button>
+        <button class="btn-icon" title="Dạng bảng" onclick="setView('table')">≡</button>
+      </div>
+    </div>
+
+    <!-- Customer grid -->
+    <div id="customerGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <!-- Card 1 -->
+      <div class="customer-card">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <div class="avatar avatar-md" style="background:#dbeafe;color:#1d4ed8;font-size:16px;">P</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;">Cty TNHH Phú Hưng</div>
+            <div class="text-xs text-muted">MST: 0302 345 678 · Doanh nghiệp</div>
+            <div class="text-xs text-muted mt-1">📞 0901 234 567 · ✉ puhung@email.com</div>
+          </div>
+          <span class="badge badge-red">Nợ quá hạn</span>
+        </div>
+        <div class="divider" style="margin:8px 0;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">24</div><div class="text-xs text-muted">Tổng đơn</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">128M</div><div class="text-xs text-muted">Doanh thu</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#dc2626;">15M</div><div class="text-xs text-muted">Còn nợ</div></div>
+        </div>
+        <div style="font-size:11px;color:#dc2626;font-weight:600;margin-bottom:8px;">⚠ Quá hạn thanh toán 14 ngày</div>
+        <div class="debt-bar"><div class="debt-bar-fill" style="width:70%;"></div></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="customer-card">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <div class="avatar avatar-md" style="background:#dcfce7;color:#15803d;font-size:16px;">B</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;">Siêu thị Big C</div>
+            <div class="text-xs text-muted">MST: 0301 123 456 · Doanh nghiệp</div>
+            <div class="text-xs text-muted mt-1">📞 0912 456 789 · ✉ bigc@bigc.vn</div>
+          </div>
+          <span class="badge badge-green">Tốt</span>
+        </div>
+        <div class="divider" style="margin:8px 0;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">56</div><div class="text-xs text-muted">Tổng đơn</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">340M</div><div class="text-xs text-muted">Doanh thu</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">0</div><div class="text-xs text-muted">Còn nợ</div></div>
+        </div>
+        <div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:8px;">✅ Thanh toán đúng hạn</div>
+        <div class="debt-bar" style="background:#dcfce7;"><div class="debt-bar-fill" style="width:0%;background:#16a34a;"></div></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="customer-card">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <div class="avatar avatar-md" style="background:#ffedd5;color:#c2410c;font-size:16px;">T</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;">Cty CP Thép Miền Nam</div>
+            <div class="text-xs text-muted">MST: 0300 987 654 · Doanh nghiệp</div>
+            <div class="text-xs text-muted mt-1">📞 0908 654 321 · ✉ thep@mn.vn</div>
+          </div>
+          <span class="badge badge-yellow">Có nợ</span>
+        </div>
+        <div class="divider" style="margin:8px 0;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">18</div><div class="text-xs text-muted">Tổng đơn</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">85M</div><div class="text-xs text-muted">Doanh thu</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#c2410c;">12M</div><div class="text-xs text-muted">Còn nợ</div></div>
+        </div>
+        <div style="font-size:11px;color:#854d0e;font-weight:600;margin-bottom:8px;">⏰ Đến hạn thanh toán 16/05</div>
+        <div class="debt-bar"><div class="debt-bar-fill" style="width:45%;background:#eab308;"></div></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="customer-card">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <div class="avatar avatar-md" style="background:#f3e8ff;color:#7e22ce;font-size:16px;">X</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;">Cty May Mặc Xuân Hòa</div>
+            <div class="text-xs text-muted">MST: 0303 456 789 · Doanh nghiệp</div>
+            <div class="text-xs text-muted mt-1">📞 0977 333 444 · ✉ xuanhoa@mail.vn</div>
+          </div>
+          <span class="badge badge-green">Tốt</span>
+        </div>
+        <div class="divider" style="margin:8px 0;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">31</div><div class="text-xs text-muted">Tổng đơn</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">198M</div><div class="text-xs text-muted">Doanh thu</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">0</div><div class="text-xs text-muted">Còn nợ</div></div>
+        </div>
+        <div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:8px;">⭐ Khách hàng VIP</div>
+        <div class="debt-bar" style="background:#dcfce7;"></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="customer-card">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <div class="avatar avatar-md" style="background:#ccfbf1;color:#0f766e;font-size:16px;">A</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:13px;">Công ty ABC Trading</div>
+            <div class="text-xs text-muted">MST: 0305 789 012 · Doanh nghiệp</div>
+            <div class="text-xs text-muted mt-1">📞 0944 555 666 · ✉ abc@trading.vn</div>
+          </div>
+          <span class="badge badge-yellow">Có nợ</span>
+        </div>
+        <div class="divider" style="margin:8px 0;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">9</div><div class="text-xs text-muted">Tổng đơn</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">42M</div><div class="text-xs text-muted">Doanh thu</div></div>
+          <div><div style="font-size:18px;font-weight:800;color:#c2410c;">9.1M</div><div class="text-xs text-muted">Còn nợ</div></div>
+        </div>
+        <div style="font-size:11px;color:#854d0e;font-weight:600;margin-bottom:8px;">⏰ Đến hạn thanh toán 20/05</div>
+        <div class="debt-bar"><div class="debt-bar-fill" style="width:30%;background:#eab308;"></div></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="customer-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:200px;" onclick="alert('Thêm khách hàng mới')">
+        <div style="font-size:32px;color:var(--text-muted);">+</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Thêm khách hàng mới</div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  function setView(v) { console.log('Switch to', v, 'view'); }
+</script>
+</body>
+</html>

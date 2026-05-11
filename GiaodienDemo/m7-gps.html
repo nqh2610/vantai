@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS Tracking – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .gps-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; height: calc(100vh - 130px); min-height: 500px; }
+    .map-container { background: #e8f0f8; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; position: relative; }
+    .map-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, #c5d8f0 0%, #b8d0ec 40%, #c8ddf5 60%, #bdd3ed 100%); }
+    /* Simulated map elements */
+    .map-road-h { position: absolute; background: white; opacity: 0.7; height: 4px; left: 0; right: 0; }
+    .map-road-v { position: absolute; background: white; opacity: 0.7; width: 4px; top: 0; bottom: 0; }
+    .map-label  { position: absolute; font-size: 10px; color: #3b5f8a; font-weight: 600; background: rgba(255,255,255,0.7); padding: 2px 5px; border-radius: 3px; }
+    .vehicle-pin { position: absolute; transform: translate(-50%, -50%); cursor: pointer; }
+    .pin-dot { width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 800; }
+    .pin-running  { background: #2563eb; }
+    .pin-idle     { background: #16a34a; }
+    .pin-stopped  { background: #dc2626; }
+    .pin-pulse::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; background: rgba(37,99,235,0.3); animation: ripple 1.5s ease-out infinite; }
+    @keyframes ripple { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2); opacity: 0; } }
+    .pin-label { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); background: white; border: 1px solid var(--border); border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: 700; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .map-controls { position: absolute; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 4px; }
+    .map-btn { background: white; border: 1px solid var(--border); border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .map-search { position: absolute; top: 12px; left: 56px; right: 12px; display: flex; gap: 6px; }
+    .map-legend { position: absolute; bottom: 12px; left: 12px; background: white; border-radius: 8px; border: 1px solid var(--border); padding: 8px 12px; font-size: 11px; }
+    .legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .vehicle-list-panel { display: flex; flex-direction: column; gap: 0; overflow-y: auto; }
+    .vehicle-item { padding: 10px 14px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background 0.1s; }
+    .vehicle-item:hover, .vehicle-item.selected { background: #f0f7ff; }
+    .vehicle-item-header { display: flex; justify-content: space-between; align-items: center; }
+    .vehicle-plate { font-size: 13px; font-weight: 700; font-family: monospace; }
+    .vehicle-driver { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .vehicle-location { font-size: 11px; color: var(--text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 3px; }
+    .speed-badge { background: #f8fafc; border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item active"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 7</span><span class="sep">›</span><span class="current">Theo dõi GPS thời gian thực</span>
+    </div>
+    <div class="topbar-actions">
+      <span style="font-size:12px;color:#16a34a;font-weight:600;display:flex;align-items:center;gap:4px;">
+        <span class="status-dot dot-green dot-pulse"></span>Live · Cập nhật 30s
+      </span>
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content" style="padding-bottom: 8px;">
+    <div class="page-header" style="margin-bottom:10px;">
+      <div>
+        <div class="page-title">📍 GPS Tracking</div>
+        <div class="page-subtitle">Theo dõi vị trí xe thời gian thực</div>
+      </div>
+      <div class="page-actions">
+        <select class="form-control" style="width:160px;">
+          <option>Tất cả xe (8)</option>
+          <option>🔵 Đang chạy (6)</option>
+          <option>🟢 Đứng yên (1)</option>
+          <option>🔴 Dừng lâu (1)</option>
+        </select>
+        <button class="btn btn-secondary">📋 Lịch sử hành trình</button>
+      </div>
+    </div>
+
+    <div class="gps-layout">
+      <!-- Map -->
+      <div class="map-container">
+        <div class="map-overlay">
+          <!-- Simulated roads -->
+          <div class="map-road-h" style="top:30%;"></div>
+          <div class="map-road-h" style="top:55%;"></div>
+          <div class="map-road-h" style="top:75%;"></div>
+          <div class="map-road-v" style="left:25%;"></div>
+          <div class="map-road-v" style="left:50%;"></div>
+          <div class="map-road-v" style="left:75%;"></div>
+          <div class="map-road-h" style="top:30%;height:2px;background:#b0c4de;opacity:0.5;left:25%;right:25%;"></div>
+          <!-- Area labels -->
+          <div class="map-label" style="top:18%;left:10%;">Quận 12</div>
+          <div class="map-label" style="top:18%;left:42%;">Gò Vấp</div>
+          <div class="map-label" style="top:18%;left:70%;">Bình Thạnh</div>
+          <div class="map-label" style="top:42%;left:10%;">Tân Bình</div>
+          <div class="map-label" style="top:42%;left:42%;">Quận 3</div>
+          <div class="map-label" style="top:42%;left:70%;">Quận 1</div>
+          <div class="map-label" style="top:62%;left:10%;">Tân Phú</div>
+          <div class="map-label" style="top:62%;left:42%;">Quận 6</div>
+          <div class="map-label" style="top:62%;left:72%;">Quận 4</div>
+          <!-- Vehicle pins -->
+          <div class="vehicle-pin" style="top:27%;left:20%;">
+            <div class="pin-label">51C-12345</div>
+            <div class="pin-dot pin-running pin-pulse">A</div>
+          </div>
+          <div class="vehicle-pin" style="top:35%;left:58%;">
+            <div class="pin-label">51D-56789</div>
+            <div class="pin-dot pin-running">K</div>
+          </div>
+          <div class="vehicle-pin" style="top:52%;left:38%;">
+            <div class="pin-label">51H-45678</div>
+            <div class="pin-dot pin-running">V</div>
+          </div>
+          <div class="vehicle-pin" style="top:65%;left:74%;">
+            <div class="pin-label">51E-90123</div>
+            <div class="pin-dot pin-running">H</div>
+          </div>
+          <div class="vehicle-pin" style="top:20%;left:72%;">
+            <div class="pin-label">51F-23456</div>
+            <div class="pin-dot pin-idle">B</div>
+          </div>
+          <div class="vehicle-pin" style="top:72%;left:18%;">
+            <div class="pin-label">51N-44444</div>
+            <div class="pin-dot pin-stopped">P</div>
+          </div>
+        </div>
+        <div class="map-controls">
+          <div class="map-btn" title="Zoom in">+</div>
+          <div class="map-btn" title="Zoom out">−</div>
+          <div class="map-btn" title="Toàn màn hình">⛶</div>
+        </div>
+        <div class="map-search">
+          <input type="text" class="form-control" placeholder="🔍 Tìm biển số, tài xế..." style="flex:1;height:32px;font-size:12px;">
+          <button class="btn btn-primary btn-sm">Theo dõi</button>
+        </div>
+        <div class="map-legend">
+          <div style="font-weight:700;margin-bottom:5px;font-size:11px;">Chú thích</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#2563eb;"></div> Đang di chuyển (5)</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#16a34a;"></div> Đứng yên / Rảnh (1)</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#dc2626;"></div> Dừng lâu >30 phút (1)</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#94a3b8;"></div> Mất tín hiệu GPS (1)</div>
+        </div>
+        <div style="position:absolute;bottom:12px;right:12px;background:rgba(255,255,255,0.9);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--text-muted);border:1px solid var(--border);">
+          🗺 Bản đồ mô phỏng · TP. Hồ Chí Minh
+        </div>
+      </div>
+
+      <!-- Vehicle list -->
+      <div class="card" style="overflow:hidden;display:flex;flex-direction:column;">
+        <div class="card-header" style="flex-shrink:0;">
+          <span class="card-title">Danh sách xe (8)</span>
+          <span class="badge badge-green">6 đang chạy</span>
+        </div>
+        <div class="vehicle-list-panel" style="flex:1;overflow-y:auto;">
+          <div class="vehicle-item selected">
+            <div class="vehicle-item-header">
+              <span class="vehicle-plate">51C-12345</span>
+              <span class="badge badge-blue">Đang chạy</span>
+            </div>
+            <div class="vehicle-driver">👤 Nguyễn Văn An · 5 tấn</div>
+            <div class="vehicle-location">📍 Quốc lộ 1A, Quận 12</div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <span class="speed-badge">🚀 52 km/h</span>
+              <span class="speed-badge">⛽ 65%</span>
+              <span style="font-size:10px;color:var(--text-muted);">CX-0528</span>
+            </div>
+          </div>
+          <div class="vehicle-item">
+            <div class="vehicle-item-header">
+              <span class="vehicle-plate">51D-56789</span>
+              <span class="badge badge-blue">Đang chạy</span>
+            </div>
+            <div class="vehicle-driver">👤 Trần Minh Khoa · 10 tấn</div>
+            <div class="vehicle-location">📍 Đinh Tiên Hoàng, Bình Thạnh</div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <span class="speed-badge">🚀 38 km/h</span>
+              <span class="speed-badge">⛽ 40%</span>
+              <span style="font-size:10px;color:var(--text-muted);">CX-0530</span>
+            </div>
+          </div>
+          <div class="vehicle-item">
+            <div class="vehicle-item-header">
+              <span class="vehicle-plate">51H-45678</span>
+              <span class="badge badge-blue">Đang chạy</span>
+            </div>
+            <div class="vehicle-driver">👤 Nguyễn Văn Khánh · 7 tấn</div>
+            <div class="vehicle-location">📍 Lý Thường Kiệt, Tân Bình</div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <span class="speed-badge">🚀 29 km/h</span>
+              <span class="speed-badge">⛽ 55%</span>
+              <span style="font-size:10px;color:var(--text-muted);">CX-0527</span>
+            </div>
+          </div>
+          <div class="vehicle-item">
+            <div class="vehicle-item-header">
+              <span class="vehicle-plate">51E-90123</span>
+              <span class="badge badge-blue">Đang chạy</span>
+            </div>
+            <div class="vehicle-driver">👤 Phạm Quốc Hùng · 15 tấn</div>
+            <div class="vehicle-location">📍 Xa lộ Hà Nội, Quận 4</div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <span class="speed-badge">🚀 65 km/h</span>
+              <span class="speed-badge">⛽ 72%</span>
+              <span style="font-size:10px;color:var(--text-muted);">CX-0526</span>
+            </div>
+          </div>
+          <div class="vehicle-item">
+            <div class="vehicle-item-header">
+              <span class="vehicle-plate">51F-23456</span>
+              <span class="badge badge-green">Đứng yên</span>
+            </div>
+            <div class="vehicle-driver">👤 Lê Văn Bình · 3 tấn</div>
+            <div class="vehicle-location">📍 Điểm giao hàng · Bình Thạnh</div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <span class="speed-badge">🚀 0 km/h</span>
+              <span class="speed-badge">⛽ 80%</span>
+              <span style="font-size:10px;color:#16a34a;">Đang giao hàng</span>
+            </div>
+          </div>
+          <div class="vehicle-item">
+            <div class="vehicle-item-header">
+              <span class="vehicle-plate">51N-44444</span>
+              <span class="badge badge-red">Dừng lâu</span>
+            </div>
+            <div class="vehicle-driver">👤 Phạm Hữu Phúc · 3 tấn</div>
+            <div class="vehicle-location">📍 Hòa Bình, Tân Phú</div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <span class="speed-badge">🚀 0 km/h</span>
+              <span class="speed-badge">⛽ 30%</span>
+              <span style="font-size:10px;color:#dc2626;">Dừng 47 phút</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .activity-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f4f6f8; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .perf-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; margin-top: 6px; }
+    .perf-bar-fill { height: 100%; border-radius: 3px; }
+    .chart-bar-wrap { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-top: 8px; }
+    .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .chart-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--primary-light); transition: all 0.2s; cursor: pointer; }
+    .chart-bar:hover { background: var(--primary); }
+    .chart-bar-label { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+    .quick-action { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border-radius: 10px; border: 1px solid var(--border); background: white; cursor: pointer; transition: all 0.13s; text-decoration: none; }
+    .quick-action:hover { border-color: var(--primary); background: var(--primary-xlight); }
+    .quick-action-icon { font-size: 24px; }
+    .quick-action-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-align: center; }
+    .trip-row td:first-child { font-weight: 600; color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">VanChuyển Pro</span><span class="sep">›</span>
+      <span class="current">Dashboard</span>
+    </div>
+    <div class="topbar-actions">
+      <span style="font-size:12px;color:var(--text-muted);">Thứ Hai, 11/05/2026</span>
+      <button class="topbar-btn" title="Thông báo">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        <span class="notif-badge">4</span>
+      </button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Tổng quan hệ thống</div>
+        <div class="page-subtitle">Cập nhật lúc 08:42 · Thứ Hai, 11/05/2026</div>
+      </div>
+      <div class="page-actions">
+        <a href="m1-bao-gia.html" class="btn btn-primary">+ Tạo đơn mới</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dbeafe;">📦</div>
+        <div class="stat-card-label">Đơn hàng hôm nay</div>
+        <div class="stat-card-value">14</div>
+        <div class="stat-card-change" style="color:#16a34a;">↑ +3 so với hôm qua</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dcfce7;">🚚</div>
+        <div class="stat-card-label">Xe đang chạy</div>
+        <div class="stat-card-value">6<span style="font-size:14px;font-weight:500;color:var(--text-muted)">/8</span></div>
+        <div class="stat-card-change" style="color:var(--text-secondary);">2 xe rảnh sẵn sàng</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fef9c3;">💰</div>
+        <div class="stat-card-label">Doanh thu tháng 5</div>
+        <div class="stat-card-value" style="font-size:20px;">312M</div>
+        <div class="stat-card-change" style="color:#16a34a;">↑ +12% so với T4</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fee2e2;">📄</div>
+        <div class="stat-card-label">Công nợ phải thu</div>
+        <div class="stat-card-value" style="font-size:20px;">48M</div>
+        <div class="stat-card-change" style="color:#dc2626;">3 khách quá hạn</div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-2-1" style="gap:18px;">
+      <!-- Recent trips -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Đơn hàng gần đây</span>
+          <a href="m1-don-hang.html" class="btn btn-secondary btn-sm">Xem tất cả</a>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã đơn</th><th>Khách hàng</th><th>Tuyến</th><th>Xe</th><th>Trạng thái</th><th>Giá trị</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="trip-row">
+                <td>CX-0541</td>
+                <td><div style="font-weight:600;">Cty TNHH Phú Hưng</div><div class="text-xs text-muted">Nguyễn Văn An</div></td>
+                <td>TP.HCM → Bình Dương</td>
+                <td><span class="badge badge-gray">5 tấn</span></td>
+                <td><span class="badge badge-blue">Đang chạy</span></td>
+                <td style="font-weight:700;">3.200.000 ₫</td>
+              </tr>
+              <tr class="trip-row">
+                <td>CX-0540</td>
+                <td><div style="font-weight:600;">Siêu thị Big C</div><div class="text-xs text-muted">Trần Thị Lan</div></td>
+                <td>Đồng Nai → TP.HCM</td>
+                <td><span class="badge badge-gray">10 tấn</span></td>
+                <td><span class="badge badge-green">Hoàn thành</span></td>
+                <td style="font-weight:700;">5.800.000 ₫</td>
+              </tr>
+              <tr class="trip-row">
+                <td>CX-0539</td>
+                <td><div style="font-weight:600;">Cty CP Thép Miền Nam</div><div class="text-xs text-muted">Lê Văn Bình</div></td>
+                <td>TP.HCM → Tây Ninh</td>
+                <td><span class="badge badge-gray">15 tấn</span></td>
+                <td><span class="badge badge-blue">Đang chạy</span></td>
+                <td style="font-weight:700;">7.500.000 ₫</td>
+              </tr>
+              <tr class="trip-row">
+                <td>CX-0538</td>
+                <td><div style="font-weight:600;">Công ty Nhựa Nam Việt</div><div class="text-xs text-muted">Phạm Thị Hoa</div></td>
+                <td>Bình Dương → Long An</td>
+                <td><span class="badge badge-gray">1 tấn</span></td>
+                <td><span class="badge badge-yellow">Chờ xác nhận</span></td>
+                <td style="font-weight:700;">1.100.000 ₫</td>
+              </tr>
+              <tr class="trip-row">
+                <td>CX-0537</td>
+                <td><div style="font-weight:600;">Cty May Mặc Xuân Hòa</div><div class="text-xs text-muted">Hoàng Văn Nam</div></td>
+                <td>TP.HCM → Vũng Tàu</td>
+                <td><span class="badge badge-gray">3 tấn</span></td>
+                <td><span class="badge badge-green">Hoàn thành</span></td>
+                <td style="font-weight:700;">4.200.000 ₫</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right col -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <!-- Quick actions -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">Thao tác nhanh</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <a href="m1-bao-gia.html" class="quick-action">
+              <div class="quick-action-icon">📋</div>
+              <div class="quick-action-label">Báo giá nhanh</div>
+            </a>
+            <a href="m2-dieu-phoi.html" class="quick-action">
+              <div class="quick-action-icon">🎯</div>
+              <div class="quick-action-label">Điều phối xe</div>
+            </a>
+            <a href="m7-gps.html" class="quick-action">
+              <div class="quick-action-icon">📍</div>
+              <div class="quick-action-label">Xem GPS xe</div>
+            </a>
+            <a href="m4-luong.html" class="quick-action">
+              <div class="quick-action-icon">💵</div>
+              <div class="quick-action-label">Tính lương</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Alert / notifications -->
+        <div class="card card-padded">
+          <div class="card-title mb-3">Cảnh báo hệ thống</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="alert alert-warning">
+              <span>⚠️</span>
+              <div><strong>Bằng lái TXE sắp hết hạn</strong><br>Tài xế Nguyễn Văn Khánh – còn 7 ngày</div>
+            </div>
+            <div class="alert alert-danger">
+              <span>🔴</span>
+              <div><strong>Công nợ quá hạn</strong><br>Cty Phú Hưng chưa thanh toán 15 triệu (quá 14 ngày)</div>
+            </div>
+            <div class="alert alert-info">
+              <span>ℹ️</span>
+              <div><strong>Xe 51C-12345 cần bảo dưỡng</strong><br>Đã chạy 8.200 km kể từ lần bảo dưỡng cuối</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom grid: revenue chart + driver performance -->
+    <div class="grid grid-2" style="gap:18px;margin-top:18px;">
+      <div class="card card-padded">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <div class="card-title">Doanh thu 7 ngày qua</div>
+          <span class="badge badge-blue">Tháng 5/2026</span>
+        </div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:42px;" title="T2: 38.5M"></div>
+            <span class="chart-bar-label">T2/5</span>
+          </div>
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:60px;" title="T3: 55M"></div>
+            <span class="chart-bar-label">T3/6</span>
+          </div>
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:35px;" title="T4: 32M"></div>
+            <span class="chart-bar-label">T4/7</span>
+          </div>
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:70px;" title="T5: 64M"></div>
+            <span class="chart-bar-label">T5/8</span>
+          </div>
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:52px;" title="T6: 48M"></div>
+            <span class="chart-bar-label">T6/9</span>
+          </div>
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:30px;" title="T7: 28M"></div>
+            <span class="chart-bar-label">T7/10</span>
+          </div>
+          <div class="chart-bar-col">
+            <div class="chart-bar" style="height:45px;background:var(--primary);" title="CN: 41M"></div>
+            <span class="chart-bar-label" style="color:var(--primary);font-weight:700;">CN/11</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-padded">
+        <div class="card-title mb-3">Hiệu suất tài xế – Tháng 5</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:12px;font-weight:600;">Nguyễn Văn An</span>
+              <span style="font-size:12px;color:var(--primary);font-weight:700;">24 chuyến</span>
+            </div>
+            <div class="perf-bar"><div class="perf-bar-fill" style="width:85%;background:#3b82f6;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:12px;font-weight:600;">Trần Minh Khoa</span>
+              <span style="font-size:12px;color:var(--primary);font-weight:700;">19 chuyến</span>
+            </div>
+            <div class="perf-bar"><div class="perf-bar-fill" style="width:67%;background:#60a5fa;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:12px;font-weight:600;">Lê Văn Bình</span>
+              <span style="font-size:12px;color:var(--primary);font-weight:700;">16 chuyến</span>
+            </div>
+            <div class="perf-bar"><div class="perf-bar-fill" style="width:56%;background:#93c5fd;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:12px;font-weight:600;">Phạm Quốc Hùng</span>
+              <span style="font-size:12px;color:var(--primary);font-weight:700;">14 chuyến</span>
+            </div>
+            <div class="perf-bar"><div class="perf-bar-fill" style="width:50%;background:#bfdbfe;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:12px;font-weight:600;">Đỗ Thanh Tùng</span>
+              <span style="font-size:12px;color:var(--primary);font-weight:700;">11 chuyến</span>
+            </div>
+            <div class="perf-bar"><div class="perf-bar-fill" style="width:39%;background:#dbeafe;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

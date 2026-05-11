@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch xe – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .calendar-wrap { overflow-x: auto; }
+    .cal-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 800px; }
+    .cal-table th { padding: 8px 10px; background: #f8fafc; font-weight: 700; text-align: center; border: 1px solid var(--border); }
+    .cal-table th.vehicle-col { text-align: left; width: 160px; background: white; }
+    .cal-table th.today { background: var(--primary-light); color: var(--primary); }
+    .cal-table td { border: 1px solid var(--border-light); vertical-align: top; padding: 4px; height: 72px; position: relative; }
+    .cal-table td.vehicle-cell { background: white; padding: 8px 10px; vertical-align: middle; border: 1px solid var(--border); }
+    .cal-table td.today-cell { background: #fffbeb; }
+    .trip-block {
+      border-radius: 6px; padding: 4px 6px; font-size: 11px; font-weight: 600;
+      margin-bottom: 2px; cursor: pointer; overflow: hidden;
+    }
+    .trip-block-blue { background: #dbeafe; color: #1d4ed8; border-left: 3px solid #3b82f6; }
+    .trip-block-green { background: #dcfce7; color: #15803d; border-left: 3px solid #22c55e; }
+    .trip-block-orange { background: #ffedd5; color: #c2410c; border-left: 3px solid #f97316; }
+    .trip-block-purple { background: #f3e8ff; color: #7e22ce; border-left: 3px solid #a855f7; }
+    .trip-block-gray { background: #f1f5f9; color: #475569; border-left: 3px solid #94a3b8; }
+    .vehicle-name { font-weight: 700; font-size: 12px; }
+    .vehicle-plate { font-size: 11px; color: var(--text-muted); }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item active"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 2</span><span class="sep">›</span><span class="current">Lịch xe</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-secondary btn-sm">◀ Tuần trước</button>
+      <span style="font-size:13px;font-weight:700;padding:0 8px;">05/05 – 11/05/2026</span>
+      <button class="btn btn-secondary btn-sm">Tuần sau ▶</button>
+      <select class="form-control" style="max-width:160px;font-size:12px;">
+        <option>Tất cả xe</option><option>51C-12345 – 5T</option><option>51D-56789 – 10T</option>
+      </select>
+      <button class="btn btn-secondary btn-sm">⬇ Xuất Excel</button>
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">🗓️ Lịch xe theo tuần</div>
+        <div class="page-subtitle">Xem lịch điều xe theo tài xế và ngày trong tuần</div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>Đang chạy</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div>Hoàn thành</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div>Chờ điều phối</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div>Đã phân công</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;"></div>Nghỉ / Bảo dưỡng</div>
+    </div>
+
+    <div class="card">
+      <div class="calendar-wrap">
+        <table class="cal-table">
+          <thead>
+            <tr>
+              <th class="vehicle-col">Xe / Tài xế</th>
+              <th>T2<br><span style="font-weight:400;font-size:11px;color:var(--text-muted);">05/05</span></th>
+              <th>T3<br><span style="font-weight:400;font-size:11px;color:var(--text-muted);">06/05</span></th>
+              <th>T4<br><span style="font-weight:400;font-size:11px;color:var(--text-muted);">07/05</span></th>
+              <th>T5<br><span style="font-weight:400;font-size:11px;color:var(--text-muted);">08/05</span></th>
+              <th>T6<br><span style="font-weight:400;font-size:11px;color:var(--text-muted);">09/05</span></th>
+              <th>T7<br><span style="font-weight:400;font-size:11px;color:var(--text-muted);">10/05</span></th>
+              <th class="today">CN<br><span style="font-weight:700;font-size:11px;">11/05 ●</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Row 1 -->
+            <tr>
+              <td class="vehicle-cell">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">A</div>
+                  <div><div class="vehicle-name">Nguyễn Văn An</div><div class="vehicle-plate">51C-12345 · 5 tấn</div></div>
+                </div>
+              </td>
+              <td><div class="trip-block trip-block-green">HCM→BD<br>CX-0510</div></td>
+              <td><div class="trip-block trip-block-green">HCM→ĐN<br>CX-0515</div></td>
+              <td></td>
+              <td><div class="trip-block trip-block-green">BD→LA<br>CX-0522</div><div class="trip-block trip-block-green">HCM→TN<br>CX-0523</div></td>
+              <td><div class="trip-block trip-block-green">HCM→VT<br>CX-0528</div></td>
+              <td></td>
+              <td class="today-cell"><div class="trip-block trip-block-blue">HCM→BD<br>CX-0541 ●</div></td>
+            </tr>
+            <!-- Row 2 -->
+            <tr>
+              <td class="vehicle-cell">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#dbeafe;color:#1d4ed8;">K</div>
+                  <div><div class="vehicle-name">Trần Minh Khoa</div><div class="vehicle-plate">51D-56789 · 10 tấn</div></div>
+                </div>
+              </td>
+              <td><div class="trip-block trip-block-green">ĐN→HCM<br>CX-0511</div></td>
+              <td></td>
+              <td><div class="trip-block trip-block-green">HCM→CT<br>CX-0517</div></td>
+              <td><div class="trip-block trip-block-green">CT→HCM<br>CX-0521</div></td>
+              <td><div class="trip-block trip-block-green">HCM→BD<br>CX-0527</div></td>
+              <td><div class="trip-block trip-block-green">BD→HCM<br>CX-0532</div></td>
+              <td class="today-cell"><div class="trip-block trip-block-green">ĐN→HCM<br>CX-0540 ✓</div></td>
+            </tr>
+            <!-- Row 3 -->
+            <tr>
+              <td class="vehicle-cell">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">H</div>
+                  <div><div class="vehicle-name">Phạm Quốc Hùng</div><div class="vehicle-plate">51E-90123 · 15 tấn</div></div>
+                </div>
+              </td>
+              <td></td>
+              <td><div class="trip-block trip-block-green">HCM→QN<br>CX-0514</div></td>
+              <td><div class="trip-block trip-block-green">QN→HCM<br>CX-0518</div></td>
+              <td></td>
+              <td><div class="trip-block trip-block-green">BD→TN<br>CX-0526</div></td>
+              <td><div class="trip-block trip-block-green">TN→HCM<br>CX-0533</div></td>
+              <td class="today-cell"><div class="trip-block trip-block-blue">BD→TN<br>CX-0539 ●</div></td>
+            </tr>
+            <!-- Row 4 -->
+            <tr>
+              <td class="vehicle-cell">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#f3e8ff;color:#7e22ce;">B</div>
+                  <div><div class="vehicle-name">Lê Văn Bình</div><div class="vehicle-plate">51F-23456 · 3 tấn</div></div>
+                </div>
+              </td>
+              <td><div class="trip-block trip-block-green">HCM→BD<br>CX-0512</div></td>
+              <td><div class="trip-block trip-block-green">HCM→LA<br>CX-0516</div></td>
+              <td><div class="trip-block trip-block-green">LA→HCM<br>CX-0519</div></td>
+              <td><div class="trip-block trip-block-green">HCM→VT<br>CX-0524</div></td>
+              <td></td>
+              <td><div class="trip-block trip-block-green">HCM→VT<br>CX-0537 ✓</div></td>
+              <td class="today-cell" style="background:#f8fafc;"><div style="font-size:10px;color:var(--text-muted);text-align:center;padding-top:20px;">Rảnh</div></td>
+            </tr>
+            <!-- Row 5 -->
+            <tr>
+              <td class="vehicle-cell">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="avatar avatar-sm" style="background:#ccfbf1;color:#0f766e;">T</div>
+                  <div><div class="vehicle-name">Đỗ Thanh Tùng</div><div class="vehicle-plate">51G-34567 · 7 tấn</div></div>
+                </div>
+              </td>
+              <td></td>
+              <td><div class="trip-block trip-block-green">HCM→CT<br>CX-0513</div></td>
+              <td><div class="trip-block trip-block-green">CT→HCM<br>CX-0520</div></td>
+              <td><div class="trip-block trip-block-green">HCM→BD<br>CX-0525</div></td>
+              <td><div class="trip-block trip-block-green">HCM→BD<br>CX-0529</div></td>
+              <td><div class="trip-block trip-block-green">HCM→CT<br>CX-0536 ●</div></td>
+              <td class="today-cell"><div class="trip-block trip-block-gray">Bảo dưỡng</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text-secondary);">Tổng tuần: 28 chuyến · 5 xe · Doanh thu ước tính 148M ₫</span>
+        <button class="btn btn-secondary btn-sm">⬇ Xuất báo cáo tuần</button>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

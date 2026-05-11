@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App tài xế – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .app-preview-area {
+      display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap;
+    }
+    /* Phone frame */
+    .phone-frame {
+      width: 320px; flex-shrink: 0;
+      background: #1e293b; border-radius: 40px; padding: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    .phone-notch {
+      background: #1e293b; width: 80px; height: 20px; border-radius: 0 0 12px 12px;
+      margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 8px; color: #64748b;
+    }
+    .phone-screen {
+      background: #f8fafc; border-radius: 28px; overflow: hidden;
+      min-height: 580px; border: 1px solid #0f172a;
+    }
+    .app-statusbar {
+      background: var(--primary); color: white; font-size: 10px;
+      padding: 6px 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .app-header {
+      background: var(--primary); color: white; padding: 12px 16px 16px;
+    }
+    .app-header-title { font-size: 15px; font-weight: 800; }
+    .app-header-sub { font-size: 11px; opacity: 0.8; }
+    .driver-status-toggle {
+      display: flex; gap: 0; background: rgba(255,255,255,0.2);
+      border-radius: 20px; padding: 3px; margin-top: 10px;
+    }
+    .toggle-opt {
+      flex: 1; text-align: center; padding: 5px 10px; border-radius: 18px;
+      font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+      color: rgba(255,255,255,0.7);
+    }
+    .toggle-opt.on { background: white; color: var(--primary); }
+    .app-body { padding: 12px; }
+    .app-card {
+      background: white; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      margin-bottom: 10px; overflow: hidden;
+    }
+    .app-card-head { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    .app-card-body { padding: 10px 12px; }
+    .trip-notif {
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white;
+      border-radius: 12px; padding: 12px; margin-bottom: 10px;
+    }
+    .trip-notif-title { font-size: 12px; font-weight: 800; margin-bottom: 6px; }
+    .trip-notif-detail { font-size: 11px; opacity: 0.9; margin-bottom: 3px; }
+    .notif-btns { display: flex; gap: 6px; margin-top: 10px; }
+    .notif-btn { flex: 1; padding: 7px; border-radius: 8px; border: none; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .notif-accept { background: white; color: var(--primary); }
+    .notif-reject { background: rgba(255,255,255,0.2); color: white; }
+    .stat-row { display: flex; gap: 8px; }
+    .stat-box { flex: 1; background: #f8fafc; border-radius: 8px; padding: 8px 10px; text-align: center; }
+    .stat-box .v { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .stat-box .l { font-size: 9px; color: var(--text-muted); }
+    .trip-history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+    .trip-history-item:last-child { border-bottom: none; }
+    /* Info panel beside phone */
+    .info-panel { flex: 1; min-width: 260px; }
+    .feature-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .feature-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .feature-icon { font-size: 22px; margin-bottom: 6px; }
+    .feature-name { font-size: 13px; font-weight: 700; }
+    .feature-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .qr-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+    .qr-placeholder { width: 100px; height: 100px; background: #f1f5f9; border-radius: 8px; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item active"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 8</span><span class="sep">›</span><span class="current">App tài xế – Mobile Preview</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">📱 App tài xế – VanChuyển Driver</div>
+        <div class="page-subtitle">Xem trước giao diện ứng dụng di động dành cho tài xế</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">📤 Gửi link cài đặt</button>
+        <button class="btn btn-primary">⬇ Tải APK</button>
+      </div>
+    </div>
+
+    <div class="app-preview-area">
+      <!-- Phone mockup -->
+      <div class="phone-frame">
+        <div class="phone-notch">● ●</div>
+        <div class="phone-screen">
+          <div class="app-statusbar">
+            <span>09:41</span>
+            <span>📶 📶 🔋</span>
+          </div>
+          <div class="app-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="avatar" style="background:rgba(255,255,255,0.2);color:white;width:34px;height:34px;font-size:14px;">A</div>
+              <div>
+                <div class="app-header-title">Xin chào, Anh An! 👋</div>
+                <div class="app-header-sub">🚚 51C-12345 · 5 tấn</div>
+              </div>
+            </div>
+            <div class="driver-status-toggle">
+              <div class="toggle-opt on">🟢 Sẵn sàng</div>
+              <div class="toggle-opt">⏸ Nghỉ ngơi</div>
+              <div class="toggle-opt">🔴 Bận</div>
+            </div>
+          </div>
+          <div class="app-body">
+            <!-- Trip notification -->
+            <div class="trip-notif">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <span style="background:rgba(255,255,255,0.3);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;">🔔 CHUYẾN MỚI</span>
+              </div>
+              <div class="trip-notif-title">CX-0532 · HCM → Biên Hòa</div>
+              <div class="trip-notif-detail">📦 Hàng điện tử · 3.2 tấn · 42 km</div>
+              <div class="trip-notif-detail">🕐 Khởi hành: 14:00 hôm nay</div>
+              <div class="trip-notif-detail">💵 Phí chuyến: <strong>480.000 ₫</strong></div>
+              <div class="notif-btns">
+                <button class="notif-btn notif-accept">✅ Nhận chuyến</button>
+                <button class="notif-btn notif-reject">✕ Từ chối</button>
+              </div>
+            </div>
+
+            <!-- Today stats -->
+            <div class="app-card">
+              <div class="app-card-head" style="font-weight:700;font-size:12px;">📊 Hôm nay</div>
+              <div class="app-card-body">
+                <div class="stat-row">
+                  <div class="stat-box"><div class="v">3</div><div class="l">Chuyến</div></div>
+                  <div class="stat-box"><div class="v">142</div><div class="l">km</div></div>
+                  <div class="stat-box"><div class="v" style="font-size:13px;">1.12M</div><div class="l">Thu nhập</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chuyến hiện tại -->
+            <div class="app-card">
+              <div class="app-card-head" style="font-weight:700;font-size:12px;display:flex;justify-content:space-between;">
+                <span>🚛 Chuyến đang thực hiện</span>
+                <span class="badge badge-blue" style="font-size:9px;">CX-0528</span>
+              </div>
+              <div class="app-card-body">
+                <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;">
+                  <div style="margin-bottom:3px;">📍 <strong>Xuất phát:</strong> KCN Tân Bình</div>
+                  <div>🏁 <strong>Điểm đến:</strong> Cảng Cát Lái, Quận 2</div>
+                </div>
+                <div style="background:#f0f7ff;border-radius:8px;padding:8px;margin-top:6px;">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;">
+                    <span>🗺 Còn 18 km · ~25 phút</span>
+                    <span style="color:var(--primary);">73%</span>
+                  </div>
+                  <div style="height:5px;background:#dbeafe;border-radius:3px;margin-top:4px;overflow:hidden;">
+                    <div style="width:73%;height:100%;background:var(--primary);border-radius:3px;"></div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                  <button style="flex:1;padding:7px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:11px;font-weight:700;">📷 Chụp biên nhận</button>
+                  <button style="flex:1;padding:7px;background:#dcfce7;color:#15803d;border:none;border-radius:8px;font-size:11px;font-weight:700;">✅ Hoàn thành</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trip history -->
+            <div class="app-card">
+              <div class="app-card-head" style="font-weight:700;font-size:12px;">📋 Lịch sử chuyến hôm nay</div>
+              <div class="app-card-body" style="padding:6px 12px;">
+                <div class="trip-history-item">
+                  <div><div style="font-size:11px;font-weight:700;">CX-0526 · HCM → Bình Dương</div><div style="font-size:10px;color:var(--text-muted);">08:00 - 09:45 · 38 km</div></div>
+                  <span class="badge badge-green" style="font-size:9px;">✓ Xong</span>
+                </div>
+                <div class="trip-history-item">
+                  <div><div style="font-size:11px;font-weight:700;">CX-0527 · Bình Dương → HCM</div><div style="font-size:10px;color:var(--text-muted);">10:30 - 12:15 · 41 km</div></div>
+                  <span class="badge badge-green" style="font-size:9px;">✓ Xong</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature info panel -->
+      <div class="info-panel">
+        <div style="font-size:15px;font-weight:800;margin-bottom:14px;">Tính năng App Tài xế</div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">🔔</div>
+            <div class="feature-name">Nhận chuyến thời gian thực</div>
+            <div class="feature-desc">Thông báo ngay khi điều phối viên giao chuyến mới</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📍</div>
+            <div class="feature-name">GPS tự động</div>
+            <div class="feature-desc">Gửi vị trí về trung tâm mỗi 30 giây khi đang chạy</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📷</div>
+            <div class="feature-name">Chụp biên nhận</div>
+            <div class="feature-desc">Chụp ảnh xác nhận giao hàng · Lưu cloud tức thì</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">💵</div>
+            <div class="feature-name">Theo dõi thu nhập</div>
+            <div class="feature-desc">Xem lương thực nhận · Số chuyến · Km theo tháng</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🗺</div>
+            <div class="feature-name">Dẫn đường</div>
+            <div class="feature-desc">Tích hợp Google Maps · Tự mở khi nhận chuyến</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">💬</div>
+            <div class="feature-name">Chat nội bộ</div>
+            <div class="feature-desc">Nhắn tin với điều phối viên · Không cần số cá nhân</div>
+          </div>
+        </div>
+
+        <!-- QR code placeholder -->
+        <div class="qr-box">
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px;">📲 Tải ứng dụng</div>
+          <div style="font-size:11px;color:var(--text-muted);">Quét QR hoặc gửi link qua SMS</div>
+          <div class="qr-placeholder">▣</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:4px;">
+            <button class="btn btn-secondary btn-sm">🍎 App Store</button>
+            <button class="btn btn-secondary btn-sm">🤖 Google Play</button>
+          </div>
+          <div style="margin-top:10px;padding:8px;background:#f0f7ff;border-radius:6px;font-size:11px;color:var(--primary);">
+            Phiên bản: <strong>2.4.1</strong> · 254 tài xế đang dùng
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

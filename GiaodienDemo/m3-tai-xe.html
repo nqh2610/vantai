@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài xế cơ hữu – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .driver-card {
+      background: white; border-radius: 12px; border: 1px solid var(--border);
+      overflow: hidden; transition: all 0.13s;
+    }
+    .driver-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #cbd5e1; }
+    .driver-card-head { padding: 16px; border-bottom: 1px solid var(--border-light); }
+    .driver-card-body { padding: 12px 16px; }
+    .driver-card-foot { padding: 10px 16px; border-top: 1px solid var(--border-light); display: flex; gap: 6px; }
+    .doc-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; border-bottom: 1px solid #f4f6f8; }
+    .doc-item:last-child { border-bottom: none; }
+    .expire-warn { color: #dc2626; font-weight: 700; }
+    .expire-ok   { color: #16a34a; }
+    .expire-soon { color: #854d0e; }
+    .stat-mini { text-align: center; }
+    .stat-mini .val { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .stat-mini .lbl { font-size: 10px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item active"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 3</span><span class="sep">›</span><span class="current">Tài xế cơ hữu</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">👤 Quản lý tài xế cơ hữu</div>
+        <div class="page-subtitle">Hồ sơ, giấy tờ và lịch sử chuyến của tài xế nội bộ</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">⬇ Xuất danh sách</button>
+        <button class="btn btn-primary">+ Thêm tài xế</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dbeafe;">👤</div>
+        <div class="stat-card-label">Tổng tài xế</div>
+        <div class="stat-card-value">8</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dcfce7;">🟢</div>
+        <div class="stat-card-label">Đang hoạt động</div>
+        <div class="stat-card-value">5</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fef9c3;">🗓️</div>
+        <div class="stat-card-label">Nghỉ phép tháng này</div>
+        <div class="stat-card-value">2</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fee2e2;">⚠️</div>
+        <div class="stat-card-label">Giấy tờ sắp hết hạn</div>
+        <div class="stat-card-value" style="color:#dc2626;">2</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tên tài xế, biển số...">
+      <select class="form-control"><option>Tất cả trạng thái</option><option>Đang hoạt động</option><option>Đang nghỉ</option><option>Nghỉ việc</option></select>
+      <select class="form-control"><option>Tất cả xe</option><option>1 tấn</option><option>3 tấn</option><option>5 tấn</option><option>10 tấn</option><option>15 tấn</option></select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <!-- Driver 1 -->
+      <div class="driver-card">
+        <div class="driver-card-head">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div class="avatar avatar-lg" style="background:#dcfce7;color:#15803d;position:relative;">
+              A
+              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700;font-size:14px;">Nguyễn Văn An</div>
+                  <div class="text-xs text-muted">CCCD: 079204001234 · 📞 0901 123 456</div>
+                </div>
+                <span class="badge badge-blue">Đang chạy</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="badge badge-gray">5 tấn</span>
+                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51C-12345</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="driver-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+            <div class="stat-mini"><div class="val">24</div><div class="lbl">Chuyến T5</div></div>
+            <div class="stat-mini"><div class="val">1,248</div><div class="lbl">Km T5</div></div>
+            <div class="stat-mini"><div class="val">98%</div><div class="lbl">Đúng hạn</div></div>
+          </div>
+          <div class="doc-item">
+            <span>📋 Bằng lái hạng C</span>
+            <span class="expire-ok">✓ Hết hạn 15/08/2028</span>
+          </div>
+          <div class="doc-item">
+            <span>📄 Đăng kiểm xe</span>
+            <span class="expire-ok">✓ Hết hạn 20/11/2026</span>
+          </div>
+          <div class="doc-item">
+            <span>🛡️ Bảo hiểm TNDS</span>
+            <span class="expire-ok">✓ Hết hạn 01/04/2027</span>
+          </div>
+        </div>
+        <div class="driver-card-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Điều phối</button>
+        </div>
+      </div>
+
+      <!-- Driver 2 -->
+      <div class="driver-card">
+        <div class="driver-card-head">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div class="avatar avatar-lg" style="background:#dbeafe;color:#1d4ed8;position:relative;">
+              K
+              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700;font-size:14px;">Trần Minh Khoa</div>
+                  <div class="text-xs text-muted">CCCD: 079204005678 · 📞 0912 234 567</div>
+                </div>
+                <span class="badge badge-green">Rảnh</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="badge badge-gray">10 tấn</span>
+                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51D-56789</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="driver-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+            <div class="stat-mini"><div class="val">19</div><div class="lbl">Chuyến T5</div></div>
+            <div class="stat-mini"><div class="val">1,056</div><div class="lbl">Km T5</div></div>
+            <div class="stat-mini"><div class="val">100%</div><div class="lbl">Đúng hạn</div></div>
+          </div>
+          <div class="doc-item">
+            <span>📋 Bằng lái hạng E</span>
+            <span class="expire-ok">✓ Hết hạn 10/06/2027</span>
+          </div>
+          <div class="doc-item">
+            <span>📄 Đăng kiểm xe</span>
+            <span class="expire-soon">⏰ Hết hạn 18/06/2026</span>
+          </div>
+          <div class="doc-item">
+            <span>🛡️ Bảo hiểm TNDS</span>
+            <span class="expire-ok">✓ Hết hạn 15/12/2026</span>
+          </div>
+        </div>
+        <div class="driver-card-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Điều phối</button>
+        </div>
+      </div>
+
+      <!-- Driver 3 - with expiry warning -->
+      <div class="driver-card" style="border-color:#fde68a;">
+        <div class="driver-card-head" style="background:#fffbeb;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div class="avatar avatar-lg" style="background:#fef9c3;color:#854d0e;position:relative;">
+              V
+              <span class="status-dot dot-yellow" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700;font-size:14px;">Nguyễn Văn Khánh</div>
+                  <div class="text-xs text-muted">CCCD: 079204009012 · 📞 0923 456 789</div>
+                </div>
+                <span class="badge badge-yellow">Cảnh báo</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="badge badge-gray">7 tấn</span>
+                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51H-45678</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="driver-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+            <div class="stat-mini"><div class="val">14</div><div class="lbl">Chuyến T5</div></div>
+            <div class="stat-mini"><div class="val">842</div><div class="lbl">Km T5</div></div>
+            <div class="stat-mini"><div class="val">93%</div><div class="lbl">Đúng hạn</div></div>
+          </div>
+          <div class="doc-item">
+            <span>📋 Bằng lái hạng D</span>
+            <span class="expire-warn">⚠ Hết hạn 18/05/2026 (còn 7 ngày!)</span>
+          </div>
+          <div class="doc-item">
+            <span>📄 Đăng kiểm xe</span>
+            <span class="expire-ok">✓ Hết hạn 30/09/2026</span>
+          </div>
+          <div class="doc-item">
+            <span>🛡️ Bảo hiểm TNDS</span>
+            <span class="expire-warn">⚠ Hết hạn 20/05/2026 (còn 9 ngày!)</span>
+          </div>
+        </div>
+        <div class="driver-card-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-warning btn-sm" style="flex:1;">Gia hạn GT</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
+        </div>
+      </div>
+
+      <!-- Driver 4 -->
+      <div class="driver-card">
+        <div class="driver-card-head">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div class="avatar avatar-lg" style="background:#ffedd5;color:#c2410c;position:relative;">
+              H
+              <span class="status-dot dot-yellow" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700;font-size:14px;">Phạm Quốc Hùng</div>
+                  <div class="text-xs text-muted">CCCD: 079204003456 · 📞 0934 567 890</div>
+                </div>
+                <span class="badge badge-blue">Đang chạy</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="badge badge-gray">15 tấn</span>
+                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51E-90123</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="driver-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+            <div class="stat-mini"><div class="val">11</div><div class="lbl">Chuyến T5</div></div>
+            <div class="stat-mini"><div class="val">2,134</div><div class="lbl">Km T5</div></div>
+            <div class="stat-mini"><div class="val">95%</div><div class="lbl">Đúng hạn</div></div>
+          </div>
+          <div class="doc-item"><span>📋 Bằng lái hạng E</span><span class="expire-ok">✓ Hết hạn 22/03/2029</span></div>
+          <div class="doc-item"><span>📄 Đăng kiểm xe</span><span class="expire-ok">✓ Hết hạn 05/08/2026</span></div>
+          <div class="doc-item"><span>🛡️ Bảo hiểm TNDS</span><span class="expire-ok">✓ Hết hạn 10/01/2027</span></div>
+        </div>
+        <div class="driver-card-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">GPS</button>
+        </div>
+      </div>
+
+      <!-- Driver 5 -->
+      <div class="driver-card">
+        <div class="driver-card-head">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div class="avatar avatar-lg" style="background:#f3e8ff;color:#7e22ce;position:relative;">
+              B
+              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700;font-size:14px;">Lê Văn Bình</div>
+                  <div class="text-xs text-muted">CCCD: 079204007890 · 📞 0945 678 901</div>
+                </div>
+                <span class="badge badge-green">Rảnh</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="badge badge-gray">3 tấn</span>
+                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51F-23456</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="driver-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
+            <div class="stat-mini"><div class="val">16</div><div class="lbl">Chuyến T5</div></div>
+            <div class="stat-mini"><div class="val">756</div><div class="lbl">Km T5</div></div>
+            <div class="stat-mini"><div class="val">97%</div><div class="lbl">Đúng hạn</div></div>
+          </div>
+          <div class="doc-item"><span>📋 Bằng lái hạng C</span><span class="expire-ok">✓ Hết hạn 30/11/2027</span></div>
+          <div class="doc-item"><span>📄 Đăng kiểm xe</span><span class="expire-ok">✓ Hết hạn 12/02/2027</span></div>
+          <div class="doc-item"><span>🛡️ Bảo hiểm TNDS</span><span class="expire-ok">✓ Hết hạn 28/06/2027</span></div>
+        </div>
+        <div class="driver-card-foot">
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;">Điều phối</button>
+        </div>
+      </div>
+
+      <!-- Add new -->
+      <div class="driver-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:260px;cursor:pointer;" onclick="alert('Thêm tài xế mới')">
+        <div style="font-size:32px;color:var(--text-muted);">+</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Thêm tài xế mới</div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

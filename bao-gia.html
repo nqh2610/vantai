@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo Giá Phần Mềm Quản Lý Vận Tải – LogiSoft Vietnam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', Arial, sans-serif; font-size: 13px; color: #111; background: #fff; line-height: 1.55; padding: 32px 40px; max-width: 920px; margin: 0 auto; }
+  .doc-header { border-bottom: 3px solid #1d4ed8; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .doc-header h1 { font-size: 19px; font-weight: 700; color: #1d4ed8; line-height: 1.3; }
+  .doc-header .company { font-size: 12px; color: #555; text-align: right; }
+  .doc-header .company strong { display: block; font-size: 14px; color: #111; margin-bottom: 2px; }
+  .section-title { font-size: 13px; font-weight: 700; color: #fff; background: #1e40af; padding: 7px 12px; margin: 24px 0 10px; text-transform: uppercase; letter-spacing: 0.4px; border-radius: 3px; }
+  .module { margin-bottom: 14px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+  .module-title { background: #1d4ed8; color: #fff; font-weight: 600; font-size: 13px; padding: 7px 12px; }
+  .module table { width: 100%; border-collapse: collapse; }
+  .module table tr:nth-child(even) td { background: #f8fafc; }
+  .module table td { padding: 6px 12px; vertical-align: top; border-bottom: 1px solid #eee; font-size: 13px; }
+  .module table td:first-child { font-weight: 600; width: 210px; color: #1e3a8a; }
+  .price-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .price-table th { background: #1d4ed8; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+  .price-table th:last-child { text-align: right; }
+  .price-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .price-table td:last-child { text-align: right; white-space: nowrap; }
+  .price-table tr:nth-child(even) td { background: #f8fafc; }
+  .price-table .group-header td { background: #dbeafe; font-weight: 700; color: #1e3a8a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; padding: 6px 10px; }
+  .price-table .subtotal td { background: #f1f5f9; font-weight: 600; color: #334155; border-top: 1px solid #cbd5e1; }
+  .price-table .total td { background: #1d4ed8; color: #fff; font-weight: 700; font-size: 14px; }
+  .price-table .total-vat td { background: #1e40af; color: #bfdbfe; font-weight: 600; }
+  .dk { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .dk-easy { background: #dcfce7; color: #15803d; }
+  .dk-med  { background: #fef9c3; color: #854d0e; }
+  .dk-hard { background: #fee2e2; color: #b91c1c; }
+  .dk-vhard{ background: #f3e8ff; color: #7e22ce; }
+  .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+  .pkg { border: 2px solid #cbd5e1; border-radius: 6px; overflow: hidden; }
+  .pkg.rec { border-color: #1d4ed8; }
+  .pkg-head { background: #f1f5f9; padding: 10px 12px; text-align: center; }
+  .pkg.rec .pkg-head { background: #1d4ed8; color: #fff; }
+  .pkg-head .lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; opacity: 0.65; }
+  .pkg-head .nm { font-size: 17px; font-weight: 700; margin: 2px 0; }
+  .pkg-head .pr { font-size: 24px; font-weight: 800; }
+  .pkg-head .pr span { font-size: 13px; font-weight: 400; }
+  .pkg-body { padding: 10px 12px; }
+  .pkg-body ul { list-style: none; padding: 0; }
+  .pkg-body ul li { padding: 3px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .pkg-body ul li::before { content: "✓ "; color: #16a34a; font-weight: 700; }
+  .pkg-note { font-size: 11px; color: #64748b; margin-top: 6px; line-height: 1.4; }
+  .badge-rec { display: inline-block; background: #fbbf24; color: #78350f; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-top: 4px; text-transform: uppercase; }
+  .milestone-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .milestone-table th { background: #334155; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+  .milestone-table td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .milestone-table tr:nth-child(even) td { background: #f8fafc; }
+  .milestone-table td:nth-child(3), .milestone-table th:nth-child(3) { text-align: right; }
+  .notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; padding: 8px 12px; font-size: 12px; color: #78350f; margin-top: 10px; }
+  .doc-footer { margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: space-between; font-size: 11px; color: #888; }
+  @media print { body { padding: 0; max-width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div>
+    <h1>ĐỀ XUẤT PHẦN MỀM QUẢN LÝ VẬN TẢI<br>PHÁT TRIỂN THEO ĐẶT HÀNG RIÊNG</h1>
+    <div style="margin-top:6px;font-size:12px;color:#555;">Ngày lập: 09/05/2026 &nbsp;·&nbsp; Hiệu lực báo giá: 30 ngày kể từ ngày lập</div>
+  </div>
+  <div class="company">
+    <strong>LogiSoft Vietnam</strong>
+    📞 0901 234 567<br>
+    ✉ info@logisoft.vn<br>
+    🌐 logisoft.vn
+  </div>
+</div>
+
+<div class="section-title">Phần 1 — Tính năng chi tiết theo module</div>
+
+<div class="module">
+  <div class="module-title">📊 Module 1 — Báo giá &amp; Quản lý đơn hàng</div>
+  <table>
+    <tr><td>Tính cước tự động theo km &amp; xe</td><td>Cấu hình biểu giá theo loại xe (1–15 tấn), bậc km (≤10 km, 11–50 km, 51–100 km, &gt;100 km). Tính cước tức thì khi nhập điểm đi / điểm đến.</td></tr>
+    <tr><td>Phụ phí cầu đường &amp; dịch vụ</td><td>Phí cầu đường theo tuyến, phụ phí ban đêm, giờ cao điểm, bốc xếp, lên tầng, xe rỗng chiều về.</td></tr>
+    <tr><td>VAT &amp; giảm giá</td><td>Bật/tắt VAT 10%, áp dụng giảm giá cố định (VNĐ) hoặc theo % trên tổng đơn.</td></tr>
+    <tr><td>Xuất báo giá PDF</td><td>In / gửi email báo giá có logo, thông tin liên hệ và thương hiệu doanh nghiệp.</td></tr>
+    <tr><td>Vòng đời đơn hàng</td><td>Báo giá → Xác nhận → Điều phối → Đang vận chuyển → Hoàn thành → Thanh toán. Lịch sử đầy đủ, ghi chú nội bộ.</td></tr>
+    <tr><td>Đề xuất xe phù hợp</td><td>Gợi ý loại xe dựa trên kích thước hàng (D×R×C), khối lượng và tải trọng xe.</td></tr>
+    <tr><td>Hồ sơ khách hàng</td><td>Lưu thông tin khách, lịch sử đơn hàng, điều khoản thanh toán riêng từng khách hàng.</td></tr>
+    <tr><td>Form nhập nhanh đơn điện thoại</td><td>Màn hình tối giản dành cho dispatcher: nhập tên KH, điểm đi, điểm đến, loại xe, giờ khởi hành — hệ thống tự tính cước và tạo chuyến trong vòng 30 giây. Phù hợp khi nhận đơn qua điện thoại rồi bổ sung chi tiết sau.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">🗓️ Module 2 — Quản lý chuyến xe</div>
+  <table>
+    <tr><td>Bảng điều phối kéo-thả</td><td>Phân công tài xế – xe – đơn hàng bằng kéo-thả. Cảnh báo trùng lịch, xe đang bận, tài xế không có mặt.</td></tr>
+    <tr><td>Lịch theo ngày / tuần</td><td>Lịch điều xe trực quan, lọc theo xe / tài xế / tuyến / trạng thái. Xuất file Excel.</td></tr>
+    <tr><td>Trạng thái chuyến thời gian thực</td><td>Tài xế cập nhật qua app: Xuất phát → Đến kho → Đang bốc/dỡ → Hoàn thành. Notification tự động cho điều phối viên.</td></tr>
+    <tr><td>Ghi nhận sự cố &amp; hình ảnh</td><td>Tài xế chụp ảnh hàng hóa, biên bản bàn giao, sự cố đường trực tiếp trên app.</td></tr>
+    <tr><td>Theo dõi GPS vị trí xe</td><td>Hiển thị vị trí hiện tại của xe trên bản đồ, lịch sử hành trình trong ngày.</td></tr>
+    <tr><td>Báo cáo chuyến hoàn thành</td><td>Thống kê km thực chạy, thời gian, chi phí phát sinh, đối chiếu với báo giá ban đầu.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">👤 Module 3 — Quản lý tài xế cơ hữu</div>
+  <table>
+    <tr><td>Hồ sơ tài xế đầy đủ</td><td>Ảnh đại diện, CCCD (2 mặt), bằng lái (hạng, ngày hết hạn, ảnh 2 mặt), hình xe, kích thước và tải trọng.</td></tr>
+    <tr><td>Cảnh báo hết hạn giấy tờ</td><td>Thông báo trước 30/15/7 ngày khi bằng lái, đăng kiểm, bảo hiểm sắp hết hạn.</td></tr>
+    <tr><td>Chấm công &amp; lịch sử chuyến</td><td>Thống kê số chuyến, km tích lũy, ngày nghỉ, ngày tăng ca theo tháng. Dữ liệu chấm công tự động truyền vào bảng lương cuối kỳ.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">💵 Module 4 — Quản lý Lương &amp; Thanh toán tài xế</div>
+  <table>
+    <tr><td>Tính lương — 3 chế độ linh hoạt</td><td><strong>(1) Lương cố định:</strong> Mức cơ bản + phụ cấp xăng + chuyên cần.<br><strong>(2) Ăn chia doanh thu:</strong> Tỷ lệ % trên doanh thu từng chuyến hoặc tháng.<br><strong>(3) Hoa hồng chuyến:</strong> Mức thưởng cố định mỗi chuyến theo loại xe / tuyến.</td></tr>
+    <tr><td>Duyệt &amp; tổng hợp chi phí phát sinh</td><td>Danh sách chi phí tài xế gửi lên chờ duyệt theo chuyến, duyệt 1 chạm hoặc từ chối có lý do, tự động tổng hợp vào bảng lương.</td></tr>
+    <tr><td>Phiếu lương tháng &amp; tạm ứng</td><td>Tự động tổng hợp lương + phụ cấp − khấu trừ tạm ứng − chi phí không duyệt. Xuất phiếu lương PDF gửi tài xế qua app.</td></tr>
+    <tr><td>Lịch sử thanh toán &amp; báo cáo lương</td><td>Tra cứu lịch sử trả lương từng tài xế, báo cáo tổng quỹ lương theo tháng / quý, xuất Excel cho kế toán.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">🤝 Module 5 — Quản lý tài xế &amp; xe đối tác</div>
+  <table>
+    <tr><td>Hồ sơ xe đối tác</td><td>Hình tài xế, hình xe, thông số thùng (D×R×C), tải trọng, biển số, loại xe.</td></tr>
+    <tr><td>Trạng thái xe thời gian thực</td><td>Rảnh / Đang bận / Offline. Vị trí cuối cập nhật, đơn đang thực hiện.</td></tr>
+    <tr><td>Phân công chuyến cho đối tác</td><td>Giao chuyến qua app, tài xế đối tác xác nhận/từ chối. Lưu lịch sử phân công.</td></tr>
+    <tr><td>Tính hoa hồng &amp; thanh toán đối tác</td><td>Cấu hình tỷ lệ hoa hồng theo tuyến / loại xe. Tự động tổng hợp khoản phải trả theo kỳ.</td></tr>
+    <tr><td>Đánh giá chất lượng đối tác</td><td>Điểm rating từ điều phối viên và khách hàng, thống kê tỷ lệ hoàn thành đúng hạn.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">💰 Module 6 — Quản lý Thu chi &amp; Công nợ</div>
+  <table>
+    <tr><td>Ghi nhận thu – chi theo chuyến</td><td>Nhập thu tiền khách, chi xăng dầu, cầu đường, bảo dưỡng, lương, hoa hồng đối tác.</td></tr>
+    <tr><td>Quản lý công nợ phải thu</td><td>Danh sách khách còn nợ, số ngày quá hạn, nhắc nợ tự động qua SMS/Zalo.</td></tr>
+    <tr><td>Đối soát doanh thu vs. chi phí</td><td>Dashboard lợi nhuận theo xe, tuyến, tài xế, tháng. Phát hiện xe / tuyến không hiệu quả.</td></tr>
+    <tr><td>Xuất báo cáo tài chính</td><td>Báo cáo doanh thu, lợi nhuận, công nợ theo kỳ — xuất Excel / PDF cho lãnh đạo và kế toán.</td></tr>
+    <tr><td>Tạm ứng &amp; hoàn ứng tài xế</td><td>Ghi nhận tạm ứng lương, tự động khấu trừ vào phiếu lương tháng.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">📍 Module 7 — Theo dõi GPS (cơ bản)</div>
+  <table>
+    <tr><td>Bản đồ tổng quan xe đang chạy</td><td>Hiển thị vị trí hiện tại của tất cả xe trên bản đồ, lọc theo trạng thái.</td></tr>
+    <tr><td>Lịch sử hành trình trong ngày</td><td>Xe đã đi qua những điểm nào, dừng bao lâu, km thực chạy.</td></tr>
+    <tr><td>Cập nhật vị trí qua app tài xế</td><td>Vị trí gửi tự động khi tài xế đang nhận chuyến — không cần thiết bị GPS riêng.</td></tr>
+    <tr><td>Cảnh báo dừng bất thường / lệch tuyến</td><td>Alert khi xe dừng quá lâu hoặc đi lệch lộ trình dự kiến.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">📱 Module 8 — App tài xế nội bộ (Đa nền tảng Android &amp; iOS)</div>
+  <table>
+    <tr><td>Công nghệ đa nền tảng React Native</td><td>Viết 1 bộ mã nguồn, biên dịch thành app native cho cả Android (APK) và iOS (IPA). Performance tương đương native, tiết kiệm chi phí so với làm 2 app riêng.</td></tr>
+    <tr><td>Nhận &amp; xác nhận chuyến</td><td>Thông báo push khi có chuyến mới. Xem chi tiết, xác nhận hoặc từ chối có lý do. Chạy ổn định trên cả 2 nền tảng.</td></tr>
+    <tr><td>Cập nhật trạng thái từng bước</td><td>Xuất phát → Đến điểm lấy → Đang bốc → Đang giao → Hoàn thành. Mỗi bước ghi thời gian + GPS tự động.</td></tr>
+    <tr><td>Chụp ảnh &amp; chữ ký bàn giao</td><td>Chụp hàng hóa, chứng từ, chữ ký điện tử người nhận ngay trên app.</td></tr>
+    <tr><td>Xem thu nhập &amp; lịch sử chuyến</td><td>Số chuyến hoàn thành, tổng km, ước tính thu nhập tháng, lịch sử giao hàng.</td></tr>
+    <tr><td>Chat nội bộ với điều phối viên</td><td>Nhắn tin + hình ảnh trong app, không cần dùng Zalo hay số điện thoại cá nhân.</td></tr>
+    <tr><td>Phân phối nội bộ</td><td>Bàn giao APK (Android) trực tiếp &amp; IPA (iOS) qua TestFlight / Enterprise — không public lên store công cộng.</td></tr>
+    <tr><td>Nhập &amp; báo cáo chi phí phát sinh ngày</td><td>Tài xế chọn chuyến, nhập từng khoản chi phí (xăng, cầu đường, vá lốp…), đính kèm ảnh biên lai, gửi lên hệ thống chờ duyệt ngay trên app.</td></tr>
+  </table>
+</div>
+
+<div class="module">
+  <div class="module-title">🌐 Module 9 — Giao diện mobile quản lý (SPA/PWA)</div>
+  <table>
+    <tr><td>Web app cài được trên điện thoại</td><td>Toàn bộ hệ thống quản lý (module 1–8) được tối ưu giao diện cho màn hình nhỏ. Quản lý viên, kế toán có thể dùng điện thoại như một app — không cần cài từ App Store.</td></tr>
+    <tr><td>Responsive layout toàn bộ</td><td>Tất cả màn hình (bảng điều phối, báo cáo, GPS, thu chi...) hiển thị đúng trên mọi kích thước màn hình từ 360px đến desktop.</td></tr>
+    <tr><td>PWA — cài được như app</td><td>Hỗ trợ “Add to Home Screen” trên Android &amp; iOS. Mở ra như app toàn màn hình, không có thanh địa chỉ trình duyệt.</td></tr>
+    <tr><td>Offline cơ bản</td><td>Cache dữ liệu thường dùng, hiển thị cảnh báo khi mất kết nối.</td></tr>
+  </table>
+</div>
+<p style="margin-bottom:10px;font-size:12px;color:#555;">Chi phí phát triển phần mềm theo đặt hàng. Quý Công Ty sở hữu toàn bộ mã nguồn sau nghiệm thu.</p>
+
+<table class="price-table">
+  <thead>
+    <tr>
+      <th style="width:36px;">#</th>
+      <th>Hạng mục</th>
+      <th style="width:90px;">Độ khó</th>
+      <th>Ghi chú kỹ thuật</th>
+      <th style="width:130px;">Đơn giá (VNĐ)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="group-header"><td colspan="5">MODULE 1 – Báo giá &amp; Đơn hàng</td></tr>
+    <tr><td>1.1</td><td>Engine tính cước tự động (km + loại xe + phụ phí)</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>Logic đa biến: bậc km × loại xe × phụ phí, cần test kỹ</td><td>14.000.000</td></tr>
+    <tr><td>1.2</td><td>Quản lý khách hàng &amp; lịch sử đơn hàng</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>CRUD cơ bản, form nhập liệu, danh sách lọc</td><td>5.000.000</td></tr>
+    <tr><td>1.3</td><td>Xuất báo giá PDF có thương hiệu</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Dùng thư viện PDF, template tùy chỉnh logo, thông tin</td><td>4.000.000</td></tr>
+    <tr><td>1.4</td><td>Form nhập nhanh đơn điện thoại</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Màn hình tối giản: KH, điểm đi/đến, loại xe, giờ — tự tính cước, tạo chuyến trong 30 giây</td><td>5.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 1</td><td>28.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 2 – Quản lý chuyến xe</td></tr>
+    <tr><td>2.1</td><td>Bảng điều phối chuyến (Dispatcher Board)</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>UI kéo-thả (drag-drop), lịch theo ngày/tuần, conflict detection</td><td>18.000.000</td></tr>
+    <tr><td>2.2</td><td>Cập nhật trạng thái &amp; notification thời gian thực</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>WebSocket server + push notification qua Firebase</td><td>18.000.000</td></tr>
+    <tr><td>2.3</td><td>Ghi nhận sự cố, ảnh, biên bản điện tử</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Form upload ảnh, lưu cloud, hiển thị timeline</td><td>4.000.000</td></tr>
+    <tr><td>2.4</td><td>Báo cáo &amp; thống kê chuyến</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Query tổng hợp, xuất Excel/PDF theo kỳ</td><td>6.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 2</td><td>46.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 3 – Quản lý tài xế cơ hữu</td></tr>
+    <tr><td>3.1</td><td>Hồ sơ tài xế (ảnh, CCCD, bằng lái, xe)</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>CRUD + upload file, lưu trữ cloud</td><td>5.000.000</td></tr>
+    <tr><td>3.2</td><td>Cảnh báo hết hạn giấy tờ tự động</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Cron job so sánh ngày, gửi email/push thông báo</td><td>3.000.000</td></tr>
+    <tr><td>3.3</td><td>Chấm công &amp; lịch sử chuyến</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Thống kê số chuyến, km tích lũy, ngày nghỉ, ngày tăng ca theo tháng — dữ liệu tự động truyền vào Module 4</td><td>0 (gộp)</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 3</td><td>8.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 4 – Quản lý Lương &amp; Thanh toán tài xế</td></tr>
+    <tr><td>4.1</td><td>Engine tính lương — 3 chế độ linh hoạt</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>Logic phức tạp: lương cố định + ăn chia % doanh thu + hoa hồng chuyến, tự động đọc dữ liệu chấm công từ Module 3</td><td>15.000.000</td></tr>
+    <tr><td>4.2</td><td>Duyệt chi phí phát sinh &amp; tổng hợp vào lương</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Duyệt/từ chối từng khoản chi phí tài xế gửi lên, tự động trừ/cộng vào bảng lương cuối kỳ</td><td>7.000.000</td></tr>
+    <tr><td>4.3</td><td>Phiếu lương tháng PDF + quản lý tạm ứng</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Tổng hợp lương + phụ cấp − tạm ứng − chi phí không duyệt, xuất phiếu lương PDF gửi tài xế qua app</td><td>6.000.000</td></tr>
+    <tr><td>4.4</td><td>Lịch sử thanh toán &amp; báo cáo quỹ lương</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Tra cứu lịch sử trả lương từng tài xế, báo cáo tổng quỹ lương theo tháng/quý, xuất Excel cho kế toán</td><td>4.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 4</td><td>32.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 5 – Quản lý tài xế &amp; xe đối tác</td></tr>
+    <tr><td>5.1</td><td>Hồ sơ đối tác (ảnh tài xế, ảnh xe, thông số)</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Tái sử dụng hầu hết code từ Module 3</td><td>3.000.000</td></tr>
+    <tr><td>5.2</td><td>Phân công &amp; xác nhận chuyến cho đối tác</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Giao chuyến qua app, sync trạng thái 2 chiều</td><td>8.000.000</td></tr>
+    <tr><td>5.3</td><td>Tính hoa hồng &amp; thanh toán đối tác</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Config tỷ lệ hoa hồng, tổng hợp khoản phải trả theo kỳ</td><td>7.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 5</td><td>18.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 6 – Quản lý Thu chi &amp; Công nợ</td></tr>
+    <tr><td>6.1</td><td>Quản lý thu – chi &amp; đối soát doanh thu</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>Aggregation query phức tạp, dashboard chart theo nhiều chiều</td><td>12.000.000</td></tr>
+    <tr><td>6.2</td><td>Quản lý công nợ phải thu &amp; nhắc nợ</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Tích hợp SMS/Zalo API, schedule nhắc nợ tự động</td><td>8.000.000</td></tr>
+    <tr><td>6.3</td><td>Báo cáo tài chính xuất Excel/PDF</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Query tổng hợp, format báo cáo, xuất file</td><td>6.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 6</td><td>26.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 7 – Theo dõi GPS (cơ bản)</td></tr>
+    <tr><td>7.1</td><td>Bản đồ xe đang chạy (vị trí hiện tại)</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>Tích hợp Google Maps API, quản lý quota, polling realtime từ app</td><td>14.000.000</td></tr>
+    <tr><td>7.2</td><td>Lịch sử hành trình &amp; cảnh báo lệch tuyến</td><td><span class="dk dk-hard">🔴 Khó</span></td><td>Lưu log GPS, geofencing, thuật toán phát hiện lệch tuyến</td><td>16.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 7</td><td>30.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 8 – App tài xế nội bộ (Đa nền tảng Android &amp; iOS)</td></tr>
+    <tr><td>8.1</td><td>App tài xế đa nền tảng – nhận chuyến, trạng thái, GPS, chat</td><td><span class="dk dk-vhard">🟣 Rất khó</span></td><td>React Native cross-platform, 1 codebase cho Android &amp; iOS, background GPS, push, camera, chat realtime</td><td>42.000.000</td></tr>
+    <tr><td>8.2</td><td>Xem thu nhập &amp; phiếu lương trên app</td><td><span class="dk dk-easy">🟢 Dễ</span></td><td>Màn hiển thị đơn giản, gọi API lấy dữ liệu từ backend</td><td>4.000.000</td></tr>
+    <tr><td>8.3</td><td>Nhập &amp; báo cáo chi phí phát sinh ngày qua app</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Tài xế chọn chuyến, nhập từng khoản (xăng, cầu đường, vá lốp…), đính kèm ảnh biên lai, gửi lên hệ thống chờ duyệt</td><td>8.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 8</td><td>54.000.000</td></tr>
+
+    <tr class="group-header"><td colspan="5">MODULE 9 – Giao diện mobile quản lý (SPA/PWA)</td></tr>
+    <tr><td>9.1</td><td>SPA/PWA toàn bộ hệ thống – responsive + cài được như app</td><td><span class="dk dk-med">🟡 Vừa</span></td><td>Responsive layout toàn bộ module 1–8, PWA manifest, service worker, Add to Home Screen, offline cơ bản</td><td>15.000.000</td></tr>
+    <tr class="subtotal"><td colspan="4">Cộng Module 9</td><td>15.000.000</td></tr>
+
+  </tbody>
+</table>
+
+<div style="margin:16px 0 8px;padding:16px 24px;background:#1d4ed8;color:#fff;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+  <span style="font-size:15px;font-weight:700;">TỔNG CỘNG TẤT CẢ MODULE</span>
+  <span style="font-size:22px;font-weight:800;letter-spacing:0.5px;">257.000.000 ₫</span>
+</div>
+
+<div class="section-title" style="margin-top:24px;">Phần 3 — Thanh toán theo milestone</div>
+<p style="margin-bottom:10px;font-size:12px;color:#555;">Chỉ thanh toán khi hoàn thành và nghiệm thu đúng từng giai đoạn.</p>
+
+<table class="milestone-table">
+  <thead>
+    <tr>
+      <th style="width:130px;">Đợt thanh toán</th>
+      <th>Điều kiện nghiệm thu</th>
+      <th style="width:130px;">Tỷ lệ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Đợt 1</strong> — Khởi động</td><td>Ký hợp đồng, bàn giao wireframe &amp; tài liệu thiết kế hệ thống</td><td><strong>30%</strong> giá trị HĐ</td></tr>
+    <tr><td><strong>Đợt 2</strong> — Demo alpha</td><td>Nghiệm thu giao diện web admin và luồng nghiệp vụ chính (báo giá, điều phối)</td><td><strong>30%</strong> giá trị HĐ</td></tr>
+    <tr><td><strong>Đợt 3</strong> — Go-live</td><td>Hệ thống chạy thực tế, đào tạo xong, dữ liệu đã import, app tài xế hoạt động</td><td><strong>25%</strong> giá trị HĐ</td></tr>
+    <tr><td><strong>Đợt 4</strong> — Bảo hành</td><td>Sau 30 ngày vận hành thực tế không có lỗi nghiêm trọng, bàn giao toàn bộ mã nguồn</td><td><strong>15%</strong> giá trị HĐ</td></tr>
+  </tbody>
+</table>
+
+<div class="notice" style="margin-top:12px;">
+  💡 Hợp đồng ký trước <strong>30/06/2026</strong> được giảm thêm <strong>10%</strong> trên tổng giá trị. Bảo hành lỗi 12 tháng sau nghiệm thu, không tính phí phát sinh.
+</div>
+
+<div class="doc-footer">
+  <div>LogiSoft Vietnam &nbsp;·&nbsp; TP. Hồ Chí Minh</div>
+  <div>📞 0901 234 567 &nbsp;·&nbsp; ✉ info@logisoft.vn &nbsp;·&nbsp; 🌐 logisoft.vn</div>
+</div>
+
+</body>
+</html>

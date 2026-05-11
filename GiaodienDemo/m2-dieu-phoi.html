@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điều phối chuyến – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+    .board-col { background: #f8fafc; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .board-col-head {
+      padding: 11px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .board-col-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .col-count { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
+    .board-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 200px; }
+    .trip-card {
+      background: white; border-radius: 10px; border: 1px solid var(--border);
+      padding: 12px; cursor: grab; transition: all 0.13s;
+    }
+    .trip-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: var(--primary); }
+    .trip-card-id { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+    .trip-card-customer { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .trip-card-route { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+    .trip-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .trip-card-time { font-size: 11px; color: var(--text-muted); }
+    .assign-btn { font-size: 11px; font-weight: 600; padding: 4px 10px; }
+    .driver-panel { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+    .driver-row {
+      display: flex; align-items: center; gap: 10px; padding: 10px;
+      background: white; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: all 0.13s;
+    }
+    .driver-row:hover { border-color: var(--primary); }
+    .driver-info { flex: 1; min-width: 0; }
+    .driver-name { font-size: 12px; font-weight: 700; }
+    .driver-vehicle { font-size: 11px; color: var(--text-muted); }
+    .drag-hint { text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 12px; border: 2px dashed var(--border); border-radius: 8px; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item active"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 2</span><span class="sep">›</span><span class="current">Điều phối chuyến xe</span>
+    </div>
+    <div class="topbar-actions">
+      <span style="font-size:12px;color:var(--text-muted);">Thứ Hai, 11/05/2026</span>
+      <button class="btn btn-secondary btn-sm">◀ Hôm qua</button>
+      <button class="btn btn-primary btn-sm">Hôm nay</button>
+      <button class="btn btn-secondary btn-sm">Ngày mai ▶</button>
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">🎯 Bảng điều phối xe</div>
+        <div class="page-subtitle">Kéo thả đơn hàng để phân công xe và tài xế · 11/05/2026</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">⬇ Xuất Excel</button>
+        <a href="m1-bao-gia.html" class="btn btn-primary">+ Tạo đơn mới</a>
+      </div>
+    </div>
+
+    <!-- Main layout: board + driver panel -->
+    <div style="display:flex;gap:16px;align-items:start;">
+
+      <!-- Kanban board -->
+      <div style="flex:1;min-width:0;">
+        <div class="board">
+          <!-- Col 1: Chờ điều phối -->
+          <div class="board-col">
+            <div class="board-col-head" style="border-left:3px solid #eab308;">
+              <div class="board-col-title">
+                <span>⏳ Chờ điều phối</span>
+                <span class="col-count" style="color:#854d0e;">4</span>
+              </div>
+            </div>
+            <div class="board-cards">
+              <div class="trip-card" draggable="true">
+                <div class="trip-card-id">CX-0538 · 12/05 09:00</div>
+                <div class="trip-card-customer">Công ty Nhựa Nam Việt</div>
+                <div class="trip-card-route">📍 KCN Bình Dương → Long An · 65km</div>
+                <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="badge badge-gray">1 tấn</span>
+                  <span class="badge badge-blue">1.850.000 ₫</span>
+                </div>
+                <div class="trip-card-footer">
+                  <span class="trip-card-time">Tạo lúc 08:15</span>
+                  <button class="btn btn-primary assign-btn">Phân công →</button>
+                </div>
+              </div>
+              <div class="trip-card" draggable="true">
+                <div class="trip-card-id">CX-0535 · 13/05 06:00</div>
+                <div class="trip-card-customer">KCN Linh Trung I</div>
+                <div class="trip-card-route">📍 Thủ Đức → Quảng Nam · 850km</div>
+                <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="badge badge-gray">Chưa chọn xe</span>
+                  <span class="badge badge-yellow">Báo giá</span>
+                </div>
+                <div class="trip-card-footer">
+                  <span class="trip-card-time">Tạo lúc 07:30</span>
+                  <button class="btn btn-primary assign-btn">Phân công →</button>
+                </div>
+              </div>
+              <div class="trip-card" draggable="true">
+                <div class="trip-card-id">CX-0534 · 12/05 14:00</div>
+                <div class="trip-card-customer">Siêu thị Co.opMart</div>
+                <div class="trip-card-route">📍 Q.Tân Bình, TP.HCM → Vũng Tàu · 120km</div>
+                <div style="display:flex;gap:4px;margin-bottom:8px;">
+                  <span class="badge badge-gray">3 tấn</span>
+                  <span class="badge badge-blue">3.800.000 ₫</span>
+                </div>
+                <div class="trip-card-footer">
+                  <span class="trip-card-time">Tạo lúc 06:55</span>
+                  <button class="btn btn-primary assign-btn">Phân công →</button>
+                </div>
+              </div>
+              <div class="drag-hint">+ Kéo thả đơn vào đây</div>
+            </div>
+          </div>
+
+          <!-- Col 2: Đã phân công -->
+          <div class="board-col">
+            <div class="board-col-head" style="border-left:3px solid #3b82f6;">
+              <div class="board-col-title">
+                <span>✅ Đã phân công</span>
+                <span class="col-count" style="color:var(--primary);">3</span>
+              </div>
+            </div>
+            <div class="board-cards">
+              <div class="trip-card" draggable="true">
+                <div class="trip-card-id">CX-0541 · 11/05 08:00</div>
+                <div class="trip-card-customer">Cty TNHH Phú Hưng</div>
+                <div class="trip-card-route">📍 Quận 12 → Thủ Dầu Một · 32km</div>
+                <div style="display:flex;gap:4px;margin-bottom:6px;">
+                  <span class="badge badge-gray">5 tấn · 51C-12345</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0fdf4;border-radius:6px;margin-bottom:8px;">
+                  <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">A</div>
+                  <div><div class="driver-name">Nguyễn Văn An</div><div class="driver-vehicle text-xs text-muted">51C-12345 · 5 tấn</div></div>
+                  <span class="badge badge-green" style="margin-left:auto;">Đã nhận</span>
+                </div>
+                <div class="trip-card-footer">
+                  <span class="trip-card-time">Phân công lúc 07:45</span>
+                  <button class="btn btn-secondary assign-btn">Chi tiết</button>
+                </div>
+              </div>
+              <div class="trip-card" draggable="true">
+                <div class="trip-card-id">CX-0539 · 11/05 05:00</div>
+                <div class="trip-card-customer">Cty CP Thép Miền Nam</div>
+                <div class="trip-card-route">📍 Bình Dương → Tây Ninh · 95km</div>
+                <div style="display:flex;gap:4px;margin-bottom:6px;">
+                  <span class="badge badge-gray">15 tấn · 51E-90123</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0fdf4;border-radius:6px;margin-bottom:8px;">
+                  <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">H</div>
+                  <div><div class="driver-name">Phạm Quốc Hùng</div><div class="driver-vehicle text-xs text-muted">51E-90123 · 15 tấn</div></div>
+                  <span class="badge badge-blue" style="margin-left:auto;">Đang chạy</span>
+                </div>
+                <div class="trip-card-footer">
+                  <span class="trip-card-time">Phân công lúc 04:30</span>
+                  <button class="btn btn-secondary assign-btn">GPS</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Col 3: Đang vận chuyển -->
+          <div class="board-col">
+            <div class="board-col-head" style="border-left:3px solid #22c55e;">
+              <div class="board-col-title">
+                <span>🚚 Đang vận chuyển</span>
+                <span class="col-count" style="color:#15803d;">3</span>
+              </div>
+            </div>
+            <div class="board-cards">
+              <div class="trip-card" style="border-left:3px solid #22c55e;">
+                <div class="trip-card-id">CX-0540 · 11/05 06:30 → ✅ 10:15</div>
+                <div class="trip-card-customer">Siêu thị Big C</div>
+                <div class="trip-card-route">📍 Đồng Nai → Quận 7, TP.HCM · 48km</div>
+                <div style="display:flex;gap:4px;margin-bottom:6px;">
+                  <span class="badge badge-gray">10 tấn</span>
+                  <span class="badge badge-green">Hoàn thành</span>
+                </div>
+                <div style="font-size:11px;background:#f0fdf4;border-radius:6px;padding:6px 8px;color:#15803d;font-weight:600;">
+                  ✅ Đã giao hàng · Đang chờ thanh toán 5.800.000 ₫
+                </div>
+              </div>
+              <div class="trip-card" style="border-left:3px solid #3b82f6;">
+                <div class="trip-card-id">CX-0541 · 11/05 08:00 — Đang chạy</div>
+                <div class="trip-card-customer">Cty TNHH Phú Hưng</div>
+                <div class="trip-card-route">📍 Quận 12 → Thủ Dầu Một · 32km</div>
+                <div style="margin:6px 0;font-size:11px;background:#eff6ff;border-radius:6px;padding:6px 8px;">
+                  📍 Vị trí hiện tại: Quốc lộ 13, Bình Dương<br>
+                  ⏱ Còn khoảng 18 phút · Đã chạy 20km
+                </div>
+                <div class="trip-card-footer">
+                  <span class="badge badge-blue">Đang chạy</span>
+                  <button class="btn btn-secondary assign-btn">Xem GPS</button>
+                </div>
+              </div>
+              <div class="trip-card" style="border-left:3px solid #3b82f6;">
+                <div class="trip-card-id">CX-0539 · 11/05 05:00 — Đang chạy</div>
+                <div class="trip-card-customer">Cty CP Thép Miền Nam</div>
+                <div class="trip-card-route">📍 Bình Dương → Tây Ninh · 95km</div>
+                <div style="margin:6px 0;font-size:11px;background:#eff6ff;border-radius:6px;padding:6px 8px;">
+                  📍 Vị trí hiện tại: Gò Dầu, Tây Ninh<br>
+                  ⏱ Còn khoảng 35 phút · Đã chạy 68km
+                </div>
+                <div class="trip-card-footer">
+                  <span class="badge badge-blue">Đang chạy</span>
+                  <button class="btn btn-secondary assign-btn">Xem GPS</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Available drivers -->
+      <div class="driver-panel">
+        <div class="card">
+          <div class="card-header" style="padding:10px 14px;">
+            <span class="card-title">🚗 Tài xế / Xe rảnh</span>
+            <span class="badge badge-green">2 sẵn sàng</span>
+          </div>
+          <div style="padding:8px;">
+            <div class="driver-row">
+              <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">K</div>
+              <div class="driver-info">
+                <div class="driver-name">Trần Minh Khoa</div>
+                <div class="driver-vehicle">10 tấn · 51D-56789</div>
+              </div>
+              <span class="status-dot dot-green dot-pulse"></span>
+            </div>
+            <div class="driver-row">
+              <div class="avatar avatar-sm" style="background:#dbeafe;color:#1d4ed8;">B</div>
+              <div class="driver-info">
+                <div class="driver-name">Lê Văn Bình</div>
+                <div class="driver-vehicle">3 tấn · 51F-23456</div>
+              </div>
+              <span class="status-dot dot-green dot-pulse"></span>
+            </div>
+          </div>
+          <div style="padding:4px 8px 10px;border-top:1px solid var(--border-light);">
+            <div style="padding:6px 8px;font-size:11px;font-weight:600;color:var(--text-muted);">Đang bận (3)</div>
+            <div class="driver-row" style="opacity:0.7;cursor:default;">
+              <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">A</div>
+              <div class="driver-info">
+                <div class="driver-name">Nguyễn Văn An</div>
+                <div class="driver-vehicle">5 tấn · CX-0541</div>
+              </div>
+              <span class="status-dot dot-yellow"></span>
+            </div>
+            <div class="driver-row" style="opacity:0.7;cursor:default;">
+              <div class="avatar avatar-sm" style="background:#f3e8ff;color:#7e22ce;">H</div>
+              <div class="driver-info">
+                <div class="driver-name">Phạm Quốc Hùng</div>
+                <div class="driver-vehicle">15 tấn · CX-0539</div>
+              </div>
+              <span class="status-dot dot-yellow"></span>
+            </div>
+            <div class="driver-row" style="opacity:0.7;cursor:default;">
+              <div class="avatar avatar-sm" style="background:#ccfbf1;color:#0f766e;">T</div>
+              <div class="driver-info">
+                <div class="driver-name">Đỗ Thanh Tùng</div>
+                <div class="driver-vehicle">7 tấn · CX-0536</div>
+              </div>
+              <span class="status-dot dot-yellow"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert conflicts -->
+        <div class="alert alert-warning">
+          ⚠️ <div><strong>Cảnh báo trùng lịch</strong><br>Tài xế Nguyễn Văn An có 2 chuyến trùng nhau ngày 12/05</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

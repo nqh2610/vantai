@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thu chi & Công nợ – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .amount-in  { color: #16a34a; font-weight: 700; }
+    .amount-out { color: #dc2626; font-weight: 700; }
+    .debt-bar { height: 6px; border-radius: 3px; background: #fee2e2; overflow: hidden; width: 100px; }
+    .debt-fill { height: 100%; background: #dc2626; border-radius: 3px; }
+    .debt-ok   { height: 100%; background: #16a34a; border-radius: 3px; }
+    .cat-icon  { width: 28px; height: 28px; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .report-bar { height: 130px; display: flex; align-items: flex-end; gap: 6px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .bar-in  { background: #dbeafe; border-radius: 4px 4px 0 0; width: 100%; }
+    .bar-out { background: #fee2e2; border-radius: 4px 4px 0 0; width: 100%; margin-top: 2px; }
+    .bar-lbl { font-size: 10px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item active"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 6</span><span class="sep">›</span><span class="current">Thu chi & Công nợ</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">💰 Thu chi & Công nợ</div>
+        <div class="page-subtitle">Doanh thu · Chi phí · Lợi nhuận · Quản lý công nợ khách hàng</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">⬇ Báo cáo tháng</button>
+        <button class="btn btn-primary">+ Ghi nhận thu chi</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dcfce7;">📈</div>
+        <div class="stat-card-label">Tổng thu tháng 5</div>
+        <div class="stat-card-value" style="color:#16a34a;font-size:20px;">312.4M</div>
+        <div class="stat-card-change positive">↑ +8.2% so T4</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fee2e2;">📉</div>
+        <div class="stat-card-label">Tổng chi tháng 5</div>
+        <div class="stat-card-value" style="color:#dc2626;font-size:20px;">247.1M</div>
+        <div class="stat-card-change negative">↑ +3.5% so T4</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#dbeafe;">💹</div>
+        <div class="stat-card-label">Lợi nhuận ròng</div>
+        <div class="stat-card-value" style="color:var(--primary);font-size:20px;">65.3M</div>
+        <div class="stat-card-change positive">Tỷ suất 20.9%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background:#fef9c3;">⚠️</div>
+        <div class="stat-card-label">Công nợ phải thu</div>
+        <div class="stat-card-value" style="color:#b45309;font-size:20px;">48.2M</div>
+        <div class="stat-card-change" style="color:#dc2626;">3 khách quá hạn</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" style="margin-bottom:12px;">
+      <button class="tab-btn active" id="tab-tx">Giao dịch</button>
+      <button class="tab-btn" id="tab-debt">Công nợ</button>
+      <button class="tab-btn" id="tab-report">Báo cáo tháng</button>
+    </div>
+
+    <!-- Transaction panel -->
+    <div id="panel-tx">
+      <div class="filter-bar">
+        <input type="text" class="form-control search-input" placeholder="🔍 Tìm mã GD, khách hàng...">
+        <select class="form-control" style="width:120px;"><option>Tất cả loại</option><option>Thu</option><option>Chi</option></select>
+        <select class="form-control" style="width:160px;"><option>Tất cả danh mục</option><option>Cước vận chuyển</option><option>Phụ phí</option><option>Nhiên liệu</option><option>Lương</option><option>Sửa chữa</option></select>
+        <input type="date" class="form-control" style="width:140px;" value="2026-05-01">
+        <input type="date" class="form-control" style="width:140px;" value="2026-05-31">
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Danh sách giao dịch – Tháng 05/2026</span>
+          <span style="font-size:12px;color:var(--text-muted);">Hiển thị 1-10 / 64 giao dịch</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Mã GD</th>
+                <th>Loại</th>
+                <th>Danh mục</th>
+                <th>Mô tả</th>
+                <th>Liên kết</th>
+                <th style="text-align:right;">Số tiền</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="white-space:nowrap;font-size:12px;">11/05/2026</td>
+                <td><span style="font-family:monospace;font-size:12px;">GD-240511-001</span></td>
+                <td><span class="badge badge-green">Thu</span></td>
+                <td><div style="display:flex;align-items:center;gap:5px;"><div class="cat-icon" style="background:#dcfce7;">💼</div>Cước vận chuyển</div></td>
+                <td>CX-0523 · HCM → Hà Nội</td>
+                <td><span class="badge badge-blue">CX-0523</span></td>
+                <td class="amount-in" style="text-align:right;">+18.500.000</td>
+                <td><button class="btn btn-secondary btn-sm">Xem</button></td>
+              </tr>
+              <tr>
+                <td style="white-space:nowrap;font-size:12px;">11/05/2026</td>
+                <td><span style="font-family:monospace;font-size:12px;">GD-240511-002</span></td>
+                <td><span class="badge badge-red">Chi</span></td>
+                <td><div style="display:flex;align-items:center;gap:5px;"><div class="cat-icon" style="background:#fee2e2;">⛽</div>Nhiên liệu</div></td>
+                <td>Đổ dầu 51C-12345 · 80L</td>
+                <td><span class="badge badge-gray">51C-12345</span></td>
+                <td class="amount-out" style="text-align:right;">-2.160.000</td>
+                <td><button class="btn btn-secondary btn-sm">Xem</button></td>
+              </tr>
+              <tr>
+                <td style="white-space:nowrap;font-size:12px;">10/05/2026</td>
+                <td><span style="font-family:monospace;font-size:12px;">GD-240510-003</span></td>
+                <td><span class="badge badge-green">Thu</span></td>
+                <td><div style="display:flex;align-items:center;gap:5px;"><div class="cat-icon" style="background:#dcfce7;">💼</div>Cước vận chuyển</div></td>
+                <td>CX-0521 · HCM → Đà Nẵng</td>
+                <td><span class="badge badge-blue">CX-0521</span></td>
+                <td class="amount-in" style="text-align:right;">+12.300.000</td>
+                <td><button class="btn btn-secondary btn-sm">Xem</button></td>
+              </tr>
+              <tr>
+                <td style="white-space:nowrap;font-size:12px;">10/05/2026</td>
+                <td><span style="font-family:monospace;font-size:12px;">GD-240510-004</span></td>
+                <td><span class="badge badge-red">Chi</span></td>
+                <td><div style="display:flex;align-items:center;gap:5px;"><div class="cat-icon" style="background:#ffedd5;">🔧</div>Sửa chữa</div></td>
+                <td>Thay lốp 51D-56789 · 4 lốp</td>
+                <td><span class="badge badge-gray">51D-56789</span></td>
+                <td class="amount-out" style="text-align:right;">-3.600.000</td>
+                <td><button class="btn btn-secondary btn-sm">Xem</button></td>
+              </tr>
+              <tr>
+                <td style="white-space:nowrap;font-size:12px;">09/05/2026</td>
+                <td><span style="font-family:monospace;font-size:12px;">GD-240509-005</span></td>
+                <td><span class="badge badge-green">Thu</span></td>
+                <td><div style="display:flex;align-items:center;gap:5px;"><div class="cat-icon" style="background:#dbeafe;">💳</div>Thanh toán nợ</div></td>
+                <td>CTY ABC thanh toán nợ T4</td>
+                <td><span class="badge badge-gray">KH-012</span></td>
+                <td class="amount-in" style="text-align:right;">+22.000.000</td>
+                <td><button class="btn btn-secondary btn-sm">Xem</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" style="padding:10px 16px;">
+          <button class="page-btn">‹ Trước</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">Tiếp ›</button>
+          <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">Trang 1/7</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debt panel (hidden by default) -->
+    <div id="panel-debt" style="display:none;">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Công nợ phải thu theo khách hàng</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Khách hàng</th>
+                <th style="text-align:right;">Tổng phải thu</th>
+                <th style="text-align:right;">Quá hạn</th>
+                <th>Hạn thanh toán</th>
+                <th>Mức nợ</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="font-weight:700;">Công ty ABC Logistics</div><div class="text-xs text-muted">KH-012 · 5 đơn chưa TT</div></td>
+                <td class="amount-out" style="text-align:right;">22.500.000</td>
+                <td style="text-align:right;color:#dc2626;font-weight:700;">22.500.000</td>
+                <td style="font-size:12px;color:#dc2626;">28/04/2026 <span class="badge badge-red">Quá 13 ngày</span></td>
+                <td><div class="debt-bar"><div class="debt-fill" style="width:100%;"></div></div></td>
+                <td><span class="badge badge-red">Quá hạn</span></td>
+                <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Nhắc nợ</button><button class="btn btn-secondary btn-sm">Xem</button></div></td>
+              </tr>
+              <tr>
+                <td><div style="font-weight:700;">Công ty XYZ Trading</div><div class="text-xs text-muted">KH-008 · 3 đơn chưa TT</div></td>
+                <td class="amount-out" style="text-align:right;">14.800.000</td>
+                <td style="text-align:right;color:#dc2626;font-weight:700;">14.800.000</td>
+                <td style="font-size:12px;color:#dc2626;">02/05/2026 <span class="badge badge-red">Quá 9 ngày</span></td>
+                <td><div class="debt-bar"><div class="debt-fill" style="width:90%;"></div></div></td>
+                <td><span class="badge badge-red">Quá hạn</span></td>
+                <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Nhắc nợ</button><button class="btn btn-secondary btn-sm">Xem</button></div></td>
+              </tr>
+              <tr>
+                <td><div style="font-weight:700;">Công ty DEF Export</div><div class="text-xs text-muted">KH-021 · 2 đơn chưa TT</div></td>
+                <td class="amount-out" style="text-align:right;">10.900.000</td>
+                <td style="text-align:right;color:var(--text-muted);">0</td>
+                <td style="font-size:12px;color:#854d0e;">20/05/2026 <span class="badge badge-yellow">Còn 9 ngày</span></td>
+                <td><div class="debt-bar"><div class="debt-fill" style="width:60%;background:#fbbf24;"></div></div></td>
+                <td><span class="badge badge-yellow">Sắp đến hạn</span></td>
+                <td><div style="display:flex;gap:3px;"><button class="btn btn-secondary btn-sm">Nhắc nợ</button><button class="btn btn-secondary btn-sm">Xem</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  document.querySelectorAll('.tabs .tab-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-tx').style.display = (i === 0) ? '' : 'none';
+      document.getElementById('panel-debt').style.display = (i === 1) ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

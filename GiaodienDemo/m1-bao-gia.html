@@ -6,37 +6,53 @@
   <title>Báo giá nhanh – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .result-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 13px; }
-    .result-row:last-of-type { border-bottom: none; }
-    .result-row .label { color: var(--text-secondary); }
-    .result-row .value { font-weight: 600; }
-    .result-total { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--primary); border-radius: 8px; color: white; margin-top: 8px; }
-    .result-total .label { font-size: 14px; font-weight: 600; }
-    .result-total .value { font-size: 22px; font-weight: 800; }
-    .vehicle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    @media (max-width: 1024px) { .vehicle-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px)  { .vehicle-grid { grid-template-columns: repeat(2, 1fr); } }
-    .vehicle-card {
-      border: 2px solid var(--border); border-radius: 10px; padding: 10px;
-      cursor: pointer; transition: all 0.13s; text-align: center;
-    }
-    .vehicle-card:hover { border-color: var(--primary); background: var(--primary-xlight); }
-    .vehicle-card.selected { border-color: var(--primary); background: var(--primary-xlight); }
-    .vehicle-card .vc-icon { font-size: 22px; margin-bottom: 4px; }
-    .vehicle-card .vc-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
-    .vehicle-card .vc-price { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .surcharge-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-    .surcharge-item label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
-    .addon-tag { display: inline-flex; align-items: center; gap: 4px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.13s; }
-    .addon-tag.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
-    .step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 20px; }
-    .step { display: flex; align-items: center; gap: 8px; }
-    .step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: var(--border); color: var(--text-muted); }
-    .step.done .step-num { background: #dcfce7; color: #16a34a; }
-    .step.active .step-num { background: var(--primary); color: white; }
-    .step-label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
-    .step.active .step-label { color: var(--primary); font-weight: 700; }
-    .step-line { flex: 1; height: 1px; background: var(--border); min-width: 24px; }
+    /* cargo mode toggle */
+    .cargo-mode { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:14px; }
+    .cargo-mode-btn { flex:1; padding:7px 6px; font-size:12px; font-weight:600; background:white; border:none; cursor:pointer; color:var(--text-secondary); transition:all 0.15s; }
+    .cargo-mode-btn.active { background:var(--primary); color:white; }
+    /* vehicles */
+    .vehicle-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+    @media (max-width:1024px) { .vehicle-grid { grid-template-columns:repeat(2, 1fr); } }
+    .vehicle-card { border:2px solid var(--border); border-radius:10px; padding:9px 7px; cursor:pointer; transition:all 0.13s; text-align:center; position:relative; }
+    .vehicle-card:hover { border-color:var(--primary); background:var(--primary-xlight); }
+    .vehicle-card.selected { border-color:var(--primary); background:var(--primary-xlight); }
+    .vehicle-card.suggested { border-color:#22c55e; background:#f0fdf4; }
+    .vehicle-card.suggested.selected { border-color:var(--primary); background:var(--primary-xlight); }
+    .vc-icon  { font-size:20px; margin-bottom:2px; }
+    .vc-name  { font-size:12px; font-weight:700; color:var(--text-primary); }
+    .vc-dim   { font-size:10px; color:var(--text-muted); margin-top:1px; line-height:1.3; }
+    .vc-price { font-size:11px; color:var(--primary); font-weight:600; margin-top:2px; }
+    .vc-badge { position:absolute; top:3px; right:3px; background:#16a34a; color:white; font-size:9px; font-weight:700; padding:1px 5px; border-radius:10px; }
+    /* result rows */
+    .result-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px dashed #e2e8f0; font-size:13px; }
+    .result-row:last-of-type { border-bottom:none; }
+    .result-row .label { color:var(--text-secondary); }
+    .result-row .value { font-weight:600; }
+    .result-row.return .label, .result-row.return .value { color:#c2410c; }
+    .result-total { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--primary); border-radius:8px; color:white; margin-top:8px; }
+    .result-total .label { font-size:14px; font-weight:600; }
+    .result-total .value { font-size:22px; font-weight:800; }
+    /* addon tags */
+    .addon-tag { display:inline-flex; align-items:center; gap:4px; background:#f1f5f9; border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all 0.13s; margin:3px; }
+    .addon-tag.active { background:var(--primary-light); border-color:var(--primary); color:var(--primary); }
+    /* round-trip row */
+    .round-trip-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; padding:8px 12px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; margin-top:10px; }
+    .round-trip-row label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#c2410c; cursor:pointer; }
+    /* steps */
+    .step-indicator { display:flex; align-items:center; margin-bottom:20px; }
+    .step { display:flex; align-items:center; gap:6px; }
+    .step-num { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; background:var(--border); color:var(--text-muted); flex-shrink:0; }
+    .step.done .step-num { background:#dcfce7; color:#16a34a; }
+    .step.active .step-num { background:var(--primary); color:white; }
+    .step-label { font-size:12px; font-weight:500; color:var(--text-muted); white-space:nowrap; }
+    .step.active .step-label { color:var(--primary); font-weight:700; }
+    .step-line { flex:1; height:1px; background:var(--border); min-width:16px; }
+    @media (max-width:600px) { .step-label { display:none; } }
+    /* qty stepper */
+    .qty-stepper { display:inline-flex; align-items:center; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+    .qty-btn { width:32px; height:34px; background:#f1f5f9; border:none; cursor:pointer; font-size:18px; font-weight:700; color:var(--text-primary); }
+    .qty-btn:hover { background:var(--primary-light); color:var(--primary); }
+    .qty-val { width:40px; text-align:center; font-weight:700; font-size:14px; border:none; border-left:1px solid var(--border); border-right:1px solid var(--border); height:34px; }
   </style>
 </head>
 <body>
@@ -166,85 +182,95 @@
               <input class="form-control" type="time" value="08:00">
             </div>
           </div>
+          <div class="form-group mt-3" style="margin-bottom:0;">
+            <label class="form-label">Số xe cần đặt</label>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="qty-stepper">
+                <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
+                <input class="qty-val" id="vehicleQty" type="number" value="1" min="1" max="20" onchange="updatePrice()">
+                <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
+              </div>
+              <span style="font-size:12px;color:var(--text-muted);">xe cùng loại xuất phát cùng lúc</span>
+            </div>
+          </div>
         </div>
 
         <!-- Hàng hóa -->
         <div class="card card-padded">
-          <div class="card-title mb-3">📦 Hàng hóa</div>
-          <div class="grid grid-2" style="gap:12px;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Mô tả hàng hóa</label>
-              <input class="form-control" value="Vật liệu xây dựng">
+          <div class="card-title mb-3">📦 Hàng hóa & Kích thước</div>
+          <!-- Mode toggle -->
+          <div class="cargo-mode">
+            <button class="cargo-mode-btn active" onclick="setCargoMode('dim',this)">📐 Nhập kích thước (D×R×C)</button>
+            <button class="cargo-mode-btn" onclick="setCargoMode('vol',this)">📦 Nhập số khối (m³)</button>
+          </div>
+          <!-- Mode: kích thước -->
+          <div id="modeDim">
+            <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Dài (m)</label>
+                <input class="form-control" type="number" step="0.1" min="0" id="cargL" placeholder="4.0" oninput="calcCargo()">
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Rộng (m)</label>
+                <input class="form-control" type="number" step="0.1" min="0" id="cargW" placeholder="1.8" oninput="calcCargo()">
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Cao (m)</label>
+                <input class="form-control" type="number" step="0.1" min="0" id="cargH" placeholder="1.6" oninput="calcCargo()">
+              </div>
             </div>
+            <div id="volResult" style="margin-top:7px;font-size:12px;color:var(--primary);font-weight:600;min-height:18px;"></div>
+          </div>
+          <!-- Mode: số khối -->
+          <div id="modeVol" style="display:none;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label">Khối lượng (tấn)</label>
-              <input class="form-control" type="number" value="4.5" id="weight">
+              <label class="form-label">Số khối (m³)</label>
+              <input class="form-control" type="number" step="0.1" min="0" id="cargVol" placeholder="Nhập số m³" oninput="calcCargo()">
             </div>
           </div>
-          <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;">
+          <div class="grid grid-2" style="gap:12px;margin-top:12px;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label">Dài (m)</label>
-              <input class="form-control" type="number" placeholder="3.0">
+              <label class="form-label">Trọng lượng hàng (tấn)</label>
+              <input class="form-control" type="number" step="0.5" min="0" id="weight" placeholder="Ví dụ: 3.5" oninput="calcCargo()">
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label">Rộng (m)</label>
-              <input class="form-control" type="number" placeholder="1.5">
+              <label class="form-label">Mô tả hàng hóa</label>
+              <input class="form-control" placeholder="Vật liệu, hàng hóa...">
             </div>
-            <div class="form-group" style="margin:0;">
-              <label class="form-label">Cao (m)</label>
-              <input class="form-control" type="number" placeholder="1.2">
-            </div>
+          </div>
+          <!-- Gợi ý xe -->
+          <div id="vehicleSuggest" style="display:none;margin-top:10px;padding:9px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:12px;color:var(--primary);font-weight:600;">
+            🚚 Gợi ý xe phù hợp: <span id="suggestText"></span>
           </div>
         </div>
 
         <!-- Loại xe -->
         <div class="card card-padded">
-          <div class="card-title mb-3">🚚 Chọn loại xe</div>
-          <div class="vehicle-grid" id="vehicleGrid">
-            <div class="vehicle-card" onclick="selectVehicle(this, 1)">
-              <div class="vc-icon">🚐</div>
-              <div class="vc-name">1 tấn</div>
-              <div class="vc-price">25.000₫/km</div>
-            </div>
-            <div class="vehicle-card" onclick="selectVehicle(this, 2)">
-              <div class="vc-icon">🚛</div>
-              <div class="vc-name">2.5 tấn</div>
-              <div class="vc-price">28.000₫/km</div>
-            </div>
-            <div class="vehicle-card selected" onclick="selectVehicle(this, 5)">
-              <div class="vc-icon">🚚</div>
-              <div class="vc-name">5 tấn</div>
-              <div class="vc-price">32.000₫/km</div>
-            </div>
-            <div class="vehicle-card" onclick="selectVehicle(this, 7)">
-              <div class="vc-icon">🚛</div>
-              <div class="vc-name">7 tấn</div>
-              <div class="vc-price">36.000₫/km</div>
-            </div>
-            <div class="vehicle-card" onclick="selectVehicle(this, 10)">
-              <div class="vc-icon">🏗️</div>
-              <div class="vc-name">10 tấn</div>
-              <div class="vc-price">42.000₫/km</div>
-            </div>
-            <div class="vehicle-card" onclick="selectVehicle(this, 15)">
-              <div class="vc-icon">🏗️</div>
-              <div class="vc-name">15 tấn</div>
-              <div class="vc-price">52.000₫/km</div>
-            </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="card-title" style="margin:0;">🚚 Chọn loại xe</div>
+            <span id="suggestHint" style="font-size:11px;color:#16a34a;font-weight:600;display:none;">✅ Xe phù hợp tô xanh</span>
           </div>
+          <div class="vehicle-grid" id="vehicleGrid"><!-- rendered by JS --></div>
         </div>
 
         <!-- Phụ phí -->
         <div class="card card-padded">
           <div class="card-title mb-3">➕ Phụ phí & Dịch vụ thêm</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;" id="addonTags">
+          <div style="display:flex;flex-wrap:wrap;" id="addonTags">
             <div class="addon-tag active" onclick="toggleAddon(this)">🌉 Cầu đường +320.000₫</div>
             <div class="addon-tag" onclick="toggleAddon(this)">🌙 Ban đêm +15%</div>
             <div class="addon-tag" onclick="toggleAddon(this)">⏰ Giờ cao điểm +10%</div>
             <div class="addon-tag active" onclick="toggleAddon(this)">📋 VAT 10%</div>
             <div class="addon-tag" onclick="toggleAddon(this)">📦 Bốc xếp +200.000₫</div>
             <div class="addon-tag" onclick="toggleAddon(this)">🏢 Lên tầng +150.000₫</div>
-            <div class="addon-tag" onclick="toggleAddon(this)">↩️ Xe rỗng chiều về</div>
+          </div>
+          <!-- Xe 2 chiều -->
+          <div class="round-trip-row">
+            <label>
+              <input type="checkbox" id="roundTrip" onchange="updatePrice()">
+              ↩️ Xe 2 chiều (có chiều về)
+            </label>
+            <span style="font-size:12px;color:var(--text-muted);">Chiều về = 40% giá cước</span>
           </div>
           <div class="form-group mt-3" style="margin-bottom:0;">
             <label class="form-label">Giảm giá</label>
@@ -281,17 +307,19 @@
             </div>
           </div>
 
-          <div class="result-row"><span class="label">Cước cơ bản (32km × 32.000₫)</span><span class="value">1.024.000 ₫</span></div>
+          <div class="result-row"><span class="label">Cước cơ bản (32km × <span id="pricePerKm">32.000</span>₫)</span><span class="value" id="baseFare">1.024.000 ₫</span></div>
           <div class="result-row"><span class="label">Phí cầu đường</span><span class="value">320.000 ₫</span></div>
           <div class="result-row"><span class="label">Nhiên liệu ước tính</span><span class="value">245.000 ₫</span></div>
+          <div class="result-row return" id="returnRow" style="display:none;"><span class="label">↩️ Chiều về (40% cước)</span><span class="value" id="returnFare">—</span></div>
+          <div class="result-row" id="multiRow" style="display:none;"><span class="label">× <span id="qtyLabel">1</span> xe</span><span class="value" id="multiFare">—</span></div>
           <div class="result-row"><span class="label">Phụ phí khác</span><span class="value">0 ₫</span></div>
-          <div class="result-row"><span class="label">Tạm tính</span><span class="value font-bold">1.589.000 ₫</span></div>
-          <div class="result-row"><span class="label">VAT 10%</span><span class="value">158.900 ₫</span></div>
+          <div class="result-row"><span class="label">Tạm tính</span><span class="value font-bold" id="subTotal">1.589.000 ₫</span></div>
+          <div class="result-row"><span class="label">VAT 10%</span><span class="value" id="vatAmt">158.900 ₫</span></div>
           <div class="result-row"><span class="label">Giảm giá</span><span class="value text-green">- 0 ₫</span></div>
 
           <div class="result-total">
             <span class="label">Tổng báo giá</span>
-            <span class="value">1.747.900 ₫</span>
+            <span class="value" id="grandTotal">1.747.900 ₫</span>
           </div>
 
           <div style="margin-top:14px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;">
@@ -321,13 +349,133 @@
 
 <script src="assets/app.js"></script>
 <script>
-  function selectVehicle(el, tons) {
-    document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
+  const VEHICLES = [
+    { id:'v1t',   label:'1 tấn',          tons:1,   dim:'2.6×1.4×1.4',  vol:5.1,  pricePerKm:25000, icon:'🚐' },
+    { id:'v15t',  label:'1.5 tấn',        tons:1.5, dim:'3.2×1.5×1.6',  vol:7.7,  pricePerKm:27000, icon:'🚐' },
+    { id:'v2ta',  label:'2T (4.2m)',       tons:2,   dim:'4.2×1.85×1.85',vol:14.4, pricePerKm:29000, icon:'🚛' },
+    { id:'v2tb',  label:'2T (6.0m)',       tons:2,   dim:'6.0×1.9×1.9',  vol:21.7, pricePerKm:30000, icon:'🚛' },
+    { id:'v25t',  label:'2.5 tấn',        tons:2.5, dim:'4.2×1.85×1.85',vol:14.4, pricePerKm:31000, icon:'🚛' },
+    { id:'v35ta', label:'3.5T (4.5m)',     tons:3.5, dim:'4.5×1.9×1.9',  vol:16.2, pricePerKm:33000, icon:'🚚' },
+    { id:'v35tb', label:'3.5T (6.0m)',     tons:3.5, dim:'6.0×2.0×2.0',  vol:24.0, pricePerKm:35000, icon:'🚚' },
+    { id:'v5t',   label:'5 tấn',          tons:5,   dim:'6.2×2.2×2.1',  vol:28.6, pricePerKm:38000, icon:'🚚' },
+    { id:'v8t',   label:'8 tấn',          tons:8,   dim:'7.4×2.3×2.2',  vol:37.4, pricePerKm:44000, icon:'🏗️' },
+    { id:'v10t',  label:'10 tấn',         tons:10,  dim:'7.4×2.3×2.2',  vol:37.4, pricePerKm:48000, icon:'🏗️' },
+    { id:'v15t2', label:'15 tấn',         tons:15,  dim:'9.5×2.38×2.4', vol:54.3, pricePerKm:56000, icon:'🏗️' },
+  ];
+
+  let selectedVehicle = VEHICLES[7]; // mặc định 5 tấn
+  let suggestedIds = [];
+
+  function renderVehicles() {
+    const grid = document.getElementById('vehicleGrid');
+    grid.innerHTML = VEHICLES.map(v => {
+      const isSugg = suggestedIds.includes(v.id);
+      const isSel  = v.id === selectedVehicle.id;
+      return `<div class="vehicle-card${isSel?' selected':''}${isSugg?' suggested':''}" onclick="selectVehicle('${v.id}')">
+        ${isSugg ? '<span class="vc-badge">Phù hợp</span>' : ''}
+        <div class="vc-icon">${v.icon}</div>
+        <div class="vc-name">${v.label}</div>
+        <div class="vc-dim">${v.dim} m</div>
+        <div class="vc-price">${v.pricePerKm.toLocaleString('vi-VN')}₫/km</div>
+      </div>`;
+    }).join('');
   }
-  function toggleAddon(el) { el.classList.toggle('active'); }
-  function clearForm() { if(confirm('Xóa toàn bộ thông tin form?')) location.reload(); }
+
+  function selectVehicle(id) {
+    selectedVehicle = VEHICLES.find(v => v.id === id) || VEHICLES[7];
+    renderVehicles();
+    updatePrice();
+  }
+
+  function setCargoMode(mode, btn) {
+    document.querySelectorAll('.cargo-mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('modeDim').style.display = mode === 'dim' ? '' : 'none';
+    document.getElementById('modeVol').style.display = mode === 'vol' ? '' : 'none';
+    calcCargo();
+  }
+
+  function calcCargo() {
+    const isDim = document.getElementById('modeDim').style.display !== 'none';
+    let vol = 0;
+    if (isDim) {
+      const l = parseFloat(document.getElementById('cargL').value) || 0;
+      const w = parseFloat(document.getElementById('cargW').value) || 0;
+      const h = parseFloat(document.getElementById('cargH').value) || 0;
+      vol = l * w * h;
+      document.getElementById('volResult').textContent =
+        (vol > 0) ? `📐 Thể tích: ${vol.toFixed(2)} m³` : '';
+    } else {
+      vol = parseFloat(document.getElementById('cargVol').value) || 0;
+    }
+    const weight = parseFloat(document.getElementById('weight').value) || 0;
+    suggestVehicles(vol, weight);
+  }
+
+  function suggestVehicles(vol, weight) {
+    if (vol <= 0 && weight <= 0) {
+      suggestedIds = [];
+      document.getElementById('vehicleSuggest').style.display = 'none';
+      document.getElementById('suggestHint').style.display = 'none';
+      renderVehicles();
+      return;
+    }
+    suggestedIds = VEHICLES
+      .filter(v => (vol <= 0 || v.vol >= vol) && (weight <= 0 || v.tons >= weight))
+      .map(v => v.id);
+    const hint = document.getElementById('vehicleSuggest');
+    if (suggestedIds.length > 0) {
+      const names = VEHICLES.filter(v => suggestedIds.includes(v.id)).map(v => v.label).join(', ');
+      document.getElementById('suggestText').textContent = names;
+      hint.style.display = '';
+      document.getElementById('suggestHint').style.display = '';
+      // auto-select smallest matching
+      const best = VEHICLES.find(v => suggestedIds.includes(v.id));
+      if (best) selectedVehicle = best;
+    } else {
+      hint.style.display = 'none';
+      document.getElementById('suggestHint').style.display = 'none';
+    }
+    renderVehicles();
+    updatePrice();
+  }
+
+  function updatePrice() {
+    const km      = 32;
+    const base    = km * selectedVehicle.pricePerKm;
+    const isRound = document.getElementById('roundTrip').checked;
+    const qty     = Math.max(1, parseInt(document.getElementById('vehicleQty').value) || 1);
+    const returnF = isRound ? Math.round(base * 0.4) : 0;
+    const perVehicle = base + returnF + 320000 + 245000;
+    const subTotal   = perVehicle * qty;
+    const vat        = Math.round(subTotal * 0.1);
+    const grand      = subTotal + vat;
+
+    document.getElementById('pricePerKm').textContent = selectedVehicle.pricePerKm.toLocaleString('vi-VN');
+    document.getElementById('baseFare').textContent   = base.toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('returnRow').style.display = isRound ? '' : 'none';
+    document.getElementById('returnFare').textContent  = returnF.toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('multiRow').style.display  = qty > 1 ? '' : 'none';
+    document.getElementById('qtyLabel').textContent    = qty;
+    document.getElementById('multiFare').textContent   = perVehicle.toLocaleString('vi-VN') + ' ₫/xe';
+    document.getElementById('subTotal').textContent    = subTotal.toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('vatAmt').textContent      = vat.toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('grandTotal').textContent  = grand.toLocaleString('vi-VN') + ' ₫';
+  }
+
+  function changeQty(delta) {
+    const inp = document.getElementById('vehicleQty');
+    inp.value = Math.max(1, Math.min(20, (parseInt(inp.value) || 1) + delta));
+    updatePrice();
+  }
+
+  function toggleAddon(el) { el.classList.toggle('active'); updatePrice(); }
+  function clearForm() { if (confirm('Xóa toàn bộ thông tin form?')) location.reload(); }
   function createOrder() { window.location.href = 'm1-don-hang.html'; }
+
+  // khởi tạo
+  renderVehicles();
+  updatePrice();
 </script>
 </body>
 </html>

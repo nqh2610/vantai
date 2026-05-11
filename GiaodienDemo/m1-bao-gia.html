@@ -7,12 +7,15 @@
   <link rel="stylesheet" href="assets/style.css">
   <style>
     /* ── layout ── */
-    .baogia-wrap { display:grid; grid-template-columns:1fr 400px; gap:18px; align-items:start; }
-    @media(max-width:1280px){ .baogia-wrap { grid-template-columns:1fr 360px; } }
+    .baogia-wrap { display:grid; grid-template-columns:1fr 380px; gap:16px; align-items:start; width:100%; box-sizing:border-box; }
+    .baogia-wrap > * { min-width:0; overflow-x:hidden; }
+    /* right panel sticky must allow overflow for scroll */
+    .baogia-wrap > .right-panel-col { overflow-x:visible; }
+    @media(max-width:1280px){ .baogia-wrap { grid-template-columns:1fr 340px; } }
     @media(max-width:1024px){ .baogia-wrap { grid-template-columns:1fr; } }
 
     /* ── section cards ── */
-    .bg-card { background:white; border-radius:14px; border:1px solid var(--border); padding:16px 18px; margin-bottom:14px; }
+    .bg-card { background:white; border-radius:14px; border:1px solid var(--border); padding:16px 18px; margin-bottom:14px; min-width:0; box-sizing:border-box; }
     .bg-card-title { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
 
     /* ── customer ── */
@@ -40,7 +43,7 @@
     @media(max-width:600px){ .dt-row { grid-template-columns:1fr 1fr; } }
 
     /* ── vehicle scroll ── */
-    .vehicle-scroll { display:flex; gap:9px; overflow-x:auto; padding-bottom:6px; scrollbar-width:none; }
+    .vehicle-scroll { display:flex; gap:9px; overflow-x:auto; overflow-y:visible; padding-bottom:6px; scrollbar-width:none; min-width:0; width:100%; }
     .vehicle-scroll::-webkit-scrollbar { display:none; }
     .vcard { flex-shrink:0; width:100px; border:2px solid var(--border); border-radius:12px; padding:10px 6px 8px; cursor:pointer; text-align:center; transition:all 0.13s; position:relative; background:white; }
     .vcard:hover { border-color:var(--primary); }
@@ -203,7 +206,7 @@
     </div>
   </header>
 
-  <main class="page-content" style="background:#f0f4f8;padding:16px;">
+  <main class="page-content" style="background:#f0f4f8;padding:16px;overflow-x:hidden;">
     <div class="baogia-wrap">
 
       <!-- ══════════ LEFT FORM ══════════ -->
@@ -429,7 +432,7 @@
       </div>
 
       <!-- ══════════ RIGHT PANEL ══════════ -->
-      <div class="right-panel">
+      <div class="right-panel right-panel-col">
 
         <!-- Map mock -->
         <div class="bg-card" style="padding:0;overflow:hidden;">

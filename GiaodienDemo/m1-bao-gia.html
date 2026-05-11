@@ -6,141 +6,416 @@
   <title>Báo giá nhanh – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    /* ── layout ── */
-    .baogia-wrap { display:grid; grid-template-columns:1fr 380px; gap:16px; align-items:start; width:100%; box-sizing:border-box; }
-    .baogia-wrap > * { min-width:0; overflow-x:hidden; }
-    /* right panel sticky must allow overflow for scroll */
-    .baogia-wrap > .right-panel-col { overflow-x:visible; }
-    @media(max-width:1280px){ .baogia-wrap { grid-template-columns:1fr 340px; } }
-    @media(max-width:1024px){ .baogia-wrap { grid-template-columns:1fr; } }
+    :root {
+      --bg: #f5f7fb;
+      --border: #e5e7eb;
+      --border-2: #f1f5f9;
+      --primary: #1d4ed8;
+      --primary-50: #eff6ff;
+      --primary-100: #dbeafe;
+      --text-1: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --green: #16a34a;
+      --green-50: #f0fdf4;
+      --green-100: #dcfce7;
+      --amber: #f59e0b;
+      --amber-50: #fffbeb;
+    }
+    body { background: var(--bg); }
+    .page-content { padding: 0 !important; background: var(--bg); }
 
-    /* ── section cards ── */
-    .bg-card { background:white; border-radius:14px; border:1px solid var(--border); padding:16px 18px; margin-bottom:14px; min-width:0; box-sizing:border-box; }
-    .bg-card-title { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    /* ── Top action bar ── */
+    .qq-head {
+      display:flex; align-items:center; gap:14px;
+      padding: 12px 20px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+    }
+    .qq-head h1 { font-size:16px; font-weight:700; color:var(--text-1); margin:0; }
+    .qq-head .sub { font-size:12px; color:var(--text-3); margin-top:2px; }
+    .qq-head .actions { margin-left:auto; display:flex; gap:8px; }
+    .qq-btn { padding:7px 14px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-2); transition:all .15s; }
+    .qq-btn:hover { background:#f8fafc; border-color:#cbd5e1; }
+    .qq-btn.primary { background:var(--primary); color:white; border-color:var(--primary); }
+    .qq-btn.primary:hover { background:#1e40af; }
 
-    /* ── customer ── */
-    .cust-search { position:relative; }
-    .cust-search input { width:100%; padding-left:36px; }
-    .cust-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); }
+    /* ── Wrapper ── */
+    .qq-wrap {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .qq-wrap { grid-template-columns: 1fr; } }
 
-    /* ── route ── */
-    .route-box { display:flex; flex-direction:column; gap:0; }
-    .route-input-wrap { display:flex; align-items:center; gap:10px; padding:10px 0; }
-    .route-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-    .route-dot.origin  { background:#22c55e; box-shadow:0 0 0 3px #dcfce7; }
-    .route-dot.dest    { background:#ef4444; box-shadow:0 0 0 3px #fee2e2; }
-    .route-line-seg { width:2px; height:22px; background:#e2e8f0; margin-left:5px; }
-    .route-input { flex:1; border:none; outline:none; font-size:14px; font-weight:500; background:transparent; color:var(--text-primary); }
-    .route-input::placeholder { color:var(--text-muted); font-weight:400; }
-    .route-sep { display:flex; align-items:center; justify-content:space-between; padding:2px 0 2px 22px; }
-    .route-swap-btn { width:28px; height:28px; border-radius:50%; border:1px solid var(--border); background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:14px; transition:all 0.15s; }
-    .route-swap-btn:hover { background:var(--primary); color:white; border-color:var(--primary); }
-    .route-dist-badge { font-size:11px; color:var(--text-muted); }
-    .route-outer { border:1px solid var(--border); border-radius:10px; padding:4px 12px; }
+    .qq-left  { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .qq-right { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 14px; }
 
-    /* ── datetime row ── */
-    .dt-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-    @media(max-width:600px){ .dt-row { grid-template-columns:1fr 1fr; } }
+    /* ── Card base ── */
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .card-h {
+      display:flex; align-items:center; gap:8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-2);
+      background: #fafbfc;
+    }
+    .card-h .step {
+      background: var(--primary); color:white;
+      width:20px; height:20px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size: 11px; font-weight: 800;
+    }
+    .card-h h3 { margin:0; font-size: 13px; font-weight: 700; color: var(--text-1); letter-spacing:.01em; }
+    .card-h .right { margin-left:auto; font-size:12px; color: var(--text-3); }
+    .card-h .toggle-btn {
+      margin-left:auto;
+      background:white; border:1px solid var(--border);
+      width:24px; height:24px; border-radius:6px;
+      cursor:pointer; font-size:14px; color:var(--text-2);
+      display:inline-flex; align-items:center; justify-content:center;
+      transition: all .15s;
+    }
+    .card-h .toggle-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .card-h .toggle-btn .arr { transition: transform .2s; display:inline-block; }
+    .card.collapsed .card-h .toggle-btn .arr { transform: rotate(-90deg); }
+    .card.collapsed .card-b { display:none; }
+    .card-b { padding: 12px 14px; }
 
-    /* ── vehicle scroll ── */
-    .vehicle-scroll { display:flex; gap:9px; overflow-x:auto; overflow-y:visible; padding-bottom:6px; scrollbar-width:none; min-width:0; width:100%; }
-    .vehicle-scroll::-webkit-scrollbar { display:none; }
-    .vcard { flex-shrink:0; width:100px; border:2px solid var(--border); border-radius:12px; padding:10px 6px 8px; cursor:pointer; text-align:center; transition:all 0.13s; position:relative; background:white; }
-    .vcard:hover { border-color:var(--primary); }
-    .vcard.sel { border-color:var(--primary); background:#eff6ff; }
-    .vcard.fit { border-color:#22c55e; }
-    .vcard.fit.sel { border-color:var(--primary); background:#eff6ff; }
-    .vcard-icon { font-size:26px; margin-bottom:3px; }
-    .vcard-name { font-size:12px; font-weight:700; }
-    .vcard-dim  { font-size:10px; color:var(--text-muted); line-height:1.35; margin-top:2px; }
-    .vcard-price{ font-size:11px; color:var(--primary); font-weight:600; margin-top:3px; }
-    .vcard-badge{ position:absolute; top:-1px; right:-1px; background:#16a34a; color:white; font-size:9px; font-weight:700; padding:2px 5px; border-radius:0 10px 0 8px; }
+    /* ── Form labels & inputs ── */
+    .lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      display:block;
+    }
+    .inp {
+      width:100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      color: var(--text-1);
+      background: white;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: all .12s;
+    }
+    .inp:focus { outline:none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-100); }
+    .inp::placeholder { color: var(--text-3); }
 
-    /* ── cargo mode ── */
-    .mode-tabs { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:12px; }
-    .mode-tab { flex:1; padding:7px 4px; font-size:12px; font-weight:600; background:white; border:none; cursor:pointer; color:var(--text-secondary); transition:all .15s; }
-    .mode-tab.active { background:var(--primary); color:white; }
+    /* ── Row utility ── */
+    .row { display:grid; gap:10px; }
+    .row.r2 { grid-template-columns: 1fr 1fr; }
+    .row.r3 { grid-template-columns: 1fr 1fr 1fr; }
+    .row.cust { grid-template-columns: 1.4fr 1fr 1.2fr; }
+    @media (max-width: 600px) { .row.r2, .row.r3, .row.cust { grid-template-columns: 1fr; } }
 
-    /* ── VAT toggle ── */
-    .vat-row { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; margin-bottom:4px; }
-    .vat-label { display:flex; align-items:center; gap:9px; }
-    .vat-label .icon { font-size:18px; }
-    .vat-label .txt  { font-size:13px; font-weight:700; color:#92400e; }
-    .vat-label .sub  { font-size:11px; color:#b45309; }
-    .toggle-sw { position:relative; width:42px; height:24px; cursor:pointer; }
-    .toggle-sw input { opacity:0; width:0; height:0; }
-    .toggle-track { position:absolute; inset:0; background:#cbd5e1; border-radius:12px; transition:.2s; }
-    .toggle-track:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:white; border-radius:50%; transition:.2s; }
-    .toggle-sw input:checked ~ .toggle-track { background:var(--primary); }
-    .toggle-sw input:checked ~ .toggle-track:before { transform:translateX(18px); }
+    /* Cargo: 2 columns (weight | size) */
+    .cargo-2col {
+      display:grid;
+      grid-template-columns: 1fr 1.7fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .cargo-2col { grid-template-columns: 1fr; } }
 
-    /* ── surcharge list ── */
-    .sc-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f1f5f9; }
-    .sc-row:last-child { border-bottom:none; }
-    .sc-check { width:17px; height:17px; cursor:pointer; accent-color:var(--primary); flex-shrink:0; }
-    .sc-label { flex:1; font-size:13px; color:var(--text-primary); }
-    .sc-label .sc-name { font-weight:500; }
-    .sc-label .sc-desc { font-size:11px; color:var(--text-muted); }
-    .sc-right { display:flex; align-items:center; gap:4px; font-size:12px; color:var(--text-secondary); }
-    .sc-input { width:80px; padding:4px 7px; border:1px solid var(--border); border-radius:6px; font-size:12px; text-align:right; background:#f8fafc; }
-    .sc-add-btn { width:100%; padding:9px; border:1.5px dashed #f97316; border-radius:8px; background:transparent; color:#f97316; font-size:13px; font-weight:600; cursor:pointer; margin-top:6px; }
-    .sc-add-btn:hover { background:#fff7ed; }
+    .size-head {
+      display:flex; align-items:center;
+      margin-bottom: 5px;
+    }
+    .size-head .lbl { margin:0; flex:1; }
+    .mode-toggle {
+      display:inline-flex;
+      border:1px solid var(--border);
+      border-radius:6px;
+      overflow:hidden;
+    }
+    .mode-toggle button {
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      background: white;
+      border: none;
+      cursor: pointer;
+      color: var(--text-2);
+    }
+    .mode-toggle button.active { background: var(--primary); color: white; }
 
-    /* ── right panel ── */
-    .right-panel { position:sticky; top:16px; display:flex; flex-direction:column; gap:14px; }
-    @media(max-width:1024px){ .right-panel { position:static; } }
+    .size-grid { display:grid; gap:6px; }
+    .size-grid.dim { grid-template-columns: 1fr 1fr 1fr; }
+    .size-grid.cbm { grid-template-columns: 1fr; }
 
-    /* ── map mock ── */
-    .map-mock { border-radius:12px; overflow:hidden; border:1px solid var(--border); background:#e8eef3; position:relative; height:220px; }
-    .map-mock svg { width:100%; height:100%; }
-    .map-bubble { position:absolute; background:white; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.18); padding:6px 10px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:5px; }
-    .map-bubble.dist { top:50%; left:50%; transform:translate(-50%,-50%); }
-    .map-label { position:absolute; background:white; border:2px solid var(--border); border-radius:6px; font-size:11px; font-weight:600; padding:3px 7px; }
-    .map-label.origin { top:14px; left:14px; }
-    .map-label.dest { bottom:14px; right:14px; color:var(--primary); border-color:var(--primary); }
+    .num-wrap { position: relative; }
+    .num-wrap .suffix {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 600;
+      pointer-events: none;
+    }
+    .num-wrap input { padding-right: 28px; }
 
-    /* ── price breakdown ── */
-    .price-row { display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px solid #f1f5f9; font-size:13px; }
-    .price-row:last-child { border-bottom:none; }
-    .price-row .pl { color:var(--text-secondary); display:flex; align-items:center; gap:6px; }
-    .price-row .pv { font-weight:600; }
-    .price-row.return .pl,.price-row.return .pv { color:#c2410c; }
-    .price-divider { height:1px; background:var(--border); margin:8px 0; }
-    .price-total-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0 2px; }
-    .price-total-lbl { font-size:14px; font-weight:700; color:var(--text-primary); }
-    .price-total-val { font-size:24px; font-weight:800; color:var(--primary); }
+    .cargo-hint {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 600;
+      display: none;
+    }
 
-    /* ── qty stepper ── */
-    .qty-stepper { display:inline-flex; align-items:center; border:1.5px solid #d1d5db; border-radius:8px; overflow:hidden; }
-    .qty-btn { width:32px; height:36px; background:#f1f5f9; border:none; cursor:pointer; font-size:18px; font-weight:700; color:#374151; }
-    .qty-btn:hover { background:#dbeafe; color:var(--primary); }
-    .qty-val { width:40px; text-align:center; font-weight:700; font-size:14px; border:none; border-left:1.5px solid #d1d5db; border-right:1.5px solid #d1d5db; height:36px; }
-    /* ── form control clarity override ── */
-    .bg-card .form-control { font-size:14px; font-weight:500; border:1.5px solid #d1d5db; background:white; color:#111827; border-radius:8px; padding:9px 12px; height:auto; line-height:1.4; }
-    .bg-card .form-control::placeholder { color:#9ca3af; font-weight:400; font-size:13px; }
-    .bg-card .form-control:focus { border-color:var(--primary); box-shadow:0 0 0 3px #dbeafe; outline:none; }
-    .bg-card select.form-control { padding-right:28px; }
-    .bg-card .form-label { font-size:12px; font-weight:700; color:#374151; margin-bottom:5px; display:block; letter-spacing:.01em; }
-    /* ── sc-input clarity ── */
-    .sc-input { padding:6px 8px; border:1.5px solid #d1d5db; border-radius:7px; font-size:13px; font-weight:600; text-align:right; background:white; color:#111827; }
-    .sc-input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 2px #dbeafe; }
-    .sc-unit { font-size:11px; font-weight:700; color:#9ca3af; white-space:nowrap; }
-    .sc-right { display:flex; align-items:center; gap:5px; flex-shrink:0; }
-    /* ── discount ── */
-    .disc-outer { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:14px 16px; }
-    .disc-tabs { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
-    .disc-tab { padding:8px 0; font-size:13px; font-weight:600; border:1.5px solid #d1d5db; border-radius:8px; background:white; cursor:pointer; color:#6b7280; transition:all .15s; }
-    .disc-tab.active { border-color:#16a34a; background:#dcfce7; color:#15803d; }
-    .disc-input-wrap { position:relative; }
-    .disc-input-wrap .form-control { padding-right:36px; font-size:16px; font-weight:700; color:#15803d; }
-    .disc-suffix { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:14px; font-weight:800; color:#16a34a; pointer-events:none; }
-    .disc-preview { font-size:14px; font-weight:800; color:#15803d; white-space:nowrap; }
-    .price-row.discount .pl, .price-row.discount .pv { color:#16a34a !important; }
+    /* ── Route ── */
+    .route-grid {
+      display:grid;
+      grid-template-columns: 1fr 32px 1fr;
+      gap: 8px;
+      align-items: end;
+    }
+    .swap-btn {
+      width: 32px; height: 35px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 16px;
+      align-self: end;
+    }
+    .swap-btn:hover { background: var(--primary-50); border-color: var(--primary); color: var(--primary); }
+
+    .time-row { display:grid; grid-template-columns: 1.2fr 1fr; gap:10px; align-items:end; margin-top:10px; }
+    .qty-ctrl { display:flex; gap:4px; align-items:stretch; }
+    .qty-ctrl button { padding:0 12px; border:1px solid var(--border); background:white; border-radius:7px; cursor:pointer; font-weight:700; color:var(--text-2); font-size:14px; }
+    .qty-ctrl button:hover { border-color: var(--primary); color: var(--primary); }
+    .qty-ctrl input { flex:1; text-align:center; }
+
+    /* Per-vcard qty stepper */
+    .vcard .qrow { display:flex; align-items:center; gap:4px; margin-top:4px; padding-top:4px; border-top:1px dashed var(--border); }
+    .vcard .qrow .qbtn {
+      width:20px; height:20px; border-radius:4px;
+      border:1px solid var(--border); background:white;
+      cursor:pointer; font-weight:800; color:var(--text-2);
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:12px; line-height:1;
+    }
+    .vcard .qrow .qbtn:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-50); }
+    .vcard .qrow .qval { flex:1; text-align:center; font-size:11px; font-weight:800; color:var(--text-1); }
+    .vcard .qrow .qval.zero { color:var(--text-3); font-weight:600; }
+    .vcard.sel .qrow { border-top-color: var(--primary); }
+
+    .qq-nudge {
+      display:none; align-items:center; gap:8px;
+      background: var(--amber-50);
+      border: 1px solid #fcd34d;
+      border-radius: 7px;
+      padding: 7px 11px;
+      font-size: 12px;
+      color: #92400e;
+      margin-top: 10px;
+    }
+    .qq-nudge button {
+      background: var(--amber); color:white; border:none;
+      border-radius:5px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer;
+    }
+
+    /* ── Vehicle picker ── */
+    .vlist {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 6px;
+    }
+    .vcard {
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 8px;
+      cursor: pointer;
+      background: white;
+      transition: all .12s;
+      display:flex; flex-direction:column; gap:2px;
+      min-width: 0;
+    }
+    .vcard:hover { border-color: var(--primary); }
+    .vcard.sel { border-color: var(--primary); background: var(--primary-50); box-shadow: 0 0 0 2px var(--primary-100); }
+    .vcard.fit { border-color: var(--green); }
+    .vcard.fit.sel { border-color: var(--primary); }
+    .vcard.unfit { opacity: .4; }
+    .vcard .top { display:flex; align-items:center; gap:5px; }
+    .vcard .icon { font-size: 14px; line-height:1; }
+    .vcard .name { font-size: 12px; font-weight: 700; color: var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .vcard .badge-fit {
+      margin-left:auto;
+      background: var(--green-100);
+      color: var(--green);
+      font-size: 8px; font-weight: 800;
+      padding: 1px 4px; border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .vcard .specs { font-size: 10px; color: var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .vcard .price { font-size: 14px; font-weight: 800; color: var(--primary); margin-top: 2px; }
+    .vcard .price-lbl { font-size: 10px; font-weight: 600; color: var(--text-3); margin-right: 3px; }
+    .vcard .price-break { font-size: 10.5px; color: var(--text-3); margin-top: 1px; line-height: 1.3; }
+
+    /* ── VAT big toggle (separate) ── */
+    .vat-box {
+      display:flex; align-items:center; gap:12px;
+      padding: 11px 14px;
+      background: var(--primary-50);
+      border: 1px dashed var(--primary);
+      border-radius: 9px;
+    }
+    .vat-box .icon-big { font-size: 22px; }
+    .vat-box .info { flex:1; }
+    .vat-box .info .t { font-size: 13px; font-weight: 700; color: var(--text-1); }
+    .vat-box .info .s { font-size: 11px; color: var(--text-2); margin-top:2px; }
+    .vat-switch {
+      position: relative;
+      width: 46px; height: 26px;
+      flex-shrink: 0;
+    }
+    .vat-switch input { opacity:0; width:0; height:0; }
+    .vat-switch .slider {
+      position:absolute; inset:0;
+      background: #cbd5e1; border-radius: 13px;
+      cursor: pointer; transition: .2s;
+    }
+    .vat-switch .slider::before {
+      content:''; position:absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: white; border-radius: 50%;
+      transition: .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .vat-switch input:checked + .slider { background: var(--green); }
+    .vat-switch input:checked + .slider::before { transform: translateX(20px); }
+
+    /* ── Surcharge chips ── */
+    .chip-grid {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+    @media (max-width: 600px) { .chip-grid { grid-template-columns: 1fr; } }
+    .chip {
+      display:flex; align-items:center; gap:7px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 12px;
+      background: white;
+      transition: all .12s;
+    }
+    .chip:hover { border-color: var(--primary); }
+    .chip.on { background: var(--primary-50); border-color: var(--primary); }
+    .chip input[type="checkbox"] { accent-color: var(--primary); cursor:pointer; }
+    .chip .t { flex:1; color: var(--text-1); font-weight: 500; display:flex; align-items:center; gap:4px; }
+    .chip .p { font-size: 11px; color: var(--text-2); font-weight: 700; }
+    .chip .nin { width:38px; padding:0 4px; height:22px; border:1px solid var(--border); border-radius:4px; text-align:center; font-size:11px; font-weight:700; box-sizing:border-box; }
+    .chip .nin.w { width:60px; text-align:right; padding:0 18px 0 6px; }
+    .chip .nin-wrap { position:relative; display:inline-block; }
+    .chip .nin-wrap .k-suf { position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:10px; font-weight:700; color:var(--text-3); pointer-events:none; }
+
+    /* ── Price card (right) ── */
+    .qq-price-hero {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      color: white;
+      padding: 14px 16px;
+    }
+    .qq-price-hero .lbl { font-size: 11px; font-weight:600; color:#bfdbfe; letter-spacing:.06em; text-transform:uppercase; }
+    .qq-price-hero .val { font-size: 30px; font-weight: 900; line-height: 1.05; margin-top: 3px; }
+    .qq-price-hero .sub { font-size: 11px; color:#bfdbfe; margin-top: 3px; }
+
+    .price-rows { padding: 9px 14px; }
+    .price-rows .r {
+      display:flex; justify-content:space-between; align-items:baseline;
+      padding: 4px 0;
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+    .price-rows .r .v { font-weight: 700; color: var(--text-1); }
+    .price-rows .r.disc, .price-rows .r.disc .v { color: var(--green); }
+    .price-rows .r.subt {
+      border-top: 1px dashed var(--border);
+      margin-top: 3px; padding-top: 6px;
+      font-weight: 700; color: var(--text-1);
+    }
+
+    .disc-row {
+      display:flex; gap:6px; align-items:center;
+      padding: 8px 14px;
+      border-top: 1px solid var(--border-2);
+    }
+    .disc-row .lbl { font-size: 12px; color: var(--text-1); font-weight:600; flex:1; margin:0; text-transform:none; letter-spacing:0; }
+    .disc-row .toggle { display:flex; border:1px solid var(--border); border-radius:5px; overflow:hidden; }
+    .disc-row .toggle button { padding: 3px 9px; font-size: 11px; font-weight:700; background:white; border:none; cursor:pointer; color: var(--text-2); }
+    .disc-row .toggle button.active { background: var(--primary); color:white; }
+    .disc-row input { width: 70px; padding: 4px 7px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px; font-weight: 700; text-align: right; color: var(--green); }
+    .disc-row input:focus { outline:none; border-color: var(--primary); }
+
+    .qq-actions {
+      padding: 11px 14px 14px;
+      display:flex; gap:6px;
+      border-top: 1px solid var(--border-2);
+    }
+    .qq-actions button {
+      flex: 1;
+      padding: 11px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .12s;
+    }
+    .qq-actions .primary { background: var(--green); color: white; }
+    .qq-actions .primary:hover { background: #15803d; }
+    .qq-actions .ghost { background: white; color: var(--primary); border: 1px solid var(--primary); }
+    .qq-actions .ghost:hover { background: var(--primary-50); }
+
+    /* Map (now on top of right column) */
+    .qq-map {
+      height: 170px;
+      position: relative;
+    }
+    .qq-map svg { width:100%; height:100%; display:block; }
+    .qq-map .badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: white;
+      padding: 4px 10px;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      display:flex; align-items:center; gap:6px;
+    }
+    .qq-map .stamp {
+      position: absolute;
+      bottom: 6px; right: 8px;
+      background: white;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 9px;
+      color: #5f6368;
+    }
   </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-inner">
@@ -185,7 +460,6 @@
   </div>
 </aside>
 
-<!-- MAIN -->
 <div class="main-wrapper">
   <header class="topbar">
     <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
@@ -197,582 +471,651 @@
     </div>
     <div class="topbar-actions">
       <button class="topbar-btn">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-        </svg>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>
         <span class="notif-badge">4</span>
       </button>
       <div class="topbar-avatar">A</div>
     </div>
   </header>
 
-  <main class="page-content" style="background:#f0f4f8;padding:16px;overflow-x:hidden;">
-    <div class="baogia-wrap">
+  <main class="page-content">
 
-      <!-- ══════════ LEFT FORM ══════════ -->
+    <div class="qq-head">
       <div>
+        <h1>Báo giá nhanh</h1>
+        <div class="sub">Khách → Tuyến → Hàng hoá → Xe → Phụ phí → Chốt</div>
+      </div>
+      <div class="actions">
+        <button class="qq-btn" onclick="clearForm()">Làm mới</button>
+        <button class="qq-btn primary" onclick="createOrder()">Tạo đơn →</button>
+      </div>
+    </div>
 
-        <!-- Khách hàng -->
-        <div class="bg-card">
-          <div class="bg-card-title">👤 Khách hàng</div>
-          <div class="cust-search" style="margin-bottom:10px;">
-            <span class="cust-search-icon">
-              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            </span>
-            <input class="form-control" id="custName" type="text" placeholder="Tìm hoặc nhập tên khách hàng..." style="padding-left:34px;">
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <input class="form-control" id="custPhone" type="tel" placeholder="📱 Số điện thoại (tự điền)">
-            <select class="form-control" id="paymentTerm">
-              <option>Thanh toán ngay</option>
-              <option selected>Thanh toán sau 30 ngày</option>
-              <option>Thanh toán sau 15 ngày</option>
-              <option>Thanh toán sau 45 ngày</option>
-            </select>
-          </div>
-        </div>
+    <div class="qq-wrap">
 
-        <!-- Tuyến đường -->
-        <div class="bg-card">
-          <div class="bg-card-title">🗺️ Tuyến đường
-            <span id="routeStatus" style="margin-left:auto;font-size:11px;font-weight:400;color:var(--text-muted);"></span>
-          </div>
-          <div class="route-outer">
-            <div class="route-box">
-              <div class="route-input-wrap">
-                <span class="route-dot origin"></span>
-                <input class="route-input" id="origin" type="text" placeholder="Điểm đi – địa chỉ lấy hàng" value="Quận 1, TP.HCM" oninput="onRouteChange()">
-              </div>
-              <div class="route-sep">
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <span class="route-line-seg"></span>
-                  <span class="route-dist-badge" id="routeDistBadge"></span>
-                </div>
-                <button class="route-swap-btn" onclick="swapRoute()" title="Đổi chiều">⇅</button>
-              </div>
-              <div class="route-input-wrap">
-                <span class="route-dot dest"></span>
-                <input class="route-input" id="dest" type="text" placeholder="Điểm đến – địa chỉ giao hàng" value="Biên Hòa, Đồng Nai" oninput="onRouteChange()">
-              </div>
-            </div>
-          </div>
-          <!-- date / time / qty row -->
-          <div class="dt-row" style="margin-top:12px;">
-            <div>
-              <label class="form-label">📅 Ngày</label>
-              <input class="form-control" type="date" value="2026-05-12">
-            </div>
-            <div>
-              <label class="form-label">🕗 Giờ xuất phát</label>
-              <input class="form-control" type="time" value="08:00">
-            </div>
-            <div>
-              <label class="form-label">🚛 Số xe</label>
-              <div class="qty-stepper" style="width:100%;">
-                <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
-                <input class="qty-val" id="vehicleQty" type="number" value="1" min="1" max="20" onchange="updatePrice()" style="flex:1;width:auto;">
-                <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- ───────── LEFT (form) ───────── -->
+      <div class="qq-left">
 
-        <!-- Loại xe / Trọng tải -->
-        <div class="bg-card">
-          <div class="bg-card-title">
-            🚚 Loại xe / Trọng tải
-            <span id="suggestHint" style="display:none;margin-left:auto;font-size:11px;font-weight:600;color:#16a34a;">✅ Xe phù hợp tô xanh</span>
+        <!-- 1. KHÁCH HÀNG -->
+        <section class="card" id="cardCust">
+          <div class="card-h">
+            <span class="step">1</span>
+            <h3>Khách</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardCust')" title="Ẩn/Hiện"><span class="arr">▾</span></button>
           </div>
-          <!-- Hàng hóa nhỏ gọn -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-            <div>
-              <label class="form-label">Trọng lượng (tấn)</label>
-              <input class="form-control" type="number" step="0.5" min="0" id="weight" placeholder="VD: 3.5" oninput="calcCargo()">
-            </div>
-            <div id="volWrap">
-              <label class="form-label">Kích thước hoặc m³</label>
-              <div style="display:flex;gap:6px;">
-                <input class="form-control" type="number" step="0.1" id="cargL" placeholder="D" oninput="calcCargo()" style="width:33%;">
-                <input class="form-control" type="number" step="0.1" id="cargW" placeholder="R" oninput="calcCargo()" style="width:33%;">
-                <input class="form-control" type="number" step="0.1" id="cargH" placeholder="C" oninput="calcCargo()" style="width:33%;">
-              </div>
-            </div>
-          </div>
-          <div id="cargoHint" style="font-size:11px;color:var(--primary);font-weight:600;min-height:16px;margin-bottom:10px;"></div>
-          <!-- Vehicle scroll -->
-          <div class="vehicle-scroll" id="vehicleGrid"><!-- JS rendered --></div>
-        </div>
-
-        <!-- Xuất hoá đơn VAT -->
-        <div class="bg-card" style="padding:14px 18px;">
-          <div class="vat-row">
-            <div class="vat-label">
-              <span class="icon">🧾</span>
+          <div class="card-b">
+            <div class="row cust">
               <div>
-                <div class="txt">Xuất hoá đơn VAT</div>
-                <div class="sub">Cộng thêm 15% VAT vào tổng giá</div>
+                <label class="lbl">Tên khách</label>
+                <input class="inp" id="custName" type="text" placeholder="VD: Anh Tuấn, Cty ABC...">
               </div>
-            </div>
-            <label class="toggle-sw">
-              <input type="checkbox" id="vatToggle" onchange="updatePrice()">
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Phụ phí & Dịch vụ -->
-        <div class="bg-card">
-          <div class="bg-card-title">⚡ Phụ phí &amp; Dịch vụ</div>
-          <div id="scList">
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_night" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">🌙 Ban đêm (22h–6h)</div></div>
-              <div class="sc-right">+20% giá cơ bản</div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_peak" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">🚦 Giờ cao điểm (7–9h, 17–19h)</div></div>
-              <div class="sc-right">+15% giá cơ bản</div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_wait" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">⏳ Chờ bốc/dỡ (&gt;2h)</div></div>
-              <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_wait_h" value="0" min="0" placeholder="0" onchange="updatePrice()" style="width:52px;">
-                <span class="sc-unit">h ×</span>
-                <input class="sc-input" type="number" id="sc_wait_n" value="150000" min="0" onchange="updatePrice()" style="width:80px;">
-                <span class="sc-unit">đ/h</span>
+              <div>
+                <label class="lbl">Số điện thoại</label>
+                <input class="inp" id="custPhone" type="tel" placeholder="0901 234 567">
               </div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_port" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">⚓ Phí vào cảng / bến bãi</div></div>
-              <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_port_v" value="200000" min="0" onchange="updatePrice()" style="width:95px;">
-                <span class="sc-unit">đ</span>
-              </div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_return" onchange="updatePrice()">
-              <div class="sc-label">
-                <div class="sc-name">↩️ Xe rỗng chiều về</div>
-                <div class="sc-desc">Chiều về tính 40% giá cước</div>
-              </div>
-              <div class="sc-right">+40% giá cơ bản</div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_bulky" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">📦 Hàng cồng kềnh</div></div>
-              <div class="sc-right">+20% giá cơ bản</div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_carry" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">💪 Khiêng phụ</div></div>
-              <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_carry_n" value="0" min="0" placeholder="0" onchange="updatePrice()" style="width:50px;">
-                <span class="sc-unit">ng ×</span>
-                <input class="sc-input" type="number" id="sc_carry_v" value="200000" min="0" onchange="updatePrice()" style="width:80px;">
-                <span class="sc-unit">đ/ng</span>
-              </div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_dis" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">🔧 Tháo gỡ đồ đạc</div></div>
-              <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_dis_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;">
-                <span class="sc-unit">đ</span>
-              </div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_asm" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">🔨 Lắp ráp đồ đạc</div></div>
-              <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_asm_v" value="500000" min="0" onchange="updatePrice()" style="width:95px;">
-                <span class="sc-unit">đ</span>
-              </div>
-            </div>
-            <div class="sc-row">
-              <input class="sc-check" type="checkbox" id="sc_floor" onchange="updatePrice()">
-              <div class="sc-label"><div class="sc-name">🏢 Lên tầng (không thang máy)</div></div>
-              <div class="sc-right">
-                <input class="sc-input" type="number" id="sc_floor_n" value="0" min="0" placeholder="0" onchange="updatePrice()" style="width:50px;">
-                <span class="sc-unit">tầng ×</span>
-                <input class="sc-input" type="number" id="sc_floor_v" value="50000" min="0" onchange="updatePrice()" style="width:75px;">
-                <span class="sc-unit">đ/tầng</span>
+              <div>
+                <label class="lbl">Hình thức thanh toán</label>
+                <select class="inp" id="paymentTerm">
+                  <option>Thanh toán ngay</option>
+                  <option>Cọc 30%</option>
+                  <option selected>Sau 30 ngày (công nợ)</option>
+                </select>
               </div>
             </div>
           </div>
-          <button class="sc-add-btn" onclick="addCustomSurcharge()">+ Thêm phụ thu khác</button>
-        </div>
+        </section>
 
-        <!-- Giảm giá -->
-        <div class="bg-card">
-          <div class="bg-card-title">🏷️ Giảm giá cho khách</div>
-          <div class="disc-outer">
-            <div class="disc-tabs">
-              <button class="disc-tab active" id="discPctBtn" onclick="setDiscMode('pct')">% Phần trăm</button>
-              <button class="disc-tab" id="discAmtBtn" onclick="setDiscMode('amt')">₫ Số tiền cố định</button>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-              <div class="disc-input-wrap" style="flex:1;">
-                <input class="form-control" type="number" id="discValue" min="0" step="1" placeholder="0" oninput="updatePrice()">
-                <span class="disc-suffix" id="discUnit">%</span>
-              </div>
-              <div class="disc-preview" id="discPreview">—</div>
-            </div>
-            <input class="form-control" type="text" id="discReason" placeholder="Lý do: khách quen, hợp đồng dài hạn..." style="font-size:12px;color:#374151;">
+        <!-- 2. TUYẾN ĐƯỜNG -->
+        <section class="card" id="cardRoute">
+          <div class="card-h">
+            <span class="step">2</span>
+            <h3>Tuyến & giờ</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardRoute')"><span class="arr">▾</span></button>
           </div>
-        </div>
+          <div class="card-b">
+            <div class="route-grid">
+              <div>
+                <label class="lbl">📍 Điểm đi</label>
+                <input class="inp" id="origin" type="text" placeholder="VD: Quận 1, TP.HCM" value="Quận 1, TP.HCM" oninput="onRouteChange()">
+              </div>
+              <button class="swap-btn" type="button" onclick="swapRoute()" title="Đổi điểm đi/đến">⇄</button>
+              <div>
+                <label class="lbl">🏁 Điểm đến</label>
+                <input class="inp" id="dest" type="text" placeholder="VD: Biên Hoà, Đồng Nai" value="Biên Hoà, Đồng Nai" oninput="onRouteChange()">
+              </div>
+            </div>
+            <div>
+              <label class="lbl">⏰ Giờ xuất phát</label>
+              <input class="inp" type="datetime-local" id="depTime" style="max-width:300px;">
+            </div>
+          </div>
+        </section>
 
-        <!-- Ghi chú -->
-        <div class="bg-card">
-          <div class="bg-card-title">📝 Ghi chú</div>
-          <textarea class="form-control" rows="2" placeholder="Ghi chú cho điều phối viên, tài xế..."></textarea>
-        </div>
+        <!-- 3. HÀNG HOÁ -->
+        <section class="card" id="cardCargo">
+          <div class="card-h">
+            <span class="step">3</span>
+            <h3>Hàng hoá</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardCargo')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="cargo-2col">
+              <!-- Cột trái: Trọng lượng -->
+              <div>
+                <label class="lbl">Trọng lượng</label>
+                <div class="num-wrap">
+                  <input class="inp" type="number" min="0" step="50" id="weight" placeholder="VD: 1500" oninput="calcCargo()">
+                  <span class="suffix">kg</span>
+                </div>
+              </div>
+
+              <!-- Cột phải: Kích thước -->
+              <div>
+                <div class="size-head">
+                  <span class="lbl">Kích thước</span>
+                  <div class="mode-toggle">
+                    <button id="modeDimBtn" class="active" onclick="setCargoMode('dim')">D × R × C</button>
+                    <button id="modeCbmBtn" onclick="setCargoMode('cbm')">m³</button>
+                  </div>
+                </div>
+                <div id="cargoDim" class="size-grid dim">
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargL" placeholder="Dài" oninput="calcCargo()">
+                    <span class="suffix">m</span>
+                  </div>
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargW" placeholder="Rộng" oninput="calcCargo()">
+                    <span class="suffix">m</span>
+                  </div>
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargH" placeholder="Cao" oninput="calcCargo()">
+                    <span class="suffix">m</span>
+                  </div>
+                </div>
+                <div id="cargoCbm" class="size-grid cbm" style="display:none;">
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargCBM" placeholder="VD: 12.5" oninput="calcCargo()">
+                    <span class="suffix">m³</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="cargo-hint" id="cargoHint">📐 Thể tích: <span id="cargoVolVal">0</span> m³ · gợi ý <span id="suggestCount">0</span> loại xe phù hợp</div>
+          </div>
+        </section>
+
+        <!-- 4. CHỌN XE -->
+        <section class="card" id="cardVeh">
+          <div class="card-h">
+            <span class="step">4</span>
+            <h3>Chọn xe <span style="font-size:11px;font-weight:500;color:var(--text-3);text-transform:none;">(nhiều loại)</span></h3>
+            <span class="right" id="suggestHint">Nhập hàng để có gợi ý</span>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardVeh')" style="margin-left:8px;"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="vlist" id="vehicleGrid"></div>
+          </div>
+        </section>
+
+        <!-- 5. PHỤ PHÍ (collapsible) -->
+        <section class="card collapsed" id="cardSurcharge">
+          <div class="card-h">
+            <span class="step">5</span>
+            <h3>Phụ phí <span id="scCountBadge" style="display:none;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:4px;">0</span></h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardSurcharge')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="chip-grid">
+              <label class="chip">
+                <input type="checkbox" id="sc_toll" onchange="updatePrice();syncRow(this)">
+                <span class="t">🛣️ Phí cầu đường</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_toll_v" value="100" min="0" step="10" onchange="updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_port" onchange="updatePrice();syncRow(this)">
+                <span class="t">⚓ Phí cảng/bến</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_port_v" value="200" min="0" step="10" onchange="updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_peak" onchange="updatePrice();syncRow(this)">
+                <span class="t">🚦 Giờ cao điểm</span>
+                <span class="p">+15%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_night" onchange="updatePrice();syncRow(this)">
+                <span class="t">🌙 Ban đêm (22h–6h)</span>
+                <span class="p">+20%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_bulky" onchange="updatePrice();syncRow(this)">
+                <span class="t">📦 Hàng cồng kềnh</span>
+                <span class="p">+20%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_return" onchange="updatePrice();syncRow(this)">
+                <span class="t">↩️ Chở thêm chiều về</span>
+                <span class="p">+40%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_carry" onchange="updatePrice();syncRow(this)">
+                <span class="t">💪 Khiêng <input type="number" class="nin" id="sc_carry_n" value="0" min="0" onchange="updatePrice()" onclick="event.preventDefault()"> ng</span>
+                <span class="p">×200K</span>
+                <input type="hidden" id="sc_carry_v" value="200000">
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_floor" onchange="updatePrice();syncRow(this)">
+                <span class="t">🏢 Lên <input type="number" class="nin" id="sc_floor_n" value="0" min="0" onchange="updatePrice()" onclick="event.preventDefault()"> tầng</span>
+                <span class="p">×50K</span>
+                <input type="hidden" id="sc_floor_v" value="50000">
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_dis" onchange="updatePrice();syncRow(this)">
+                <span class="t">🔧 Tháo gỡ</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_dis_v" value="500" min="0" step="10" onchange="updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_asm" onchange="updatePrice();syncRow(this)">
+                <span class="t">🔨 Lắp ráp</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_asm_v" value="500" min="0" step="10" onchange="updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+            </div>
+
+            <!-- Custom surcharges (user-defined) -->
+            <div id="customScList" class="chip-grid" style="margin-top:7px;"></div>
+            <button type="button" class="qq-btn" style="margin-top:8px;width:100%;border-style:dashed;color:var(--primary);border-color:var(--primary);background:var(--primary-50);font-weight:700;" onclick="addCustomSc()">+ Thêm phụ phí khác</button>
+          </div>
+        </section>
+
+        <!-- Ghi chú (tách riêng) -->
+        <section class="card" id="cardNote">
+          <div class="card-h">
+            <h3>📝 Ghi chú</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardNote')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <input class="inp" id="note" type="text" placeholder="VD: Khách yêu cầu giao trước 17h, có hàng dễ vỡ...">
+          </div>
+        </section>
+
       </div>
 
-      <!-- ══════════ RIGHT PANEL ══════════ -->
-      <div class="right-panel right-panel-col">
+      <!-- ───────── RIGHT: Map (TOP) → Price ───────── -->
+      <div class="qq-right">
 
-        <!-- Map mock -->
-        <div class="bg-card" style="padding:0;overflow:hidden;">
-          <div class="map-mock">
-            <!-- SVG map background + route -->
-            <svg viewBox="0 0 380 220" preserveAspectRatio="xMidYMid slice">
-              <!-- map tiles bg -->
-              <rect width="380" height="220" fill="#e8eef3"/>
-              <!-- roads faint -->
-              <line x1="0" y1="80"  x2="380" y2="80"  stroke="#fff" stroke-width="3" opacity=".5"/>
-              <line x1="0" y1="140" x2="380" y2="140" stroke="#fff" stroke-width="3" opacity=".5"/>
-              <line x1="95"  y1="0" x2="95"  y2="220" stroke="#fff" stroke-width="3" opacity=".5"/>
-              <line x1="200" y1="0" x2="200" y2="220" stroke="#fff" stroke-width="3" opacity=".5"/>
-              <line x1="290" y1="0" x2="290" y2="220" stroke="#fff" stroke-width="3" opacity=".5"/>
-              <!-- water (river) -->
-              <path d="M280,0 Q300,60 275,110 Q260,150 285,220" fill="none" stroke="#b3d4f5" stroke-width="10" opacity=".7"/>
-              <!-- route line shadow -->
-              <path d="M 60,175 C 100,140 160,100 230,70 L 310,45" fill="none" stroke="#1a56db" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".25"/>
-              <!-- route line -->
-              <path id="svgRoute" d="M 60,175 C 100,140 160,100 230,70 L 310,45" fill="none" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-              <!-- origin marker -->
-              <circle cx="60" cy="175" r="7" fill="white" stroke="#1d4ed8" stroke-width="2.5"/>
-              <circle cx="60" cy="175" r="3" fill="#1d4ed8"/>
-              <!-- dest pin -->
-              <circle cx="310" cy="45" r="9" fill="#ef4444"/>
-              <line x1="310" y1="45" x2="310" y2="60" stroke="#ef4444" stroke-width="2.5"/>
-              <circle cx="310" cy="45" r="4" fill="white"/>
+        <!-- Bản đồ lên trên -->
+        <section class="card">
+          <div class="qq-map">
+            <svg viewBox="0 0 360 170" preserveAspectRatio="xMidYMid slice">
+              <rect width="360" height="170" fill="#e8eaed"/>
+              <ellipse cx="60" cy="135" rx="60" ry="34" fill="#c8e6b8"/>
+              <ellipse cx="310" cy="34" rx="50" ry="30" fill="#c8e6b8"/>
+              <line x1="0" y1="85" x2="360" y2="85" stroke="#bdc1c6" stroke-width="8"/>
+              <line x1="0" y1="85" x2="360" y2="85" stroke="#ffffff" stroke-width="5"/>
+              <line x1="180" y1="0" x2="180" y2="170" stroke="#bdc1c6" stroke-width="8"/>
+              <line x1="180" y1="0" x2="180" y2="170" stroke="#ffffff" stroke-width="5"/>
+              <path d="M40,145 C100,125 150,85 200,65 S300,30 330,20" fill="none" stroke="#1a73e8" stroke-width="9" stroke-linecap="round" opacity=".25"/>
+              <path d="M40,145 C100,125 150,85 200,65 S300,30 330,20" fill="none" stroke="#1a73e8" stroke-width="4.5" stroke-linecap="round"/>
+              <circle cx="40" cy="145" r="10" fill="#1a73e8" opacity=".2"/>
+              <circle cx="40" cy="145" r="5.5" fill="#1a73e8" stroke="#fff" stroke-width="2"/>
+              <g transform="translate(330,20)">
+                <path d="M0,3 C0,-9 -10,-13 -10,-19 C-10,-28 10,-28 10,-19 C10,-13 0,-9 0,3 Z" fill="#ea4335" stroke="#b31412" stroke-width="1"/>
+                <circle cx="0" cy="-19" r="3.5" fill="#fff"/>
+              </g>
             </svg>
-            <!-- distance bubble -->
-            <div class="map-bubble dist">
-              <svg width="14" height="14" fill="none" stroke="#1d4ed8" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/><path d="M13 10h4l3 6H13V10z"/></svg>
-              <span id="mapKm">48 km</span>
-              <span style="color:#6b7280;font-weight:400;">· ~</span>
-              <span id="mapTime">55 phút</span>
+            <div class="badge">🗺️ <span id="mapKm">48 km</span> · <span id="mapTime">67 ph</span></div>
+            <div class="stamp">© Demo</div>
+          </div>
+        </section>
+
+        <!-- Card báo giá -->
+        <section class="card">
+          <div class="qq-price-hero">
+            <div class="lbl">💰 Tổng báo giá</div>
+            <div class="val" id="grandTotal">–</div>
+            <div class="sub" id="grandSub">1 xe · đã gồm cầu đường</div>
+          </div>
+
+          <div class="price-rows">
+            <div class="r"><span>Giá cơ bản (10km đầu)</span><span class="v" id="baseFareFlat">–</span></div>
+            <div class="r"><span>+ <span id="kmExtra">38</span> km × <span id="perKmRate">26K</span></span><span class="v" id="baseFareKm">–</span></div>
+            <div class="r" id="multiRow" style="display:none;"><span>× <span id="qtyLabel">1</span> xe</span><span class="v" id="multiFare">–</span></div>
+            <div class="r" id="scTotalRow" style="display:none;"><span>Phụ phí</span><span class="v" id="scTotalAmt">–</span></div>
+            <div class="r subt"><span>Tạm tính</span><span class="v" id="subTotal">–</span></div>
+            <div class="r" id="vatRow" style="display:none;"><span>VAT 15%</span><span class="v" id="vatAmt">–</span></div>
+            <div class="r disc" id="discRow" style="display:none;"><span>Giảm giá</span><span class="v" id="discAmtDisp">–</span></div>
+          </div>
+
+          <div style="padding:8px 14px;border-top:1px solid var(--border-2);">
+            <div class="vat-box" style="padding:8px 11px;gap:10px;">
+              <span class="icon-big" style="font-size:18px;">🧾</span>
+              <div class="info">
+                <div class="t" style="font-size:12.5px;">Xuất hoá đơn VAT</div>
+                <div class="s" style="font-size:10.5px;">Thêm 15% vào tổng báo giá</div>
+              </div>
+              <label class="vat-switch">
+                <input type="checkbox" id="vatToggle" onchange="updatePrice()">
+                <span class="slider"></span>
+              </label>
             </div>
-            <!-- labels -->
-            <div class="map-label origin" id="mapOriginLabel">Quận 1, TP.HCM</div>
-            <div class="map-label dest"   id="mapDestLabel">Biên Hòa, Đồng Nai</div>
-          </div>
-        </div>
-
-        <!-- Chi tiết báo giá -->
-        <div class="bg-card">
-          <div class="bg-card-title">💰 Chi tiết báo giá</div>
-
-          <div class="price-row">
-            <span class="pl">📏 Khoảng cách</span>
-            <span class="pv" id="dispKm">48 km</span>
-          </div>
-          <div class="price-row">
-            <span class="pl" style="flex-direction:column;align-items:flex-start;gap:2px;">
-              <span>🚚 Cước vận chuyển</span>
-              <span id="fareFormula" style="font-size:11px;color:var(--text-muted);font-weight:400;"></span>
-            </span>
-            <span class="pv" id="baseFare">–</span>
-          </div>
-          <div class="price-row" id="tollRow">
-            <span class="pl">🛣️ Phí cầu đường</span>
-            <span class="pv" id="tollAmt">–</span>
-          </div>
-          <div class="price-row return" id="returnRow" style="display:none;">
-            <span class="pl">↩️ Chiều về (40%)</span>
-            <span class="pv" id="returnAmt">–</span>
-          </div>
-          <div class="price-row" id="multiRow" style="display:none;">
-            <span class="pl">✕ <span id="qtyLabel">1</span> xe</span>
-            <span class="pv" id="multiFare">–</span>
-          </div>
-          <div class="price-row" id="scTotalRow" style="display:none;">
-            <span class="pl">⚡ Phụ phí dịch vụ</span>
-            <span class="pv" id="scTotalAmt">–</span>
           </div>
 
-          <div class="price-divider"></div>
-
-          <div class="price-row">
-            <span class="pl">Tạm tính</span>
-            <span class="pv" id="subTotal">–</span>
-          </div>
-          <div class="price-row" id="vatRow" style="display:none;">
-            <span class="pl">🧾 VAT 15%</span>
-            <span class="pv" id="vatAmt">–</span>
-          </div>
-          <div class="price-row discount" id="discRow" style="display:none;">
-            <span class="pl" style="color:#16a34a;">🏷️ Giảm giá</span>
-            <span class="pv" id="discAmtDisp" style="color:#16a34a;">–</span>
+          <div class="disc-row">
+            <span class="lbl">🏷️ Bớt cho khách</span>
+            <div class="toggle">
+              <button id="discPctBtn" class="active" onclick="setDiscMode('pct')">%</button>
+              <button id="discAmtBtn" onclick="setDiscMode('amt')">₫</button>
+            </div>
+            <input type="number" id="discValue" min="0" step="1" placeholder="0" oninput="updatePrice()">
+            <span id="discUnit" style="font-size:12px;font-weight:700;color:var(--green);">%</span>
           </div>
 
-          <div class="price-divider"></div>
+          <div class="qq-actions">
+            <button class="primary" onclick="createOrderAndDispatch()">🚛 Tạo đơn & điều phối xe</button>
+          </div>
+        </section>
 
-          <div class="price-total-row">
-            <span class="price-total-lbl">TỔNG BÁO GIÁ</span>
-            <span class="price-total-val" id="grandTotal">–</span>
-          </div>
-
-          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
-            <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;" onclick="createOrder()">✅ Tạo đơn hàng</button>
-            <button class="btn btn-secondary" style="width:100%;" onclick="copyQuote()">📋 Sao chép báo giá</button>
-          </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.7;border-top:1px solid #f1f5f9;padding-top:8px;">
-            * Báo giá có hiệu lực 24 giờ<br>
-            * Phụ phí phát sinh sẽ thông báo thêm
-          </div>
-        </div>
       </div>
-
-    </div><!-- .baogia-wrap -->
+    </div>
   </main>
 </div>
 
 <script src="assets/app.js"></script>
 <script>
-/* ───────────────────────────────────────────────
-   DATA
-─────────────────────────────────────────────── */
 const VEHICLES = [
-  { id:'v1t',   label:'1 Tấn',    tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
-  { id:'v15t',  label:'1.5 Tấn',  tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
-  { id:'v2ta',  label:'2T (4.2m)',tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
-  { id:'v2tb',  label:'2T (6.0m)',tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
-  { id:'v25t',  label:'2.5 Tấn',  tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
-  { id:'v35ta', label:'3.5T 4.5m',tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
-  { id:'v35tb', label:'3.5T 6.0m',tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
-  { id:'v5t',   label:'5 Tấn',    tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
-  { id:'v8t',   label:'8 Tấn',    tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
-  { id:'v10t',  label:'10 Tấn',   tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
-  { id:'v15t2', label:'15 Tấn',   tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
+  { id:'v1t',   label:'1 Tấn',     tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
+  { id:'v15t',  label:'1.5 Tấn',   tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
+  { id:'v2ta',  label:'2T (4.2m)', tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
+  { id:'v2tb',  label:'2T (6.0m)', tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
+  { id:'v25t',  label:'2.5 Tấn',   tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
+  { id:'v35ta', label:'3.5T 4.5m', tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
+  { id:'v35tb', label:'3.5T 6.0m', tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
+  { id:'v5t',   label:'5 Tấn',     tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
+  { id:'v8t',   label:'8 Tấn',     tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
+  { id:'v10t',  label:'10 Tấn',    tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
+  { id:'v15t2', label:'15 Tấn',    tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
 ];
 
-/* ───────────────────────────────────────────────
-   STATE
-─────────────────────────────────────────────── */
-let sel = VEHICLES[7];  // default 5T
+let cart = {};        // { vehId: qty }
+let primaryId = null; // id used for default 'sel' when nothing picked
 let fitIds = [];
 let simKm = 48;
+let cargoMode = 'dim';
+let customScs = [];   // { id, name, amount, on }
+let _csSeq = 0;
 
-/* ───────────────────────────────────────────────
-   VEHICLE RENDER
-─────────────────────────────────────────────── */
+function cartEntries() { return Object.entries(cart).filter(([id,q]) => q > 0); }
+function cartTotalQty() { return cartEntries().reduce((s,[,q])=>s+q,0); }
+
+function fmt(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+
+function calcVehiclePrice(v, km) {
+  return v.priceBase + Math.max(0, km - 10) * v.pricePerKm;
+}
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+function setCargoMode(m) {
+  cargoMode = m;
+  document.getElementById('modeDimBtn').classList.toggle('active', m==='dim');
+  document.getElementById('modeCbmBtn').classList.toggle('active', m==='cbm');
+  document.getElementById('cargoDim').style.display = m==='dim' ? 'grid' : 'none';
+  document.getElementById('cargoCbm').style.display = m==='cbm' ? 'grid' : 'none';
+  calcCargo();
+}
+
+function getCargoVol() {
+  if (cargoMode === 'cbm') {
+    return parseFloat(document.getElementById('cargCBM').value) || 0;
+  }
+  const l = parseFloat(document.getElementById('cargL').value) || 0;
+  const w = parseFloat(document.getElementById('cargW').value) || 0;
+  const h = parseFloat(document.getElementById('cargH').value) || 0;
+  return l * w * h;
+}
+
 function renderVehicles() {
   const g = document.getElementById('vehicleGrid');
+  const wt = (parseFloat(document.getElementById('weight').value) || 0) / 1000;
+  const vol = getCargoVol();
+  const hasInput = wt > 0 || vol > 0;
+  const km10 = Math.max(0, simKm - 10);
   g.innerHTML = VEHICLES.map(v => {
     const isFit = fitIds.includes(v.id);
-    const isSel = v.id === sel.id;
-    return `<div class="vcard${isSel?' sel':''}${isFit?' fit':''}" onclick="pickVehicle('${v.id}')">
-      ${isFit ? '<span class="vcard-badge">✓ Phù hợp</span>' : ''}
-      <div class="vcard-icon">${v.icon}</div>
-      <div class="vcard-name">${v.label}</div>
-      <div class="vcard-dim">${v.dim} m</div>
-      <div class="vcard-price">${v.priceBase.toLocaleString('vi-VN')}đ<br><span style="font-size:10px;">(10km) +${v.pricePerKm.toLocaleString('vi-VN')}đ/km</span></div>
+    const qty = cart[v.id] || 0;
+    const isSel = qty > 0;
+    const isUnfit = hasInput && !isFit;
+    const tot = calcVehiclePrice(v, simKm);
+    return `<div class="vcard${isSel?' sel':''}${isFit?' fit':''}${isUnfit?' unfit':''}" onclick="addVehicle(event,'${v.id}')">
+      <div class="top">
+        <span class="icon">${v.icon}</span>
+        <span class="name">${v.label}</span>
+        ${isFit ? '<span class="badge-fit">Phù hợp</span>' : ''}
+      </div>
+      <div class="specs">${v.dim} · ${v.vol}m³ · ${v.tons}T</div>
+      <div class="qrow" onclick="event.stopPropagation()">
+        <button class="qbtn" type="button" onclick="changeVehQty('${v.id}',-1)">−</button>
+        <span class="qval${qty===0?' zero':''}">${qty}</span>
+        <button class="qbtn" type="button" onclick="changeVehQty('${v.id}',1)">+</button>
+      </div>
     </div>`;
   }).join('');
 }
-
-function pickVehicle(id) {
-  sel = VEHICLES.find(v => v.id === id) || sel;
+function addVehicle(e, id) { changeVehQty(id, (cart[id]||0)===0 ? 1 : 0); }
+function changeVehQty(id, d) {
+  if (d === 0) return;
+  const cur = cart[id] || 0;
+  const nxt = Math.max(0, Math.min(20, cur + d));
+  if (nxt === 0) delete cart[id]; else cart[id] = nxt;
   renderVehicles();
   updatePrice();
 }
 
-/* ───────────────────────────────────────────────
-   CARGO → SUGGEST VEHICLES
-─────────────────────────────────────────────── */
+// ===== Custom surcharges =====
+function renderCustomScs() {
+  const wrap = document.getElementById('customScList');
+  if (!wrap) return;
+  wrap.innerHTML = customScs.map(c => `
+    <label class="chip${c.on?' on':''}" style="position:relative;">
+      <input type="checkbox" ${c.on?'checked':''} onchange="toggleCustomSc('${c.id}', this.checked)">
+      <input type="text" class="inp" style="flex:1;height:26px;padding:2px 8px;font-size:12px;" value="${c.name.replace(/"/g,'&quot;')}" placeholder="Tên phụ phí" oninput="setCustomScName('${c.id}', this.value)" onclick="event.preventDefault()">
+      <span class="nin-wrap"><input type="number" class="nin w" min="0" step="10" value="${c.amount}" placeholder="Số" oninput="setCustomScAmount('${c.id}', this.value)" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+      <button type="button" title="Xoá" onclick="removeCustomSc(event,'${c.id}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;font-weight:800;padding:0 2px;">×</button>
+    </label>
+  `).join('');
+}
+function addCustomSc() {
+  customScs.push({ id: 'cs' + (++_csSeq), name: '', amount: 0, on: true });
+  document.getElementById('cardSurcharge').classList.remove('collapsed');
+  renderCustomScs();
+  updateScBadge();
+  updatePrice();
+}
+function removeCustomSc(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  customScs = customScs.filter(c => c.id !== id);
+  renderCustomScs();
+  updateScBadge();
+  updatePrice();
+}
+function toggleCustomSc(id, on) {
+  const c = customScs.find(x => x.id === id); if (!c) return;
+  c.on = on;
+  renderCustomScs();
+  updateScBadge();
+  updatePrice();
+}
+function setCustomScAmount(id, v) {
+  const c = customScs.find(x => x.id === id); if (!c) return;
+  c.amount = parseFloat(v) || 0;
+  updateScBadge();
+  updatePrice();
+}
+function setCustomScName(id, v) {
+  const c = customScs.find(x => x.id === id); if (!c) return;
+  c.name = v;
+}
+
 function calcCargo() {
-  const l = parseFloat(document.getElementById('cargL').value) || 0;
-  const w = parseFloat(document.getElementById('cargW').value) || 0;
-  const h = parseFloat(document.getElementById('cargH').value) || 0;
-  const wt = parseFloat(document.getElementById('weight').value) || 0;
-  const vol = l * w * h;
-  const hint = document.getElementById('cargoHint');
-  if (vol > 0) hint.textContent = `📐 Thể tích: ${vol.toFixed(2)} m³`;
-  else if (wt > 0) hint.textContent = '';
-  else { hint.textContent = ''; }
+  const vol = getCargoVol();
+  const wt = (parseFloat(document.getElementById('weight').value) || 0) / 1000;
 
   fitIds = VEHICLES
     .filter(v => (vol <= 0 || v.vol >= vol) && (wt <= 0 || v.tons >= wt))
     .map(v => v.id);
 
-  document.getElementById('suggestHint').style.display = fitIds.length ? '' : 'none';
-  if (fitIds.length) {
-    const best = VEHICLES.find(v => fitIds.includes(v.id));
-    if (best) sel = best;
+  const hint = document.getElementById('cargoHint');
+  const hintEl = document.getElementById('suggestHint');
+  if (vol > 0 || wt > 0) {
+    hint.style.display = 'block';
+    document.getElementById('cargoVolVal').textContent = vol.toFixed(2);
+    document.getElementById('suggestCount').textContent = fitIds.length;
+    if (fitIds.length) {
+      hintEl.textContent = `✅ ${fitIds.length} xe phù hợp`;
+      hintEl.style.color = 'var(--green)';
+    } else {
+      hintEl.textContent = '⚠️ Không có xe phù hợp';
+      hintEl.style.color = 'var(--amber)';
+    }
+  } else {
+    hint.style.display = 'none';
+    hintEl.textContent = 'Nhập hàng để có gợi ý';
+    hintEl.style.color = 'var(--text-3)';
   }
   renderVehicles();
   updatePrice();
 }
 
-/* ───────────────────────────────────────────────
-   ROUTE
-─────────────────────────────────────────────── */
 function onRouteChange() {
   const o = document.getElementById('origin').value.trim();
   const d = document.getElementById('dest').value.trim();
-  // simulate km from text length (demo only)
-  simKm = Math.max(5, Math.min(300, (o.length + d.length) * 2 + 10));
-  document.getElementById('mapOriginLabel').textContent = o || 'Điểm đi';
-  document.getElementById('mapDestLabel').textContent   = d || 'Điểm đến';
-  document.getElementById('mapKm').textContent   = simKm + ' km';
-  document.getElementById('mapTime').textContent  = Math.round(simKm * 1.4) + ' phút';
-  document.getElementById('dispKm').textContent   = simKm + ' km';
-  document.getElementById('routeDistBadge').textContent = simKm + ' km';
+  let h = 0;
+  const s = (o + '|' + d).toLowerCase();
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  simKm = !o || !d ? 0 : Math.abs(h % 250) + 8;
+  const dk2 = document.getElementById('distKm2'); if (dk2) dk2.textContent = simKm;
+  document.getElementById('mapKm').textContent = simKm + ' km';
+  document.getElementById('mapTime').textContent = Math.round(simKm * 1.4) + ' ph';
+  renderVehicles();
   updatePrice();
 }
 
 function swapRoute() {
   const o = document.getElementById('origin');
   const d = document.getElementById('dest');
-  [o.value, d.value] = [d.value, o.value];
+  const tmp = o.value; o.value = d.value; d.value = tmp;
   onRouteChange();
 }
 
-/* ───────────────────────────────────────────────
-   SURCHARGES
-─────────────────────────────────────────────── */
+function syncRow(cb) {
+  const row = cb.closest('.chip');
+  if (row) row.classList.toggle('on', cb.checked);
+  updateScBadge();
+}
+
+function updateScBadge() {
+  const ids = ['sc_night','sc_peak','sc_return','sc_bulky','sc_port','sc_toll','sc_carry','sc_floor','sc_dis','sc_asm'];
+  let n = ids.filter(i => { const el=document.getElementById(i); return el && el.checked; }).length;
+  n += customScs.filter(c => c.on && c.amount > 0).length;
+  const b = document.getElementById('scCountBadge');
+  b.textContent = n;
+  b.style.display = n > 0 ? 'inline-block' : 'none';
+}
+
 function getSurcharges(base) {
   let total = 0;
-  const get  = id => document.getElementById(id);
-  const on   = id => get(id) && get(id).checked;
-  const val  = id => parseFloat((get(id)||{}).value || 0) || 0;
-
+  const get = id => document.getElementById(id);
+  const on  = id => get(id) && get(id).checked;
+  const val = id => parseFloat((get(id)||{}).value || 0) || 0;
   if (on('sc_night'))  total += base * 0.20;
   if (on('sc_peak'))   total += base * 0.15;
-  if (on('sc_wait'))   total += val('sc_wait_n')  * val('sc_wait_h');
-  if (on('sc_port'))   total += val('sc_port_v');
+  if (on('sc_port'))   total += val('sc_port_v') * 1000;
+  if (on('sc_toll'))   total += val('sc_toll_v') * 1000;
   if (on('sc_return')) total += base * 0.40;
   if (on('sc_bulky'))  total += base * 0.20;
   if (on('sc_carry'))  total += val('sc_carry_v') * val('sc_carry_n');
-  if (on('sc_dis'))    total += val('sc_dis_v');
-  if (on('sc_asm'))    total += val('sc_asm_v');
+  if (on('sc_dis'))    total += val('sc_dis_v') * 1000;
+  if (on('sc_asm'))    total += val('sc_asm_v') * 1000;
   if (on('sc_floor'))  total += val('sc_floor_v') * val('sc_floor_n');
-
-  // custom rows
-  document.querySelectorAll('.sc-custom-check').forEach((cb,i)=>{
-    if (cb.checked) {
-      const inp = document.querySelectorAll('.sc-custom-val')[i];
-      if (inp) total += parseFloat(inp.value) || 0;
-    }
-  });
+  for (const c of customScs) { if (c.on) total += (c.amount || 0) * 1000; }
   return Math.round(total);
 }
-
 function setDiscMode(mode) {
   const isPct = mode === 'pct';
   document.getElementById('discPctBtn').classList.toggle('active', isPct);
   document.getElementById('discAmtBtn').classList.toggle('active', !isPct);
-  document.getElementById('discUnit').textContent = isPct ? '%' : '₫';
+  document.getElementById('discUnit').textContent = isPct ? '%' : 'K';
   const inp = document.getElementById('discValue');
   inp.max = isPct ? 100 : '';
-  inp.step = isPct ? 1 : 10000;
-  inp.placeholder = isPct ? 'VD: 5' : 'VD: 100000';
+  inp.step = isPct ? 1 : 10;
   inp.value = '';
   updatePrice();
 }
 
-function addCustomSurcharge() {
-  const list = document.getElementById('scList');
-  const row = document.createElement('div');
-  row.className = 'sc-row';
-  row.innerHTML = `
-    <input class="sc-check sc-custom-check" type="checkbox" checked onchange="updatePrice()">
-    <div class="sc-label"><input type="text" class="form-control" placeholder="Tên phụ thu..." style="border:none;padding:0;font-size:13px;background:transparent;" oninput="updatePrice()"></div>
-    <div class="sc-right">
-      <input class="sc-input sc-custom-val" type="number" value="0" min="0" onchange="updatePrice()" style="width:100px;"> đ
-      <button onclick="this.closest('.sc-row').remove();updatePrice();" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;margin-left:4px;">✕</button>
-    </div>`;
-  list.appendChild(row);
-}
-
-/* ───────────────────────────────────────────────
-   PRICE CALCULATION
-─────────────────────────────────────────────── */
-function fmt(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
-
 function updatePrice() {
-  const km    = simKm;
-  const base  = sel.priceBase + Math.max(0, km - 10) * sel.pricePerKm;
-  const toll  = sel.toll;
-  const isRet = document.getElementById('sc_return') && document.getElementById('sc_return').checked;
-  const qty   = Math.max(1, parseInt(document.getElementById('vehicleQty').value) || 1);
-  const scAmt = getSurcharges(base);
-  const retAmt= isRet ? Math.round(base * 0.4) : 0;
-  const perVeh= base + toll + scAmt;
-  const beforeMulti = perVeh * qty;
-  const subT  = beforeMulti;
+  const km = simKm;
+  const km10 = Math.max(0, km - 10);
+  const entries = cartEntries();
+
+  let baseFlatTotal = 0, baseKmTotal = 0, baseTotal = 0, scTotal = 0, subT = 0, totalQty = 0;
+  const lines = [];
+
+  // Use the first picked vehicle (or first VEHICLES) for the displayed per-km rate
+  const refV = entries.length ? VEHICLES.find(x=>x.id===entries[0][0]) : VEHICLES[5];
+  document.getElementById('kmExtra').textContent = km10;
+  document.getElementById('perKmRate').textContent = refV ? (refV.pricePerKm/1000).toFixed(0)+'K' : '–';
+
+  if (entries.length === 0) {
+    document.getElementById('baseFareFlat').textContent = '–';
+    document.getElementById('baseFareKm').textContent  = '–';
+    document.getElementById('multiRow').style.display = 'none';
+    document.getElementById('scTotalRow').style.display = 'none';
+    document.getElementById('subTotal').textContent   = '–';
+    document.getElementById('vatRow').style.display   = 'none';
+    document.getElementById('discRow').style.display  = 'none';
+    document.getElementById('grandTotal').textContent = 'Chọn xe';
+    document.getElementById('grandSub').textContent   = `${km} km · chưa chọn xe`;
+    return;
+  }
+
+  for (const [id, qty] of entries) {
+    const v = VEHICLES.find(x => x.id === id);
+    if (!v) continue;
+    const baseFlat = v.priceBase;
+    const baseKm   = km10 * v.pricePerKm;
+    const base     = baseFlat + baseKm;
+    const scV      = getSurcharges(base);
+    const perV     = base + scV;
+    baseFlatTotal += baseFlat * qty;
+    baseKmTotal   += baseKm   * qty;
+    baseTotal     += base * qty;
+    scTotal       += scV  * qty;
+    subT          += perV * qty;
+    totalQty      += qty;
+    lines.push(`${qty}× ${v.label}`);
+  }
+
   const hasVAT  = document.getElementById('vatToggle').checked;
   const vatAmt  = hasVAT ? Math.round(subT * 0.15) : 0;
   const afterVAT= subT + vatAmt;
-  // discount
   const discV   = parseFloat(document.getElementById('discValue').value) || 0;
   const isPctDisc = document.getElementById('discPctBtn').classList.contains('active');
-  const discAmt = discV > 0 ? (isPctDisc ? Math.round(afterVAT * Math.min(discV,100) / 100) : Math.min(discV, afterVAT)) : 0;
+  const discAmt = discV > 0 ? (isPctDisc ? Math.round(afterVAT * Math.min(discV,100) / 100) : Math.min(discV * 1000, afterVAT)) : 0;
   const grand   = afterVAT - discAmt;
 
-  // fare formula string
-  document.getElementById('fareFormula').textContent =
-    `${sel.priceBase.toLocaleString('vi-VN')}đ (10km đầu) + ${Math.max(0,km-10)}km × ${sel.pricePerKm.toLocaleString('vi-VN')}đ`;
-
-  document.getElementById('baseFare').textContent  = fmt(base);
-  document.getElementById('tollAmt').textContent   = fmt(toll);
-  document.getElementById('returnRow').style.display = isRet ? '' : 'none';
-  document.getElementById('returnAmt').textContent  = fmt(retAmt);
-  document.getElementById('multiRow').style.display = qty > 1 ? '' : 'none';
-  document.getElementById('qtyLabel').textContent   = qty;
-  document.getElementById('multiFare').textContent  = fmt(perVeh) + '/xe';
-  document.getElementById('scTotalRow').style.display = scAmt > 0 ? '' : 'none';
-  document.getElementById('scTotalAmt').textContent  = fmt(scAmt);
+  document.getElementById('baseFareFlat').textContent  = fmt(baseFlatTotal);
+  document.getElementById('baseFareKm').textContent    = fmt(baseKmTotal);
+  document.getElementById('multiRow').style.display = totalQty > 1 || entries.length > 1 ? '' : 'none';
+  document.getElementById('qtyLabel').textContent   = totalQty;
+  document.getElementById('multiFare').textContent  = entries.length > 1 ? `${entries.length} loại` : `${totalQty} xe`;
+  document.getElementById('scTotalRow').style.display = scTotal > 0 ? '' : 'none';
+  document.getElementById('scTotalAmt').textContent  = fmt(scTotal);
   document.getElementById('subTotal').textContent   = fmt(subT);
   document.getElementById('vatRow').style.display   = hasVAT ? '' : 'none';
   document.getElementById('vatAmt').textContent     = fmt(vatAmt);
   document.getElementById('discRow').style.display  = discAmt > 0 ? '' : 'none';
   document.getElementById('discAmtDisp').textContent= discAmt > 0 ? '- ' + fmt(discAmt) : '–';
-  document.getElementById('discPreview').textContent= discAmt > 0 ? '- ' + fmt(discAmt) : (discV > 0 ? '...' : '—');
   document.getElementById('grandTotal').textContent = fmt(grand);
-
-  // map bubble
-  document.getElementById('mapKm').textContent  = km + ' km';
-  document.getElementById('mapTime').textContent = Math.round(km * 1.4) + ' phút';
-  document.getElementById('dispKm').textContent  = km + ' km';
+  document.getElementById('grandSub').textContent   = `${lines.join(' + ')} · ${km} km`;
 }
 
-function changeQty(d) {
-  const inp = document.getElementById('vehicleQty');
-  inp.value = Math.max(1, Math.min(20, (parseInt(inp.value)||1) + d));
-  updatePrice();
+function vehSummary() {
+  const e = cartEntries();
+  if (!e.length) return 'Chưa chọn xe';
+  return e.map(([id,q]) => {
+    const v = VEHICLES.find(x => x.id === id);
+    return `${q}× ${v ? v.label : id}`;
+  }).join(' + ');
 }
-
 function copyQuote() {
   const g = document.getElementById('grandTotal').textContent;
   const o = document.getElementById('origin').value;
   const de= document.getElementById('dest').value;
-  const txt = `Báo giá vận chuyển VanChuyển Pro\n${o} → ${de}\nLoại xe: ${sel.label}\nTổng: ${g}`;
-  navigator.clipboard.writeText(txt).then(()=>alert('Đã sao chép báo giá!')).catch(()=>alert(txt));
+  const txt = `Báo giá VanChuyển Pro\n${o} → ${de} (${simKm} km)\nXe: ${vehSummary()}\nTổng: ${g}`;
+  navigator.clipboard.writeText(txt).then(()=>alert('Đã sao chép!')).catch(()=>alert(txt));
+}
+function clearForm() { if(confirm('Xoá toàn bộ form?')) location.reload(); }
+function createOrder() { window.location.href = 'm1-don-hang.html'; }
+function dispatchVehicle() { window.location.href = 'm2-dieu-phoi.html'; }
+function createOrderAndDispatch() { window.location.href = 'm2-dieu-phoi.html'; }
+function sendQuote() {
+  const g  = document.getElementById('grandTotal').textContent;
+  const o  = document.getElementById('origin').value  || 'Điểm đi';
+  const de = document.getElementById('dest').value    || 'Điểm đến';
+  const txt = `🚚 *Báo giá – VanChuyển Pro*\n📍 ${o} → ${de}\n📏 ${simKm} km · 🚛 ${vehSummary()}\n💰 *Tổng: ${g}*\n_Hiệu lực 24h. LH xác nhận._`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
 }
 
-function clearForm() { if(confirm('Xóa toàn bộ form?')) location.reload(); }
-function createOrder() { window.location.href = 'm1-don-hang.html'; }
-
-// ── init ──
+cart = { 'v35ta': 1 };
 renderVehicles();
 onRouteChange();
+const _dt = document.getElementById('depTime');
+if (_dt) {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  _dt.value = d.toISOString().slice(0,16);
+}
 </script>
 </body>
 </html>

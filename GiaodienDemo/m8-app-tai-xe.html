@@ -9,6 +9,14 @@
     .app-preview-area {
       display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap;
     }
+    @media (max-width: 900px) {
+      .phone-frame { width: 100%; max-width: 360px; margin: 0 auto; }
+      .info-panel { min-width: unset; width: 100%; }
+      .feature-list { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .feature-list { grid-template-columns: 1fr; }
+    }
     /* Phone frame */
     .phone-frame {
       width: 320px; flex-shrink: 0;
@@ -78,6 +86,7 @@
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-inner">
@@ -124,6 +133,9 @@
 
 <div class="main-wrapper">
   <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
     <div class="topbar-breadcrumb">
       <span class="parent">Module 8</span><span class="sep">›</span><span class="current">App tài xế – Mobile Preview</span>
     </div>
@@ -294,5 +306,6 @@
     </div>
   </main>
 </div>
+<script src="assets/app.js"></script>
 </body>
 </html>

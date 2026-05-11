@@ -16,6 +16,7 @@
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-inner">
@@ -62,6 +63,9 @@
 
 <div class="main-wrapper">
   <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
     <div class="topbar-breadcrumb">
       <span class="parent">Module 1</span><span class="sep">›</span><span class="current">Khách hàng</span>
     </div>
@@ -119,7 +123,7 @@
     </div>
 
     <!-- Customer grid -->
-    <div id="customerGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+    <div id="customerGrid" class="cards-grid">
       <!-- Card 1 -->
       <div class="customer-card">
         <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
@@ -253,6 +257,7 @@
     </div>
   </main>
 </div>
+<script src="assets/app.js"></script>
 <script>
   function setView(v) { console.log('Switch to', v, 'view'); }
 </script>

@@ -24,6 +24,7 @@
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -73,6 +74,9 @@
 <!-- MAIN -->
 <div class="main-wrapper">
   <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
     <div class="topbar-breadcrumb">
       <span class="parent">VanChuyển Pro</span><span class="sep">›</span>
       <span class="current">Dashboard</span>
@@ -319,5 +323,6 @@
 
   </main>
 </div>
+<script src="assets/app.js"></script>
 </body>
 </html>

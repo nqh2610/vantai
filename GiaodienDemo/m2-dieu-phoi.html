@@ -8,6 +8,8 @@
   <style>
     .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
     .board-col { background: #f8fafc; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    @media (max-width: 1024px) { .board { grid-template-columns: 1fr; } .driver-panel { width: 100%; } }
+    @media (max-width: 768px) { .board { overflow-x: auto; display: flex; gap: 12px; } .board-col { min-width: 270px; } }
     .board-col-head {
       padding: 11px 14px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
@@ -39,6 +41,7 @@
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-inner">
@@ -85,6 +88,9 @@
 
 <div class="main-wrapper">
   <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
     <div class="topbar-breadcrumb">
       <span class="parent">Module 2</span><span class="sep">›</span><span class="current">Điều phối chuyến xe</span>
     </div>
@@ -328,5 +334,6 @@
     </div>
   </main>
 </div>
+<script src="assets/app.js"></script>
 </body>
 </html>

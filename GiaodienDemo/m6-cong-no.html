@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Công nợ khách hàng – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* Stat bar */
+    .stat-bar {
+      display:grid; grid-template-columns:repeat(5,1fr); gap:8px;
+      background:white; border:1px solid var(--border); border-radius:10px;
+      padding:10px 12px; margin-bottom:14px;
+    }
+    .stat-pill { display:flex; align-items:center; gap:9px; padding:4px 8px; border-radius:8px; }
+    .stat-pill .ico { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .stat-pill .meta { min-width:0; }
+    .stat-pill .lbl { font-size:11px; color:var(--text-muted); font-weight:600; line-height:1.1; }
+    .stat-pill .val { font-size:14px; font-weight:800; color:var(--text); margin-top:2px; letter-spacing:-0.01em; }
+    .stat-pill .sub { font-size:10.5px; color:var(--text-secondary); margin-top:1px; }
+
+    /* Toolbar */
+    .toolbar {
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      background:white; border:1px solid var(--border); border-radius:10px;
+      padding:10px 12px; margin-bottom:14px;
+    }
+    .toolbar .grow { flex:1; min-width:200px; }
+    .toolbar input.search, .toolbar select {
+      width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+      font-family:inherit; font-size:13px; background:white;
+    }
+    .month-pick { display:flex; align-items:center; gap:4px; }
+    .month-pick button { width:30px; height:32px; border:1px solid var(--border); background:white; border-radius:6px; cursor:pointer; font-size:12px; color:var(--text-secondary); }
+    .month-pick button:hover { background:#f1f5f9; }
+    .month-pick .lbl { padding:0 10px; font-weight:700; font-size:13px; min-width:120px; text-align:center; }
+
+    .filter-tabs { display:inline-flex; background:#f1f5f9; padding:3px; border-radius:8px; gap:2px; }
+    .filter-tabs button {
+      border:none; background:transparent; padding:6px 12px; font-size:12.5px; font-weight:600;
+      color:var(--text-secondary); border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:5px;
+    }
+    .filter-tabs button.active { background:white; color:var(--primary); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+    .filter-tabs .pill {
+      background:#fee2e2; color:#dc2626;
+      padding:1px 6px; border-radius:8px; font-size:10px; font-weight:800;
+    }
+    .filter-tabs button.active .pill.warn { background:#fef3c7; color:#92400e; }
+
+    /* Customer table */
+    .data-table tr.row-cust { cursor:pointer; transition:background .12s; }
+    .data-table tr.row-cust:hover { background:#f8fafc; }
+    .data-table tr.row-cust.is-open { background:#eef2ff !important; }
+    .cust-name { font-weight:700; font-size:13px; }
+    .cust-meta { font-size:11px; color:var(--text-muted); margin-top:1px; }
+
+    .progress {
+      width:140px; height:8px; border-radius:4px; background:#fee2e2; overflow:hidden;
+      display:inline-block; vertical-align:middle;
+    }
+    .progress-fill { height:100%; background:linear-gradient(90deg, #16a34a, #22c55e); }
+    .progress.full .progress-fill { background:#16a34a; }
+    .progress-lbl { font-size:11px; color:var(--text-muted); margin-left:6px; }
+
+    .aging { display:flex; gap:3px; align-items:center; }
+    .aging-cell {
+      font-size:10px; font-weight:700; padding:2px 5px; border-radius:4px;
+      background:#f1f5f9; color:var(--text-muted); white-space:nowrap;
+    }
+    .aging-cell.warn { background:#fef3c7; color:#92400e; }
+    .aging-cell.bad  { background:#fee2e2; color:#dc2626; }
+
+    .row-actions { display:flex; gap:4px; flex-wrap:nowrap; justify-content:flex-end; }
+
+    /* Drawer */
+    .drawer-overlay {
+      position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:90;
+      opacity:0; visibility:hidden; transition:opacity .2s, visibility .2s;
+    }
+    .drawer-overlay.show { opacity:1; visibility:visible; }
+    .drawer {
+      position:fixed; top:0; right:0; bottom:0; width:540px; max-width:100%;
+      background:#f8fafc; z-index:91; box-shadow:-8px 0 30px rgba(15,23,42,0.18);
+      transform:translateX(100%); transition:transform .25s ease-out;
+      display:flex; flex-direction:column;
+    }
+    .drawer.show { transform:translateX(0); }
+    .drawer-head {
+      padding:14px 18px; background:white; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:12px;
+    }
+    .drawer-head .av { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0; }
+    .drawer-head .nm { font-weight:800; font-size:15px; }
+    .drawer-head .meta { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+    .drawer-close { margin-left:auto; width:30px; height:30px; border:none; border-radius:8px; background:#f1f5f9; cursor:pointer; color:var(--text-secondary); font-size:16px; }
+    .drawer-close:hover { background:#fee2e2; color:#dc2626; }
+
+    .drawer-body { flex:1; overflow-y:auto; padding:14px 16px; }
+    .dr-section { background:white; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:12px; }
+    .dr-section-title { font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+
+    .dr-total {
+      background:linear-gradient(135deg, #b91c1c, #dc2626); color:white; border:none; padding:16px;
+    }
+    .dr-total.paid { background:linear-gradient(135deg, #15803d, #16a34a); }
+    .dr-total .lbl { font-size:11px; color:rgba(255,255,255,0.85); font-weight:600; }
+    .dr-total .val { font-size:26px; font-weight:800; margin-top:4px; letter-spacing:-0.02em; }
+    .dr-total .meta { font-size:11.5px; color:rgba(255,255,255,0.9); margin-top:4px; }
+    .dr-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .dr-stat { background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:8px 10px; }
+    .dr-stat .l { font-size:10.5px; color:rgba(255,255,255,0.85); }
+    .dr-stat .v { font-size:14px; font-weight:800; margin-top:2px; }
+
+    /* Invoice / payment rows */
+    .inv-row {
+      display:grid; grid-template-columns:auto 1fr auto auto; gap:10px;
+      align-items:center; padding:10px; border:1px solid var(--border); border-radius:8px;
+      margin-bottom:6px; background:#f8fafc; font-size:12.5px;
+    }
+    .inv-row .code { font-weight:800; color:var(--primary); font-size:12px; }
+    .inv-row .route { font-weight:700; color:var(--text); margin-top:2px; }
+    .inv-row .day { font-size:10.5px; color:var(--text-muted); margin-top:2px; }
+    .inv-row .amt { text-align:right; font-weight:800; }
+    .inv-row .amt .due { color:#dc2626; }
+    .inv-row .amt .paid { color:#16a34a; }
+    .inv-row .badge-mini {
+      font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px;
+    }
+    .inv-row .badge-mini.paid    { background:#dcfce7; color:#15803d; }
+    .inv-row .badge-mini.partial { background:#dbeafe; color:#1d4ed8; }
+    .inv-row .badge-mini.unpaid  { background:#fee2e2; color:#dc2626; }
+    .inv-row .badge-mini.overdue { background:#fef3c7; color:#92400e; }
+
+    .pay-row {
+      display:flex; align-items:center; gap:10px; padding:9px 10px;
+      border:1px solid #bbf7d0; background:#f0fdf4; border-radius:8px; margin-bottom:6px; font-size:12.5px;
+    }
+    .pay-row .icon { width:28px; height:28px; border-radius:7px; background:#dcfce7; display:flex; align-items:center; justify-content:center; }
+    .pay-row .meta { flex:1; }
+    .pay-row .who { font-weight:700; }
+    .pay-row .day { font-size:10.5px; color:#15803d; margin-top:2px; }
+    .pay-row .amt { font-weight:800; color:#15803d; }
+    .pay-row .actions { display:flex; gap:4px; }
+
+    .drawer-foot {
+      padding:12px 16px; background:white; border-top:1px solid var(--border);
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .drawer-foot .btn { flex:1; min-width:120px; }
+
+    /* Modal (payment + qr) */
+    .modal {
+      position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:100;
+      display:none; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal.show { display:flex; }
+    .modal-card {
+      background:white; border-radius:14px; max-width:480px; width:100%;
+      max-height:90vh; overflow:hidden; display:flex; flex-direction:column;
+      box-shadow:0 20px 50px rgba(15,23,42,0.3);
+    }
+    .modal-head {
+      padding:14px 18px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:10px;
+    }
+    .modal-head .ttl { font-weight:800; font-size:15px; }
+    .modal-head .ct  { font-size:12px; color:var(--text-muted); margin-top:2px; }
+    .modal-body { padding:16px 18px; overflow-y:auto; }
+    .modal-foot {
+      padding:12px 18px; border-top:1px solid var(--border);
+      display:flex; gap:8px; justify-content:flex-end;
+    }
+    .modal-foot .btn { min-width:100px; }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+    .form-field { display:flex; flex-direction:column; gap:5px; }
+    .form-field.full { grid-column:1/-1; }
+    .form-field label { font-size:11.5px; font-weight:700; color:var(--text); }
+    .form-field input, .form-field select, .form-field textarea {
+      padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+      font-family:inherit; font-size:13px; background:white;
+    }
+    .form-field textarea { resize:vertical; min-height:60px; }
+    .amount-wrap { display:flex; align-items:center; gap:6px; padding:0 10px; border:1px solid var(--border); border-radius:8px; }
+    .amount-wrap input { flex:1; border:none; outline:none; padding:9px 0; font-size:14px; font-weight:800; text-align:right; font-family:inherit; }
+    .amount-wrap .suf { font-size:11px; font-weight:700; color:#94a3b8; }
+
+    .quick-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+    .chip {
+      background:#f1f5f9; border:1px solid var(--border); border-radius:6px;
+      padding:4px 9px; font-size:11.5px; font-weight:600; cursor:pointer; color:var(--text-secondary);
+    }
+    .chip:hover { background:#eef2ff; border-color:var(--primary); color:var(--primary); }
+
+    .seg { display:inline-flex; background:#f1f5f9; padding:3px; border-radius:8px; gap:2px; }
+    .seg label {
+      padding:6px 12px; font-size:12px; font-weight:600; color:var(--text-secondary);
+      border-radius:6px; cursor:pointer; border:1px solid transparent;
+    }
+    .seg label.is-checked { background:white; color:var(--primary); border-color:var(--border); }
+
+    /* QR */
+    .qr-frame {
+      background:linear-gradient(180deg, #4338ca, #4f46e5); color:white;
+      border-radius:12px; padding:16px; text-align:center;
+    }
+    .qr-frame .bank-row { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:14px; margin-bottom:8px; }
+    .qr-frame .bank-row .logo {
+      width:32px; height:32px; border-radius:6px; background:white; color:#4338ca;
+      display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px;
+    }
+    .qr-box {
+      background:white; border-radius:8px; padding:14px;
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto; width:fit-content;
+    }
+    .qr-box img { display:block; width:240px; height:240px; }
+    .qr-info { font-size:12px; margin-top:10px; line-height:1.6; }
+    .qr-info b { font-size:13px; }
+    .qr-amount { font-size:22px; font-weight:800; margin:6px 0; letter-spacing:-0.02em; }
+    .qr-note { font-size:11px; color:rgba(255,255,255,0.85); }
+
+    /* Print */
+    @media print {
+      body * { visibility:hidden; }
+      #printArea, #printArea * { visibility:visible; }
+      #printArea { position:absolute; top:0; left:0; right:0; padding:24px; }
+    }
+    #printArea { display:none; }
+    #printArea.printing { display:block; }
+    .receipt { font-family:'Arial', sans-serif; color:#0f172a; max-width:780px; margin:0 auto; }
+    .receipt-head { display:flex; justify-content:space-between; border-bottom:2px solid #0f172a; padding-bottom:8px; margin-bottom:14px; }
+    .receipt-head .co { font-weight:800; font-size:16px; }
+    .receipt-head .co-sub { font-size:11px; color:#475569; margin-top:2px; }
+    .receipt-title { text-align:center; font-size:20px; font-weight:800; margin:18px 0 4px; text-transform:uppercase; }
+    .receipt-sub { text-align:center; font-size:12px; color:#475569; margin-bottom:18px; }
+    .receipt-info { display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; margin-bottom:14px; font-size:13px; }
+    .receipt table { width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:12px; }
+    .receipt table th, .receipt table td { border:1px solid #cbd5e1; padding:6px 8px; }
+    .receipt table th { background:#f1f5f9; font-weight:800; text-align:left; }
+    .receipt-net {
+      background:#dcfce7; border:2px solid #16a34a; padding:12px 16px; border-radius:8px;
+      display:flex; justify-content:space-between; align-items:center; margin:12px 0 18px;
+    }
+    .receipt-net .lbl { font-weight:800; font-size:14px; color:#14532d; }
+    .receipt-net .val { font-weight:800; font-size:22px; color:#15803d; }
+    .receipt-amt-text { font-size:11.5px; font-style:italic; color:#475569; margin-top:4px; }
+    .receipt-sign { display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; margin-top:30px; text-align:center; font-size:12px; }
+    .receipt-sign .lbl { font-weight:800; }
+    .receipt-sign .nm { margin-top:60px; font-style:italic; color:#475569; }
+
+    .empty-state { text-align:center; padding:50px 20px; color:var(--text-muted); }
+    .empty-state .ico { font-size:42px; margin-bottom:8px; opacity:0.5; }
+
+    @media (max-width: 1024px) {
+      .stat-bar { grid-template-columns:repeat(2,1fr); }
+      .drawer { width:100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 114 0zM19 17a2 2 0 11-4 0 2 2 0 114 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <a href="m6-cong-no.html" class="nav-item active"><span class="nav-icon">🧾</span>Công nợ khách hàng</a>
+    <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 6</span><span class="sep">›</span><span class="current">Công nợ khách hàng</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">🧾 Công nợ khách hàng</div>
+        <div class="page-subtitle">Theo dõi · Nhận thanh toán · In phiếu thu · Gửi QR chuyển khoản</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="exportExcel()">⬇ Xuất Excel</button>
+        <button class="btn btn-secondary" onclick="bulkRemind()">📧 Nhắc nợ hàng loạt</button>
+        <button class="btn btn-primary" onclick="openCloseMonth()">🔒 Chốt công nợ tháng</button>
+      </div>
+    </div>
+
+    <div class="stat-bar" id="statBar"></div>
+
+    <div class="toolbar">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="active" data-filter="all" onclick="setFilter('all')">Tất cả</button>
+        <button data-filter="overdue" onclick="setFilter('overdue')">⚠️ Quá hạn <span class="pill" id="pillOverdue">0</span></button>
+        <button data-filter="duesoon" onclick="setFilter('duesoon')">⏰ Sắp đến hạn <span class="pill warn" id="pillSoon">0</span></button>
+        <button data-filter="paid" onclick="setFilter('paid')">✅ Đã thu xong</button>
+      </div>
+      <div class="month-pick">
+        <button onclick="changeMonth(-1)">◀</button>
+        <div class="lbl" id="monthLabel">Tháng 5 / 2026</div>
+        <button onclick="changeMonth(1)">▶</button>
+      </div>
+      <div class="grow">
+        <input type="text" class="search" id="searchBox" placeholder="🔍 Tìm khách / MST / SĐT…" oninput="render()">
+      </div>
+      <div style="min-width:160px;">
+        <select id="sortSel" onchange="render()">
+          <option value="debt-desc">Nợ nhiều → ít</option>
+          <option value="debt-asc">Nợ ít → nhiều</option>
+          <option value="overdue-desc">Quá hạn lâu nhất</option>
+          <option value="name-asc">Tên A → Z</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Danh sách công nợ – Tháng 05/2026</span>
+        <div style="display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--text-muted);">
+          Mức độ tuổi nợ:
+          <span class="aging-cell">0–30 ngày</span>
+          <span class="aging-cell warn">30–60</span>
+          <span class="aging-cell bad">60+</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Khách hàng</th>
+              <th style="text-align:right;">Doanh số tháng</th>
+              <th style="text-align:right;">Đã thu</th>
+              <th style="text-align:right;">Còn nợ</th>
+              <th>Tiến độ thu</th>
+              <th>Tuổi nợ (ngày)</th>
+              <th>Trạng thái</th>
+              <th style="text-align:right;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="custBody"></tbody>
+          <tfoot id="custFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Customer detail drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="av" id="dr_av">A</div>
+    <div style="min-width:0;flex:1;">
+      <div class="nm" id="dr_name">—</div>
+      <div class="meta" id="dr_meta">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</div>
+
+<!-- Payment modal -->
+<div class="modal" id="payModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="ttl">💵 Ghi nhận thanh toán</div>
+        <div class="ct" id="payModalSub">—</div>
+      </div>
+      <button class="drawer-close" style="margin-left:auto;" onclick="closePayModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field full">
+          <label>Số tiền nhận</label>
+          <div class="amount-wrap">
+            <input type="text" id="payAmt" inputmode="numeric" placeholder="0">
+            <span class="suf">VNĐ</span>
+          </div>
+          <div class="quick-chips" id="payChips"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Hình thức</label>
+          <div class="seg" id="paySeg">
+            <label class="is-checked" onclick="pickPayMethod(this,'bank')">🏦 Chuyển khoản</label>
+            <label onclick="pickPayMethod(this,'cash')">💵 Tiền mặt</label>
+          </div>
+          <input type="hidden" id="payMethod" value="bank">
+        </div>
+        <div class="form-field">
+          <label>Ngày nhận</label>
+          <input type="date" id="payDate">
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Đối với hoá đơn</label>
+        <select id="payInv">
+          <option value="">— Phân bổ tự động (đơn cũ trước) —</option>
+        </select>
+      </div>
+      <div class="form-field full" style="margin-top:10px;">
+        <label>Ghi chú</label>
+        <input type="text" id="payNote" placeholder="VD: Thanh toán đợt 2…">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closePayModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="submitPayment()">✓ Ghi nhận thu</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR modal -->
+<div class="modal" id="qrModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="ttl">📲 Mã QR chuyển khoản</div>
+        <div class="ct" id="qrModalSub">VietQR · Quét bằng app ngân hàng</div>
+      </div>
+      <button class="drawer-close" style="margin-left:auto;" onclick="closeQrModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="qr-frame" id="qrFrame">
+        <!-- filled by JS -->
+      </div>
+      <div class="form-row" style="margin-top:14px;">
+        <div class="form-field">
+          <label>Số tiền (VNĐ)</label>
+          <div class="amount-wrap">
+            <input type="text" id="qrAmt" inputmode="numeric" oninput="formatAmt(this); refreshQr()">
+            <span class="suf">đ</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Nội dung CK</label>
+          <input type="text" id="qrNote" oninput="refreshQr()">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="downloadQr()">⬇ Tải ảnh QR</button>
+      <button class="btn btn-secondary" onclick="copyQrLink()">🔗 Copy link</button>
+      <button class="btn btn-primary" onclick="sendQr()">📤 Gửi cho khách</button>
+    </div>
+  </div>
+</div>
+
+<!-- Print area -->
+<div id="printArea"></div>
+
+<script src="assets/app.js"></script>
+<script>
+  // ==========================================================
+  //  Master data
+  // ==========================================================
+  const COMPANY = {
+    name: 'CÔNG TY VẬN TẢI VANCHUYỂN PRO',
+    addr: '123 Nguyễn Văn Linh, P. Tân Phong, Q.7, TP.HCM',
+    mst:  '0312345678',
+    bank: { id: 'VCB', name: 'Vietcombank', acct: '0123456789', holder: 'CTY VANCHUYEN PRO' },
+  };
+  const FMT  = n => (n || 0).toLocaleString('vi-VN') + ' ₫';
+  const FMTM = n => {
+    const m = n / 1000000;
+    return (Math.abs(m) >= 10 ? m.toFixed(0) : m.toFixed(1).replace('.0','')) + 'M';
+  };
+  const TODAY = new Date(2026, 4, 12); // May 12, 2026
+
+  // Customers
+  const CUSTOMERS = [
+    { id:'KH01', name:'Cty TNHH SX Minh Phú', short:'Minh Phú',     mst:'0301234567', phone:'0901 234 567', contact:'Anh Hùng', avatar:'M', bg:'#fee2e2', fg:'#dc2626', terms:30 },
+    { id:'KH02', name:'Cty CP Thực Phẩm An Khang', short:'An Khang', mst:'0312345678', phone:'0912 345 678', contact:'Chị Lan', avatar:'A', bg:'#dbeafe', fg:'#1d4ed8', terms:15 },
+    { id:'KH03', name:'Siêu thị Hoàng Gia',        short:'Hoàng Gia', mst:'0322334455', phone:'0934 567 890', contact:'Chị Mai', avatar:'H', bg:'#fef3c7', fg:'#92400e', terms:30 },
+    { id:'KH04', name:'Cty Xây dựng Đại Phát',     short:'Đại Phát',  mst:'0345566778', phone:'0978 222 333', contact:'Anh Tuấn', avatar:'Đ', bg:'#dcfce7', fg:'#15803d', terms:45 },
+    { id:'KH05', name:'Cty TM Phương Nam',         short:'Phương Nam', mst:'0356677889', phone:'0908 765 432', contact:'Anh Bình', avatar:'P', bg:'#ede9fe', fg:'#6d28d9', terms:30 },
+    { id:'KH06', name:'Cty Logistics Sao Việt',    short:'Sao Việt',  mst:'0389901122', phone:'0944 555 666', contact:'Chị Hồng', avatar:'S', bg:'#cffafe', fg:'#0e7490', terms:7 },
+  ];
+
+  // Invoices per customer (per month). For demo, all in T5/2026
+  // status derived: paid / partial / unpaid; overdue if today > issuedDay + terms and remaining > 0
+  // amount in đồng
+  let INVOICES = [
+    // Minh Phú (cao, có quá hạn nhiều)
+    { id:101, custId:'KH01', code:'HD-2026-0501', orderCode:'DH-2026-0488', issuedDay:1,  route:'TP.HCM → Cần Thơ',    amount:42000000, paid: 0,        note:'' },
+    { id:102, custId:'KH01', code:'HD-2026-0507', orderCode:'DH-2026-0495', issuedDay:5,  route:'TP.HCM → Long An',    amount:18500000, paid: 0,        note:'' },
+    { id:103, custId:'KH01', code:'HD-2026-0512', orderCode:'DH-2026-0501', issuedDay:9,  route:'TP.HCM → Vũng Tàu',   amount:22800000, paid: 10000000, note:'Đặt cọc 10tr' },
+
+    // An Khang (đã thanh toán 1 phần)
+    { id:201, custId:'KH02', code:'HD-2026-0502', orderCode:'DH-2026-0490', issuedDay:2,  route:'TP.HCM → Bình Dương', amount:9500000,  paid: 9500000,  note:'Đã CK' },
+    { id:202, custId:'KH02', code:'HD-2026-0509', orderCode:'DH-2026-0497', issuedDay:7,  route:'TP.HCM → Đồng Nai',   amount:12300000, paid: 6000000,  note:'' },
+    { id:203, custId:'KH02', code:'HD-2026-0511', orderCode:'DH-2026-0500', issuedDay:10, route:'TP.HCM → Bình Phước', amount:14700000, paid: 0,        note:'' },
+
+    // Hoàng Gia (1 đơn quá hạn, 1 đơn mới)
+    { id:301, custId:'KH03', code:'HD-2026-0504', orderCode:'DH-2026-0492', issuedDay:3,  route:'TP.HCM → Tây Ninh',   amount:8800000,  paid: 0,        note:'' },
+    { id:302, custId:'KH03', code:'HD-2026-0510', orderCode:'DH-2026-0499', issuedDay:8,  route:'TP.HCM → Long An',    amount:6500000,  paid: 0,        note:'' },
+
+    // Đại Phát (đơn lớn - hạn dài)
+    { id:401, custId:'KH04', code:'HD-2026-0503', orderCode:'DH-2026-0491', issuedDay:3,  route:'TP.HCM → Đà Nẵng',    amount:65000000, paid: 30000000, note:'Trả 2 đợt' },
+    { id:402, custId:'KH04', code:'HD-2026-0508', orderCode:'DH-2026-0496', issuedDay:6,  route:'TP.HCM → Quy Nhơn',   amount:48200000, paid: 0,        note:'' },
+
+    // Phương Nam - đã thanh toán hết
+    { id:501, custId:'KH05', code:'HD-2026-0505', orderCode:'DH-2026-0493', issuedDay:4,  route:'TP.HCM → Nha Trang',  amount:28000000, paid: 28000000, note:'CK đầy đủ' },
+    { id:502, custId:'KH05', code:'HD-2026-0511', orderCode:'DH-2026-0498', issuedDay:9,  route:'TP.HCM → Phan Thiết', amount:15400000, paid: 15400000, note:'' },
+
+    // Sao Việt - hạn ngắn, quá hạn nặng
+    { id:601, custId:'KH06', code:'HD-2026-0501', orderCode:'DH-2026-0489', issuedDay:1,  route:'TP.HCM → HN (LT)',     amount:38500000, paid: 0,        note:'' },
+    { id:602, custId:'KH06', code:'HD-2026-0506', orderCode:'DH-2026-0494', issuedDay:4,  route:'TP.HCM → HN (LT)',     amount:42000000, paid: 0,        note:'' },
+  ];
+
+  // Payments per customer
+  let PAYMENTS = [
+    { id:1, custId:'KH01', invIds:[103], day:11, amount:10000000, method:'bank', note:'Đặt cọc' },
+    { id:2, custId:'KH02', invIds:[201], day:8,  amount:9500000,  method:'bank', note:'CK đầy đủ HD-0502' },
+    { id:3, custId:'KH02', invIds:[202], day:11, amount:6000000,  method:'cash', note:'TM đợt 1' },
+    { id:4, custId:'KH04', invIds:[401], day:9,  amount:30000000, method:'bank', note:'Đợt 1' },
+    { id:5, custId:'KH05', invIds:[501], day:7,  amount:28000000, method:'bank', note:'' },
+    { id:6, custId:'KH05', invIds:[502], day:11, amount:15400000, method:'bank', note:'' },
+  ];
+  let nextPayId = 7;
+  let nextReceiptNo = 100;
+
+  // ==========================================================
+  //  Calculations
+  // ==========================================================
+  const dueDate = inv => {
+    const c = CUSTOMERS.find(x => x.id === inv.custId);
+    return inv.issuedDay + c.terms;
+  };
+  const overdueDays = inv => Math.max(0, TODAY.getDate() - dueDate(inv));
+  const remaining   = inv => Math.max(0, inv.amount - inv.paid);
+  const invStatus   = inv => {
+    if (remaining(inv) === 0) return 'paid';
+    if (inv.paid > 0)         return 'partial';
+    if (overdueDays(inv) > 0) return 'overdue';
+    return 'unpaid';
+  };
+
+  function custInvoices(c) { return INVOICES.filter(i => i.custId === c.id); }
+  function custPayments(c) { return PAYMENTS.filter(p => p.custId === c.id); }
+  function custTotal(c)    { return custInvoices(c).reduce((s,i) => s + i.amount, 0); }
+  function custPaid(c)     { return custInvoices(c).reduce((s,i) => s + i.paid, 0); }
+  function custDebt(c)     { return custTotal(c) - custPaid(c); }
+  function custOverdueDays(c) {
+    return Math.max(0, ...custInvoices(c).filter(i => remaining(i) > 0).map(overdueDays));
+  }
+  function custMaxDaysSoon(c) {
+    // ≤7 days remaining until due (and not overdue, not paid)
+    return custInvoices(c).some(i => {
+      const r = remaining(i);
+      const left = dueDate(i) - TODAY.getDate();
+      return r > 0 && left >= 0 && left <= 7;
+    });
+  }
+  function custStatus(c) {
+    if (custDebt(c) === 0) return 'paid';
+    if (custOverdueDays(c) > 0) return 'overdue';
+    if (custMaxDaysSoon(c)) return 'duesoon';
+    return 'open';
+  }
+
+  // ==========================================================
+  //  State + render
+  // ==========================================================
+  let filter = 'all';
+  let openCustId = null;
+
+  function setFilter(f) {
+    filter = f;
+    document.querySelectorAll('#filterTabs button').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+    render();
+  }
+  function changeMonth(d) { alert(d < 0 ? 'Xem tháng trước (demo)' : 'Xem tháng sau (demo)'); }
+  function exportExcel()  { alert('⬇ Đã xuất file Excel công nợ tháng (demo).'); }
+  function bulkRemind() {
+    const targets = CUSTOMERS.filter(c => custStatus(c) === 'overdue' || custStatus(c) === 'duesoon');
+    if (targets.length === 0) { alert('✨ Hiện không có khách hàng cần nhắc nợ.'); return; }
+    alert(`📧 Đã gửi email + SMS nhắc nợ tới ${targets.length} khách hàng:\n${targets.map(c => '• ' + c.short).join('\n')}`);
+  }
+  function openCloseMonth() {
+    const debt = CUSTOMERS.reduce((s,c) => s + custDebt(c), 0);
+    if (!confirm(`Chốt công nợ T5/2026?\nTổng còn nợ chuyển sang tháng sau: ${FMT(debt)}`)) return;
+    alert('🔒 Đã chốt công nợ Tháng 05/2026.');
+  }
+
+  function getFilteredCustomers() {
+    const q  = document.getElementById('searchBox').value.trim().toLowerCase();
+    let list = CUSTOMERS.filter(c => {
+      if (q && !(c.name.toLowerCase().includes(q) || c.short.toLowerCase().includes(q) || c.mst.includes(q) || c.phone.replace(/\s/g,'').includes(q.replace(/\s/g,'')))) return false;
+      const st = custStatus(c);
+      if (filter === 'overdue' && st !== 'overdue') return false;
+      if (filter === 'duesoon' && st !== 'duesoon') return false;
+      if (filter === 'paid'    && st !== 'paid') return false;
+      return true;
+    });
+    const sort = document.getElementById('sortSel').value;
+    if (sort === 'debt-desc')      list.sort((a,b) => custDebt(b) - custDebt(a));
+    if (sort === 'debt-asc')       list.sort((a,b) => custDebt(a) - custDebt(b));
+    if (sort === 'overdue-desc')   list.sort((a,b) => custOverdueDays(b) - custOverdueDays(a));
+    if (sort === 'name-asc')       list.sort((a,b) => a.short.localeCompare(b.short));
+    return list;
+  }
+
+  function renderStats() {
+    const total    = CUSTOMERS.reduce((s,c) => s + custTotal(c), 0);
+    const paid     = CUSTOMERS.reduce((s,c) => s + custPaid(c), 0);
+    const debt     = total - paid;
+    const overdue  = CUSTOMERS.filter(c => custStatus(c) === 'overdue').length;
+    const overdueAmt = CUSTOMERS.reduce((s,c) =>
+      s + custInvoices(c).filter(i => overdueDays(i) > 0).reduce((a,i) => a + remaining(i), 0), 0);
+    const debtorCount = CUSTOMERS.filter(c => custDebt(c) > 0).length;
+    const soonCount = CUSTOMERS.filter(c => custStatus(c) === 'duesoon').length;
+
+    document.getElementById('statBar').innerHTML = `
+      <div class="stat-pill"><div class="ico" style="background:#dbeafe;color:#1d4ed8;">📊</div>
+        <div class="meta"><div class="lbl">Doanh số tháng</div><div class="val">${FMTM(total)}</div><div class="sub">${INVOICES.length} hoá đơn</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#dcfce7;color:#15803d;">💵</div>
+        <div class="meta"><div class="lbl">Đã thu</div><div class="val">${FMTM(paid)}</div><div class="sub">${total>0? Math.round(paid*100/total) : 0}% doanh số</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#fee2e2;color:#dc2626;">⚖️</div>
+        <div class="meta"><div class="lbl">Còn phải thu</div><div class="val">${FMTM(debt)}</div><div class="sub">${debtorCount} khách còn nợ</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#fef3c7;color:#92400e;">⚠️</div>
+        <div class="meta"><div class="lbl">Quá hạn</div><div class="val">${FMTM(overdueAmt)}</div><div class="sub">${overdue} khách quá hạn</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#fde68a;color:#854d0e;">⏰</div>
+        <div class="meta"><div class="lbl">Sắp đến hạn</div><div class="val">${soonCount}</div><div class="sub">trong 7 ngày</div></div></div>
+    `;
+    document.getElementById('pillOverdue').textContent = overdue;
+    document.getElementById('pillSoon').textContent = soonCount;
+  }
+
+  function statusBadge(c) {
+    const s = custStatus(c);
+    if (s === 'paid')    return '<span class="badge badge-green">✅ Đã thu xong</span>';
+    if (s === 'overdue') return `<span class="badge badge-red">⚠️ Quá hạn ${custOverdueDays(c)}d</span>`;
+    if (s === 'duesoon') return '<span class="badge badge-yellow">⏰ Sắp đến hạn</span>';
+    return '<span class="badge badge-blue">📋 Còn nợ</span>';
+  }
+
+  function agingHtml(c) {
+    const buckets = { a:0, b:0, c:0 }; // 0-30, 30-60, 60+
+    custInvoices(c).filter(i => remaining(i) > 0).forEach(i => {
+      const od = overdueDays(i);
+      if (od > 60) buckets.c += remaining(i);
+      else if (od > 30) buckets.b += remaining(i);
+      else buckets.a += remaining(i);
+    });
+    return `
+      <div class="aging">
+        <span class="aging-cell" title="Trong hạn / quá hạn ≤30 ngày">${FMTM(buckets.a)}</span>
+        <span class="aging-cell warn" title="Quá hạn 30-60 ngày">${FMTM(buckets.b)}</span>
+        <span class="aging-cell bad"  title="Quá hạn trên 60 ngày">${FMTM(buckets.c)}</span>
+      </div>
+    `;
+  }
+
+  function rowActionsHtml(c) {
+    const debt = custDebt(c);
+    if (debt === 0) {
+      return `<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();printReceipt('${c.id}')">In phiếu</button>`;
+    }
+    return `
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openPayModal('${c.id}')">💵 Thu</button>
+      <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openQrModal('${c.id}')">📲 QR</button>
+      <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();sendReminder('${c.id}')">📧 Nhắc</button>
+    `;
+  }
+
+  function renderTable() {
+    const list = getFilteredCustomers();
+    const tbody = document.getElementById('custBody');
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="ico">🔍</div>Không có khách hàng phù hợp bộ lọc</div></td></tr>`;
+      document.getElementById('custFoot').innerHTML = '';
+      return;
+    }
+    tbody.innerHTML = list.map(c => {
+      const total = custTotal(c), paid = custPaid(c), debt = custDebt(c);
+      const pct = total > 0 ? Math.round(paid * 100 / total) : 0;
+      const od = custOverdueDays(c);
+      return `
+        <tr class="row-cust ${openCustId===c.id?'is-open':''}" onclick="openDrawer('${c.id}')">
+          <td>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div class="avatar avatar-sm" style="background:${c.bg};color:${c.fg};">${c.avatar}</div>
+              <div>
+                <div class="cust-name">${c.short}</div>
+                <div class="cust-meta">MST ${c.mst} · ${c.phone}</div>
+              </div>
+            </div>
+          </td>
+          <td style="text-align:right;font-weight:700;">${FMT(total)}</td>
+          <td style="text-align:right;color:#16a34a;">${FMT(paid)}</td>
+          <td style="text-align:right;color:${debt>0?'#dc2626':'#94a3b8'};font-weight:800;">${debt>0?FMT(debt):'—'}</td>
+          <td>
+            <div class="progress ${pct===100?'full':''}"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span class="progress-lbl">${pct}%</span>
+          </td>
+          <td>${od > 0 ? `<span class="aging-cell ${od>60?'bad':od>30?'warn':''}">${od} ngày</span>` : '<span class="aging-cell">— trong hạn</span>'}</td>
+          <td>${statusBadge(c)}</td>
+          <td style="text-align:right;"><div class="row-actions">${rowActionsHtml(c)}</div></td>
+        </tr>
+      `;
+    }).join('');
+
+    const tot = {
+      total: list.reduce((s,c)=>s+custTotal(c),0),
+      paid:  list.reduce((s,c)=>s+custPaid(c),0),
+      debt:  list.reduce((s,c)=>s+custDebt(c),0),
+    };
+    document.getElementById('custFoot').innerHTML = `
+      <tr style="background:#f8fafc;font-weight:700;">
+        <td style="padding:10px 12px;font-size:13px;">Tổng cộng (${list.length} khách)</td>
+        <td style="text-align:right;padding:10px 12px;">${FMT(tot.total)}</td>
+        <td style="text-align:right;padding:10px 12px;color:#16a34a;">${FMT(tot.paid)}</td>
+        <td style="text-align:right;padding:10px 12px;color:#dc2626;font-size:14px;">${FMT(tot.debt)}</td>
+        <td colspan="4"></td>
+      </tr>
+    `;
+  }
+
+  function render() {
+    renderStats();
+    renderTable();
+  }
+
+  // ==========================================================
+  //  Drawer (per-customer detail)
+  // ==========================================================
+  function openDrawer(id) {
+    openCustId = id;
+    refreshDrawer();
+    document.getElementById('drawer').classList.add('show');
+    document.getElementById('drawerOverlay').classList.add('show');
+    render();
+  }
+  function closeDrawer() {
+    openCustId = null;
+    document.getElementById('drawer').classList.remove('show');
+    document.getElementById('drawerOverlay').classList.remove('show');
+    render();
+  }
+  function refreshDrawer() {
+    if (!openCustId) return;
+    const c = CUSTOMERS.find(x => x.id === openCustId);
+    if (!c) return;
+    const av = document.getElementById('dr_av');
+    av.textContent = c.avatar; av.style.background = c.bg; av.style.color = c.fg;
+    document.getElementById('dr_name').textContent = c.name;
+    document.getElementById('dr_meta').textContent = `MST ${c.mst} · ${c.phone} · ${c.contact} · Hạn TT ${c.terms} ngày`;
+
+    const invs = custInvoices(c).slice().sort((a,b) => a.issuedDay - b.issuedDay);
+    const pays = custPayments(c).slice().sort((a,b) => b.day - a.day);
+    const total = custTotal(c), paid = custPaid(c), debt = custDebt(c);
+    const status = custStatus(c);
+
+    const totalCardHtml = `
+      <div class="dr-section dr-total ${debt===0?'paid':''}">
+        <div class="lbl">${debt>0?'Còn phải thu':'Đã thu xong'} – Tháng 05/2026</div>
+        <div class="val">${FMT(debt > 0 ? debt : paid)}</div>
+        <div class="meta">
+          ${debt>0
+            ? `${invs.filter(i=>remaining(i)>0).length} hoá đơn còn nợ · ${custOverdueDays(c)>0 ? `Quá hạn ${custOverdueDays(c)} ngày` : 'Trong hạn'}`
+            : `Tất cả ${invs.length} hoá đơn đã thanh toán đầy đủ`}
+        </div>
+        <div class="dr-grid">
+          <div class="dr-stat"><div class="l">Doanh số</div><div class="v">${FMT(total)}</div></div>
+          <div class="dr-stat"><div class="l">Đã thu</div><div class="v">${FMT(paid)}</div></div>
+        </div>
+      </div>
+    `;
+
+    const invHtml = invs.length === 0
+      ? `<div class="empty-state" style="padding:18px;"><div class="ico">📭</div>Chưa có hoá đơn</div>`
+      : invs.map(i => {
+          const r = remaining(i);
+          const od = overdueDays(i);
+          const st = invStatus(i);
+          const stB = st === 'paid'    ? '<span class="badge-mini paid">✓ Đã thu đủ</span>'
+                    : st === 'partial' ? `<span class="badge-mini partial">◐ Thu một phần</span>`
+                    : st === 'overdue' ? `<span class="badge-mini overdue">⚠ Quá hạn ${od}d</span>`
+                    : '<span class="badge-mini unpaid">○ Chưa thu</span>';
+          return `
+            <div class="inv-row">
+              <div>
+                <div class="code">${i.code}</div>
+                <div class="day">Phát hành ${String(i.issuedDay).padStart(2,'0')}/05 · Hạn ${String(dueDate(i)).padStart(2,'0')}/05</div>
+              </div>
+              <div>
+                <div class="route">${i.route}</div>
+                <div class="day">${i.orderCode}${i.note?` · ${i.note}`:''}</div>
+                <div style="margin-top:4px;">${stB}</div>
+              </div>
+              <div class="amt">
+                ${FMT(i.amount)}
+                ${i.paid > 0 ? `<div class="paid" style="font-size:11px;">+${FMT(i.paid)}</div>` : ''}
+                ${r > 0 ? `<div class="due" style="font-size:11px;">−${FMT(r)}</div>` : ''}
+              </div>
+              <div>
+                ${r > 0 ? `<button class="btn btn-primary btn-sm" onclick="openPayModalForInv('${c.id}', ${i.id})">Thu</button>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+    const payHtml = pays.length === 0
+      ? `<div class="empty-state" style="padding:18px;"><div class="ico">✨</div>Chưa có giao dịch thu</div>`
+      : pays.map(p => `
+          <div class="pay-row">
+            <div class="icon">${p.method==='bank'?'🏦':'💵'}</div>
+            <div class="meta">
+              <div class="who">${p.method==='bank'?'Chuyển khoản':'Tiền mặt'}${p.note?` · ${p.note}`:''}</div>
+              <div class="day">Ngày ${String(p.day).padStart(2,'0')}/05/2026 · Áp cho ${p.invIds.map(id=>{const inv=INVOICES.find(x=>x.id===id);return inv?inv.code:'#'+id;}).join(', ')||'phân bổ tự động'}</div>
+            </div>
+            <div class="amt">+ ${FMT(p.amount)}</div>
+            <div class="actions">
+              <button class="btn btn-secondary btn-sm" onclick="printReceiptOne('${c.id}', ${p.id})">🖨️ In phiếu</button>
+            </div>
+          </div>
+        `).join('');
+
+    document.getElementById('drawerBody').innerHTML = `
+      ${totalCardHtml}
+      <div class="dr-section">
+        <div class="dr-section-title">
+          <span>🧾 Hoá đơn tháng (${invs.length})</span>
+          <span style="font-weight:600;color:var(--text-muted);text-transform:none;letter-spacing:0;">
+            ${invs.filter(i=>invStatus(i)==='paid').length} đã thu · ${invs.filter(i=>invStatus(i)==='partial').length} một phần · ${invs.filter(i=>['unpaid','overdue'].includes(invStatus(i))).length} chưa thu
+          </span>
+        </div>
+        ${invHtml}
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">💵 Lịch sử thanh toán (${pays.length})</div>
+        ${payHtml}
+      </div>
+    `;
+
+    let foot = '';
+    if (debt > 0) {
+      foot = `
+        <button class="btn btn-secondary" onclick="sendReminder('${c.id}')">📧 Gửi nhắc nợ</button>
+        <button class="btn btn-secondary" onclick="openQrModal('${c.id}')">📲 QR thanh toán</button>
+        <button class="btn btn-primary" onclick="openPayModal('${c.id}')">💵 Ghi nhận thu</button>
+      `;
+    } else {
+      foot = `
+        <button class="btn btn-secondary" onclick="closeDrawer()">Đóng</button>
+        <button class="btn btn-primary" onclick="printReceipt('${c.id}')">🖨️ In tổng hợp</button>
+      `;
+    }
+    document.getElementById('drawerFoot').innerHTML = foot;
+  }
+
+  // ==========================================================
+  //  Reminder
+  // ==========================================================
+  function sendReminder(id) {
+    const c = CUSTOMERS.find(x=>x.id===id);
+    const debt = custDebt(c);
+    alert(`📧 Đã gửi nhắc nợ tới ${c.short}\nSĐT: ${c.phone}\nTổng còn nợ: ${FMT(debt)}\n→ SMS + Email + Zalo OA (demo)`);
+  }
+
+  // ==========================================================
+  //  Payment modal
+  // ==========================================================
+  let payCustId = null;
+  function openPayModal(custId) {
+    payCustId = custId;
+    const c = CUSTOMERS.find(x=>x.id===custId);
+    const debt = custDebt(c);
+    const invs = custInvoices(c).filter(i => remaining(i) > 0);
+
+    document.getElementById('payModalSub').textContent = `${c.short} · Còn nợ ${FMT(debt)}`;
+    document.getElementById('payAmt').value = (debt/1000).toLocaleString('vi-VN');
+    document.getElementById('payDate').value = `2026-05-${String(TODAY.getDate()).padStart(2,'0')}`;
+    document.getElementById('payNote').value = '';
+    document.getElementById('payMethod').value = 'bank';
+    document.querySelectorAll('#paySeg label').forEach((l,i) => l.classList.toggle('is-checked', i===0));
+
+    // Quick chips
+    const chips = [
+      { l:'Thu hết', v:debt },
+      { l:'½ nợ',    v:Math.round(debt/2) },
+    ];
+    invs.slice(0,3).forEach(i => chips.push({ l:i.code, v:remaining(i) }));
+    document.getElementById('payChips').innerHTML = chips
+      .filter(c => c.v > 0)
+      .map(c => `<span class="chip" onclick="document.getElementById('payAmt').value='${(c.v).toLocaleString('vi-VN')}'">${c.l} (${FMT(c.v)})</span>`)
+      .join('');
+
+    // Invoice select
+    const sel = document.getElementById('payInv');
+    sel.innerHTML = `<option value="">— Phân bổ tự động (đơn cũ trước) —</option>` +
+      invs.map(i => `<option value="${i.id}">${i.code} · còn ${FMT(remaining(i))}</option>`).join('');
+
+    // Set amount input mode = absolute đồng
+    document.getElementById('payAmt').oninput = function(){ formatAmt(this); };
+    // Override default placeholder logic: amount displayed as đồng directly
+    document.getElementById('payAmt').value = debt.toLocaleString('vi-VN');
+
+    document.getElementById('payModal').classList.add('show');
+  }
+  function openPayModalForInv(custId, invId) {
+    openPayModal(custId);
+    const inv = INVOICES.find(x=>x.id===invId);
+    if (inv) {
+      document.getElementById('payAmt').value = remaining(inv).toLocaleString('vi-VN');
+      document.getElementById('payInv').value = invId;
+      document.getElementById('payNote').value = `Thanh toán ${inv.code}`;
+    }
+  }
+  function closePayModal() { document.getElementById('payModal').classList.remove('show'); }
+  function pickPayMethod(el, m) {
+    document.querySelectorAll('#paySeg label').forEach(l => l.classList.remove('is-checked'));
+    el.classList.add('is-checked');
+    document.getElementById('payMethod').value = m;
+  }
+  function formatAmt(input) {
+    const raw = input.value.replace(/[^\d]/g,'');
+    input.value = raw ? Number(raw).toLocaleString('vi-VN') : '';
+  }
+  function parseAmt(s) { return Number((s||'').replace(/[^\d]/g,'')) || 0; }
+
+  function submitPayment() {
+    const c = CUSTOMERS.find(x=>x.id===payCustId);
+    let amount = parseAmt(document.getElementById('payAmt').value);
+    if (amount <= 0) { alert('Vui lòng nhập số tiền.'); return; }
+    const debt = custDebt(c);
+    if (amount > debt) {
+      if (!confirm(`Số tiền (${FMT(amount)}) lớn hơn nợ còn lại (${FMT(debt)}). Tiếp tục?`)) return;
+    }
+    const method = document.getElementById('payMethod').value;
+    const note   = document.getElementById('payNote').value.trim();
+    const dateRaw = document.getElementById('payDate').value;
+    const day = dateRaw ? parseInt(dateRaw.split('-')[2], 10) : TODAY.getDate();
+    const targetInvId = document.getElementById('payInv').value;
+
+    // Allocate
+    let remain = amount;
+    const appliedInvs = [];
+    const candidates = targetInvId
+      ? [INVOICES.find(i => i.id == targetInvId)].filter(Boolean)
+      : custInvoices(c).filter(i => remaining(i) > 0).sort((a,b)=>a.issuedDay-b.issuedDay);
+    for (const inv of candidates) {
+      if (remain <= 0) break;
+      const r = remaining(inv);
+      if (r <= 0) continue;
+      const apply = Math.min(r, remain);
+      inv.paid += apply;
+      remain   -= apply;
+      appliedInvs.push(inv.id);
+    }
+    if (remain > 0 && candidates.length === 0) {
+      // No invoice debt remaining → record as overpayment on first invoice (rare)
+      if (custInvoices(c)[0]) {
+        custInvoices(c)[0].paid += remain;
+        appliedInvs.push(custInvoices(c)[0].id);
+      }
+    }
+
+    PAYMENTS.unshift({
+      id: nextPayId++, custId: c.id, invIds: appliedInvs,
+      day, amount, method, note,
+    });
+
+    closePayModal();
+    refreshDrawer();
+    render();
+
+    if (confirm(`✓ Đã ghi nhận thu ${FMT(amount)} từ ${c.short}.\nIn phiếu thu ngay?`)) {
+      printReceiptOne(c.id, PAYMENTS[0].id);
+    }
+  }
+
+  // ==========================================================
+  //  QR modal (VietQR)
+  // ==========================================================
+  let qrCustId = null;
+  function openQrModal(custId) {
+    qrCustId = custId;
+    const c = CUSTOMERS.find(x=>x.id===custId);
+    const debt = custDebt(c);
+    document.getElementById('qrModalSub').textContent = `Gửi cho ${c.short} · ${c.phone}`;
+    document.getElementById('qrAmt').value = (debt > 0 ? debt : 0).toLocaleString('vi-VN');
+    document.getElementById('qrNote').value = `TT cong no T05 ${c.short}`;
+    refreshQr();
+    document.getElementById('qrModal').classList.add('show');
+  }
+  function closeQrModal() { document.getElementById('qrModal').classList.remove('show'); }
+  function refreshQr() {
+    const amt = parseAmt(document.getElementById('qrAmt').value);
+    const note = document.getElementById('qrNote').value.trim();
+    // Use VietQR.io image API (img.vietqr.io) - supports public quick image generation
+    // Format: https://img.vietqr.io/image/<bank>-<acct>-<template>.png?amount=&addInfo=&accountName=
+    const bank = COMPANY.bank.id; // e.g. VCB
+    const acct = COMPANY.bank.acct;
+    const holder = encodeURIComponent(COMPANY.bank.holder);
+    const url = `https://img.vietqr.io/image/${bank}-${acct}-qr_only.png?amount=${amt}&addInfo=${encodeURIComponent(note)}&accountName=${holder}`;
+    document.getElementById('qrFrame').innerHTML = `
+      <div class="bank-row">
+        <div class="logo">${bank}</div>
+        <div>${COMPANY.bank.name} · ${COMPANY.bank.acct}</div>
+      </div>
+      <div class="qr-box">
+        <img id="qrImg" src="${url}" alt="QR"
+             onerror="this.onerror=null;this.src='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent('VietQR|'+bank+'|'+acct+'|'+amt+'|'+note)}'">
+      </div>
+      <div class="qr-info">
+        <div><b>${COMPANY.bank.holder}</b></div>
+        <div class="qr-amount">${FMT(amt)}</div>
+        <div class="qr-note">Nội dung: <b>${note || '—'}</b></div>
+      </div>
+    `;
+  }
+  function downloadQr() {
+    const img = document.getElementById('qrImg');
+    if (!img) return;
+    const a = document.createElement('a');
+    a.href = img.src; a.download = `QR-${qrCustId}.png`; a.target = '_blank';
+    a.click();
+  }
+  function copyQrLink() {
+    const img = document.getElementById('qrImg');
+    if (!img) return;
+    navigator.clipboard?.writeText(img.src).then(
+      () => alert('🔗 Đã copy link QR.'),
+      () => alert('Không copy được, hãy thử thủ công: ' + img.src)
+    );
+  }
+  function sendQr() {
+    const c = CUSTOMERS.find(x=>x.id===qrCustId);
+    const amt = parseAmt(document.getElementById('qrAmt').value);
+    alert(`📤 Đã gửi QR ${FMT(amt)} tới ${c.short}\nKênh: SMS, Email, Zalo OA (demo).`);
+    closeQrModal();
+  }
+
+  // ==========================================================
+  //  Print receipt
+  // ==========================================================
+  function dStr(day) { return `${String(day).padStart(2,'0')}/05/2026`; }
+  function printReceiptOne(custId, payId) {
+    const c = CUSTOMERS.find(x=>x.id===custId);
+    const p = PAYMENTS.find(x=>x.id===payId);
+    if (!c || !p) return;
+    const invsInPay = p.invIds.map(id => INVOICES.find(x=>x.id===id)).filter(Boolean);
+    const today = new Date();
+    const printDate = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+    const receiptNo = String(nextReceiptNo + p.id).padStart(5, '0');
+
+    const invRows = invsInPay.length === 0
+      ? `<tr><td colspan="3" style="text-align:center;color:#94a3b8;">— Phân bổ chung —</td></tr>`
+      : invsInPay.map(i => `
+          <tr>
+            <td>${i.code}</td>
+            <td>${i.route} (${i.orderCode})</td>
+            <td style="text-align:right;">${FMT(i.amount)}</td>
+          </tr>`).join('');
+
+    document.getElementById('printArea').innerHTML = `
+      <div class="receipt">
+        <div class="receipt-head">
+          <div>
+            <div class="co">${COMPANY.name}</div>
+            <div class="co-sub">${COMPANY.addr} · MST: ${COMPANY.mst}</div>
+            <div class="co-sub">Ngân hàng: ${COMPANY.bank.name} · ${COMPANY.bank.acct} · ${COMPANY.bank.holder}</div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:#475569;">
+            Số: PT-2026-${receiptNo}<br>Ngày in: ${printDate}
+          </div>
+        </div>
+
+        <div class="receipt-title">PHIẾU THU</div>
+        <div class="receipt-sub">Mẫu số 01-TT (Thông tư 200/2014/TT-BTC)</div>
+
+        <div class="receipt-info">
+          <div><b>Họ tên người nộp:</b> ${c.contact}</div>
+          <div><b>Đơn vị:</b> ${c.name}</div>
+          <div><b>Địa chỉ:</b> ${c.short} · ${c.phone}</div>
+          <div><b>MST:</b> ${c.mst}</div>
+          <div><b>Lý do nộp:</b> Thanh toán cước vận chuyển ${p.note ? '· '+p.note : ''}</div>
+          <div><b>Ngày nộp:</b> ${dStr(p.day)} · <b>Hình thức:</b> ${p.method==='bank'?'Chuyển khoản':'Tiền mặt'}</div>
+        </div>
+
+        <div style="font-weight:800;font-size:13px;margin:8px 0 4px;">Chi tiết hoá đơn được thanh toán</div>
+        <table>
+          <thead><tr><th style="width:130px;">Số HĐ</th><th>Diễn giải</th><th style="width:160px;text-align:right;">Giá trị HĐ</th></tr></thead>
+          <tbody>${invRows}</tbody>
+        </table>
+
+        <div class="receipt-net">
+          <div>
+            <div class="lbl">SỐ TIỀN ĐÃ THU</div>
+            <div class="receipt-amt-text">Bằng chữ: ${FMT(p.amount).replace(' ₫','')} đồng</div>
+          </div>
+          <div class="val">${FMT(p.amount)}</div>
+        </div>
+
+        <div class="receipt-sign">
+          <div><div class="lbl">NGƯỜI NỘP</div><div class="nm">${c.contact}</div></div>
+          <div><div class="lbl">THỦ QUỸ</div><div class="nm">________</div></div>
+          <div><div class="lbl">KẾ TOÁN</div><div class="nm">________</div></div>
+        </div>
+      </div>
+    `;
+    document.getElementById('printArea').classList.add('printing');
+    setTimeout(() => { window.print(); document.getElementById('printArea').classList.remove('printing'); }, 100);
+  }
+  // Print summary (all payments of a customer) when no specific pay
+  function printReceipt(custId) {
+    const c = CUSTOMERS.find(x=>x.id===custId);
+    const pays = custPayments(c);
+    if (pays.length === 0) { alert('Khách hàng chưa có giao dịch thu nào.'); return; }
+    const today = new Date();
+    const printDate = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+    const total = pays.reduce((s,p)=>s+p.amount,0);
+
+    document.getElementById('printArea').innerHTML = `
+      <div class="receipt">
+        <div class="receipt-head">
+          <div>
+            <div class="co">${COMPANY.name}</div>
+            <div class="co-sub">${COMPANY.addr} · MST: ${COMPANY.mst}</div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:#475569;">Bảng tổng hợp · Ngày in: ${printDate}</div>
+        </div>
+        <div class="receipt-title">SAO KÊ THANH TOÁN T05/2026</div>
+        <div class="receipt-sub">Khách hàng: ${c.name} (${c.mst})</div>
+
+        <table>
+          <thead><tr><th style="width:60px;">STT</th><th style="width:110px;">Ngày</th><th>Diễn giải</th><th style="width:120px;">Hình thức</th><th style="width:160px;text-align:right;">Số tiền</th></tr></thead>
+          <tbody>
+            ${pays.map((p,i) => `
+              <tr>
+                <td style="text-align:center;">${i+1}</td>
+                <td>${dStr(p.day)}</td>
+                <td>${p.note || 'Thanh toán cước vận chuyển'} (${p.invIds.map(id=>{const inv=INVOICES.find(x=>x.id===id);return inv?inv.code:'';}).filter(Boolean).join(', ')})</td>
+                <td>${p.method==='bank'?'Chuyển khoản':'Tiền mặt'}</td>
+                <td style="text-align:right;">${FMT(p.amount)}</td>
+              </tr>`).join('')}
+            <tr style="background:#f1f5f9;font-weight:800;">
+              <td colspan="4" style="text-align:right;">Tổng cộng:</td>
+              <td style="text-align:right;color:#15803d;">${FMT(total)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:14px;font-size:13px;">
+          <div><b>Doanh số tháng:</b> ${FMT(custTotal(c))}</div>
+          <div><b>Đã thu:</b> ${FMT(custPaid(c))}</div>
+          <div><b>Còn nợ:</b> <span style="color:#dc2626;font-weight:800;">${FMT(custDebt(c))}</span></div>
+        </div>
+        <div class="receipt-sign">
+          <div><div class="lbl">NGƯỜI NHẬN</div><div class="nm">${c.contact}</div></div>
+          <div><div class="lbl">KẾ TOÁN</div><div class="nm">________</div></div>
+        </div>
+      </div>
+    `;
+    document.getElementById('printArea').classList.add('printing');
+    setTimeout(() => { window.print(); document.getElementById('printArea').classList.remove('printing'); }, 100);
+  }
+
+  // Init
+  render();
+</script>
+</body>
+</html>

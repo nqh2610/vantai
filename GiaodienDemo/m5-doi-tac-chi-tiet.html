@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ đối tác – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page-content { padding:10px 14px !important; }
+    .crumb { display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; margin-bottom:8px; }
+    .crumb a { color:#4f46e5; text-decoration:none; font-weight:600; }
+
+    /* Hero */
+    .hero {
+      display:grid; grid-template-columns:120px 1fr auto; gap:14px;
+      background:linear-gradient(135deg,#fff 0%,#f5f3ff 100%);
+      border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px;
+    }
+    .drv-photo {
+      width:120px; height:120px; border-radius:14px; overflow:hidden; position:relative;
+      box-shadow:0 4px 14px rgba(0,0,0,.1); display:flex; align-items:center; justify-content:center;
+      font-size:42px; font-weight:800; color:#fff;
+    }
+    .drv-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .drv-photo .liv {
+      position:absolute; bottom:6px; right:6px; padding:2px 7px; border-radius:10px;
+      font-size:10px; font-weight:800; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2);
+    }
+    .liv-on  { background:#16a34a; } .liv-busy{background:#dc2626;} .liv-off{background:#94a3b8;}
+
+    .hero-info { min-width:0; }
+    .hero-info h1 { font-size:22px; font-weight:800; color:#0f172a; margin:0 0 3px; line-height:1.1; }
+    .hero-info .sub { font-size:12px; color:#64748b; margin-bottom:8px; }
+    .meta-row { display:flex; flex-wrap:wrap; gap:14px 22px; font-size:12px; }
+    .meta-row > div { display:flex; flex-direction:column; }
+    .ml { font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:.4px; font-weight:700; }
+    .mv { font-size:13px; color:#0f172a; font-weight:700; margin-top:2px; }
+    .stars { color:#f59e0b; letter-spacing:1px; font-size:14px; }
+    .stars .empty { color:#e2e8f0; }
+
+    .hero-act { display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+    .b { display:inline-block; padding:3px 9px; border-radius:10px; font-size:11px; font-weight:700; }
+    .b-free{background:#dcfce7;color:#15803d;} .b-busy{background:#fee2e2;color:#b91c1c;} .b-off{background:#f1f5f9;color:#64748b;}
+
+    /* Tabs */
+    .tab-bar { display:flex; gap:4px; background:#fff; border:1px solid var(--border); border-radius:10px 10px 0 0; padding:4px 6px; border-bottom:0; }
+    .tab-bar button {
+      border:0; background:transparent; padding:9px 16px; font-size:12.5px; font-weight:700; color:#64748b;
+      cursor:pointer; border-radius:6px 6px 0 0; position:relative;
+    }
+    .tab-bar button.active { color:var(--primary); background:#f5f3ff; }
+    .tab-bar button.active::after {
+      content:''; position:absolute; left:8px; right:8px; bottom:-5px; height:3px; background:var(--primary); border-radius:2px;
+    }
+    .panel { background:#fff; border:1px solid var(--border); border-radius:0 0 10px 10px; padding:14px 16px; }
+
+    /* 2-col info */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .info-card { border:1px solid var(--border); border-radius:8px; padding:10px 12px; background:#fafafa; }
+    .info-card h3 { margin:0 0 8px; font-size:12px; font-weight:800; text-transform:uppercase; color:#475569; letter-spacing:.5px; }
+    .info-row { display:flex; justify-content:space-between; padding:5px 0; font-size:12.5px; border-bottom:1px dashed #e2e8f0; }
+    .info-row:last-child { border-bottom:0; }
+    .info-row .lbl { color:#64748b; }
+    .info-row .val { font-weight:700; color:#0f172a; max-width:60%; text-align:right; word-break:break-word; }
+
+    /* Doc cards */
+    .docs-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .doc-card { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:#fff; }
+    .doc-img { height:170px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .doc-img svg { width:100%; height:100%; display:block; }
+    .doc-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .doc-meta { padding:8px 12px; font-size:11.5px; color:#64748b; display:flex; justify-content:space-between; }
+    .doc-meta b { color:#0f172a; font-size:12.5px; }
+    .doc-exp { font-weight:700; }
+    .exp-ok{color:#15803d;} .exp-warn{color:#b45309;} .exp-out{color:#b91c1c;}
+
+    /* Trips table */
+    table.t { width:100%; border-collapse:collapse; font-size:12px; }
+    table.t th { text-align:left; padding:7px 8px; background:#f8fafc; font-size:10.5px; text-transform:uppercase; color:#64748b; font-weight:700; border-bottom:1px solid var(--border); }
+    table.t td { padding:7px 8px; border-bottom:1px solid #f1f5f9; }
+    .pill { display:inline-block; padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700; background:#f1f5f9; color:#475569; }
+
+    /* Pay history */
+    .pay-bar { background:#eef2ff; border-left:4px solid var(--primary); padding:10px 14px; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .pay-bar b { color:#0f172a; font-size:14px; }
+    .paybar-mini { height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden; min-width:80px; display:inline-block; vertical-align:middle; }
+    .paybar-mini > i { display:block; height:100%; background:#16a34a; }
+
+    /* KPI strip detail */
+    .kpi4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+    .kbox { background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 12px; }
+    .kbox .l { font-size:10.5px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:.3px; }
+    .kbox .v { font-size:18px; font-weight:800; color:#0f172a; margin-top:2px; }
+    .kbox.in .v {color:#15803d;} .kbox.warn .v{color:#b45309;} .kbox.blue .v{color:#1d4ed8;}
+
+    @media (max-width:900px) { .hero { grid-template-columns:90px 1fr; } .hero-act { grid-column:1/-1; flex-direction:row; } .grid-2 { grid-template-columns:1fr; } .docs-grid { grid-template-columns:1fr; } .kpi4 { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item active"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
+    <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 5</span><span class="sep">›</span>
+      <span class="parent"><a href="m5-doi-tac.html" style="color:inherit;text-decoration:none;">Đối tác</a></span>
+      <span class="sep">›</span><span class="current" id="cbName">Hồ sơ</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="crumb"><a href="m5-doi-tac.html">← Quay lại danh sách đối tác</a></div>
+
+    <!-- Hero -->
+    <div class="hero" id="hero"></div>
+
+    <!-- Tabs -->
+    <div class="tab-bar" id="tabs">
+      <button data-tab="info" class="active">📇 Hồ sơ</button>
+      <button data-tab="vehicle">🚛 Xe & Đăng kiểm</button>
+      <button data-tab="docs">📄 Giấy tờ</button>
+      <button data-tab="trips">🛣 Lịch sử chuyến</button>
+      <button data-tab="pay">💵 Hoa hồng & Công nợ</button>
+    </div>
+    <div class="panel" id="panel"></div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => { const v=Math.abs(n||0);
+  if (v>=1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'')+' tỷ';
+  if (v>=1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+  if (v>=1e3) return (n/1e3).toFixed(0)+'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const daysUntil = d => Math.round((d - TODAY)/86400000);
+
+/* ===== PARTNERS (đồng bộ với m5-doi-tac.html, có thêm dữ liệu chi tiết) ===== */
+const PARTNERS = {
+  DT01: {
+    id:'DT01', type:'indiv', name:'Lê Hoàng Sơn', avatar:'S', bg:'#dcfce7', fg:'#15803d',
+    photo:'https://i.pravatar.cc/240?img=8',
+    company:null, phone:'0901 555 111', email:'leson@gmail.com',
+    cccd:'079 188 234 567', dob:new Date(1988,3,15), gender:'Nam',
+    address:'45 Lê Văn Sỹ, P.13, Q.3, TP.HCM',
+    truck:'51C-67890', weight:8, weightLbl:'8T', truckType:'Thùng kín', truckBrand:'Hino XZU720',
+    truckYear:2020, truckColor:'Trắng', truckImg:'truckBox',
+    register:{ no:'BR-088234', expire:new Date(2026,11,15), place:'Trung tâm ĐK 50-03V' },
+    license:{ no:'079188234567', class:'C', issue:new Date(2022,8,15), expire:new Date(2027,8,15), place:'Sở GTVT TP.HCM' },
+    insurance:{ no:'BHTN-2026-77234', company:'Bảo Việt', expire:new Date(2026,9,12) },
+    bank:'Vietcombank', bankNo:'1234567890', bankName:'LE HOANG SON',
+    joinDate:new Date(2023,5,10),
+    rating:4.8, totalTrips:128, tripsM:14, revM:62_000_000, payM:9_300_000, paid:0,
+    status:'free', commission:{type:'pct', value:15},
+    note:'Quen tuyến SG–Đà Nẵng · luôn đúng giờ'
+  },
+  DT02: {
+    id:'DT02', type:'company', name:'Vận tải Hùng Phát', avatar:'H', bg:'#fef3c7', fg:'#b45309',
+    photo:null,
+    company:'Cty TNHH Vận tải Hùng Phát', phone:'0908 222 333', email:'hungphat@vt.vn',
+    cccd:'—', dob:null, gender:'—', taxCode:'0312345678',
+    address:'KCN Tân Bình, P.Tây Thạnh, Q.Tân Phú, TP.HCM',
+    truck:'51K-12121', weight:15, weightLbl:'15T', truckType:'Container 40ft', truckBrand:'Hyundai HD320',
+    truckYear:2019, truckColor:'Xanh dương', truckImg:'truckCont',
+    register:{ no:'BR-121200', expire:new Date(2026,8,30), place:'Trung tâm ĐK 50-05V' },
+    license:{ no:'079850121212', class:'FC', issue:new Date(2023,3,20), expire:new Date(2028,3,20), place:'Sở GTVT TP.HCM' },
+    insurance:{ no:'BHTN-2026-12121', company:'PVI', expire:new Date(2026,11,8) },
+    bank:'Techcombank', bankNo:'9988776655', bankName:'CTY TNHH VT HUNG PHAT',
+    joinDate:new Date(2021,1,5),
+    rating:4.6, totalTrips:312, tripsM:9, revM:185_000_000, payM:27_750_000, paid:15_000_000,
+    status:'busy', commission:{type:'pct', value:15},
+    note:'Đối tác chiến lược · 5 xe đầu kéo'
+  },
+  DT03: {
+    id:'DT03', type:'indiv', name:'Trần Quốc Hải', avatar:'H', bg:'#dbeafe', fg:'#1d4ed8',
+    photo:'https://i.pravatar.cc/240?img=58',
+    company:null, phone:'0912 345 678', email:'haitq95@gmail.com',
+    cccd:'079 195 678 123', dob:new Date(1995,7,22), gender:'Nam',
+    address:'112 Phan Văn Trị, P.10, Q.Gò Vấp, TP.HCM',
+    truck:'51F-44455', weight:3, weightLbl:'3T', truckType:'Thùng bạt', truckBrand:'Isuzu QKR',
+    truckYear:2021, truckColor:'Trắng', truckImg:'truckTarp',
+    register:{ no:'BR-444550', expire:new Date(2026,5,28), place:'Trung tâm ĐK 50-03V' },
+    license:{ no:'079195678123', class:'C', issue:new Date(2021,5,20), expire:new Date(2026,5,20), place:'Sở GTVT TP.HCM' },
+    insurance:{ no:'BHTN-2025-44455', company:'Bảo Minh', expire:new Date(2026,7,3) },
+    bank:'BIDV', bankNo:'5566778899', bankName:'TRAN QUOC HAI',
+    joinDate:new Date(2024,2,18),
+    rating:4.5, totalTrips:64, tripsM:18, revM:38_500_000, payM:5_775_000, paid:0,
+    status:'free', commission:{type:'trip', value:350_000},
+    note:'Khu vực nội đô + lân cận · giấy phép sắp hết hạn'
+  },
+  DT04: {
+    id:'DT04', type:'company', name:'Cty Vận tải Sao Việt', avatar:'S', bg:'#f3e8ff', fg:'#7e22ce',
+    photo:null,
+    company:'Cty CP Vận tải Sao Việt', phone:'0902 888 999', email:'saoviet@logistics.vn',
+    cccd:'—', dob:null, gender:'—', taxCode:'0309876543',
+    address:'Lô A12, KCN Linh Trung 2, TP. Thủ Đức',
+    truck:'51G-77711', weight:20, weightLbl:'20T', truckType:'Đầu kéo + Mooc 40ft', truckBrand:'Hyundai HD1000',
+    truckYear:2022, truckColor:'Đỏ', truckImg:'truckHead',
+    register:{ no:'BR-777110', expire:new Date(2027,2,15), place:'Trung tâm ĐK 50-05V' },
+    license:{ no:'079800777111', class:'FC', issue:new Date(2022,11,30), expire:new Date(2027,11,30), place:'Sở GTVT TP.HCM' },
+    insurance:{ no:'BHTN-2027-77711', company:'PJICO', expire:new Date(2027,1,15) },
+    bank:'ACB', bankNo:'1212343456', bankName:'CTY CP VT SAO VIET',
+    joinDate:new Date(2020,8,12),
+    rating:4.9, totalTrips:480, tripsM:7, revM:215_000_000, payM:32_250_000, paid:32_250_000,
+    status:'busy', commission:{type:'pct', value:15},
+    note:'Chuyên SG–Hà Nội · 8 xe đầu kéo · TOP đối tác 2025'
+  }
+};
+/* fallback rỗng cho id không có */
+function getDriver(id) { return PARTNERS[id] || PARTNERS.DT01; }
+
+const params = new URLSearchParams(location.search);
+const ID = params.get('id') || 'DT01';
+const D = getDriver(ID);
+document.getElementById('cbName').textContent = D.name;
+
+/* ===== Trips & Pay history ===== */
+const TRIPS = [
+  { date:new Date(2026,4,11), code:'CH-0612', route:'SG → Đà Nẵng',  km:980, rev:18_500_000, com:2_775_000, st:'done' },
+  { date:new Date(2026,4,9),  code:'CH-0598', route:'SG → Nha Trang', km:445, rev:9_200_000,  com:1_380_000, st:'done' },
+  { date:new Date(2026,4,7),  code:'CH-0577', route:'SG → Vũng Tàu',  km:120, rev:3_800_000,  com:570_000,   st:'done' },
+  { date:new Date(2026,4,5),  code:'CH-0561', route:'SG → Cần Thơ',   km:170, rev:4_500_000,  com:675_000,   st:'done' },
+  { date:new Date(2026,4,3),  code:'CH-0540', route:'SG → Đà Lạt',    km:310, rev:7_000_000,  com:1_050_000, st:'done' },
+  { date:new Date(2026,4,1),  code:'CH-0521', route:'SG → Bình Dương',km:35,  rev:1_800_000,  com:270_000,   st:'done' },
+  { date:new Date(2026,3,28), code:'CH-0499', route:'SG → Long An',   km:55,  rev:2_200_000,  com:330_000,   st:'done' },
+  { date:new Date(2026,3,25), code:'CH-0478', route:'SG → Phan Thiết',km:200, rev:4_800_000,  com:720_000,   st:'cancel' },
+];
+const PAY_HIST = [
+  { month:'05/2026', trips:14, rev:62_000_000, com:9_300_000, paid:0,           date:null,                 st:'unpaid' },
+  { month:'04/2026', trips:18, rev:78_500_000, com:11_775_000,paid:11_775_000,  date:new Date(2026,4,3),    st:'paid' },
+  { month:'03/2026', trips:15, rev:65_000_000, com:9_750_000, paid:9_750_000,   date:new Date(2026,3,5),    st:'paid' },
+  { month:'02/2026', trips:12, rev:52_000_000, com:7_800_000, paid:7_800_000,   date:new Date(2026,2,4),    st:'paid' },
+  { month:'01/2026', trips:16, rev:71_000_000, com:10_650_000,paid:10_650_000,  date:new Date(2026,1,6),    st:'paid' },
+  { month:'12/2025', trips:13, rev:58_500_000, com:8_775_000, paid:8_775_000,   date:new Date(2025,11,4),   st:'paid' },
+];
+
+/* ===== SVG Mock cards ===== */
+function svgCCCD() {
+  if (D.type==='company') return svgBusinessLicense();
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#7f1d1d"/></linearGradient></defs>
+    <rect width="320" height="200" fill="url(#cg)"/>
+    <text x="160" y="22" text-anchor="middle" fill="#fef3c7" font-size="9" font-weight="700">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</text>
+    <text x="160" y="36" text-anchor="middle" fill="#fef3c7" font-size="11" font-weight="800">CĂN CƯỚC CÔNG DÂN</text>
+    ${D.photo?`<image href="${D.photo}" x="20" y="55" width="80" height="100" preserveAspectRatio="xMidYMid slice"/>`:`<rect x="20" y="55" width="80" height="100" fill="#fee2e2" rx="4"/>`}
+    <text x="115" y="68" fill="#fef3c7" font-size="7.5">Số:</text>
+    <text x="115" y="82" fill="#fff" font-size="13" font-weight="800">${D.cccd}</text>
+    <text x="115" y="98" fill="#fef3c7" font-size="7.5">Họ và tên:</text>
+    <text x="115" y="111" fill="#fff" font-size="11" font-weight="700">${D.name.toUpperCase()}</text>
+    <text x="115" y="126" fill="#fef3c7" font-size="7.5">NS: <tspan fill="#fff" font-weight="600">${D.dob?dStr(D.dob):'—'}</tspan>   GT: <tspan fill="#fff" font-weight="600">${D.gender}</tspan></text>
+    <text x="115" y="140" fill="#fef3c7" font-size="7.5">Quốc tịch: <tspan fill="#fff" font-weight="600">Việt Nam</tspan></text>
+    <text x="115" y="156" fill="#fef3c7" font-size="7" font-family="Arial">Địa chỉ:</text>
+    <text x="115" y="168" fill="#fff" font-size="7.5" font-weight="600">${(D.address||'').slice(0,40)}</text>
+    <text x="115" y="184" fill="#fef3c7" font-size="7">Có giá trị đến: <tspan fill="#fff" font-weight="700">${D.dob?D.dob.getFullYear()+60:'—'}</tspan></text>
+    <rect x="240" y="155" width="60" height="35" fill="#fef3c7" opacity="0.15" rx="2"/>
+    <text x="270" y="178" text-anchor="middle" fill="#fef3c7" font-size="7">QR · MRZ</text>
+  </svg>`;
+}
+function svgBusinessLicense() {
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="320" height="200" fill="#fff"/>
+    <rect x="0" y="0" width="320" height="36" fill="#1d4ed8"/>
+    <text x="160" y="15" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">SỞ KẾ HOẠCH ĐẦU TƯ TP.HCM</text>
+    <text x="160" y="29" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">GIẤY CHỨNG NHẬN ĐĂNG KÝ DOANH NGHIỆP</text>
+    <text x="20" y="56" fill="#475569" font-size="9">Tên DN: <tspan fill="#0f172a" font-weight="700">${D.company}</tspan></text>
+    <text x="20" y="74" fill="#475569" font-size="9">Mã số thuế: <tspan fill="#0f172a" font-weight="800" font-size="13" font-family="Courier New">${D.taxCode}</tspan></text>
+    <text x="20" y="92" fill="#475569" font-size="9">Đại diện PL: <tspan fill="#0f172a" font-weight="700">${D.name}</tspan></text>
+    <text x="20" y="106" fill="#475569" font-size="9">Địa chỉ trụ sở:</text>
+    <text x="20" y="120" fill="#0f172a" font-size="9" font-weight="600">${(D.address||'').slice(0,55)}</text>
+    <text x="20" y="138" fill="#475569" font-size="9">Ngành nghề: <tspan fill="#0f172a" font-weight="700">Vận tải hàng hoá đường bộ</tspan></text>
+    <line x1="20" y1="148" x2="300" y2="148" stroke="#e2e8f0"/>
+    <text x="20" y="164" fill="#475569" font-size="8">Đăng ký lần đầu: ${dStr(D.joinDate)}</text>
+    <circle cx="265" cy="170" r="22" fill="none" stroke="#b91c1c" stroke-width="1.5" opacity="0.6"/>
+    <text x="265" y="170" text-anchor="middle" fill="#b91c1c" font-size="6">SỞ KH-ĐT</text>
+    <text x="265" y="180" text-anchor="middle" fill="#b91c1c" font-size="6">TP.HCM</text>
+  </svg>`;
+}
+function svgLicense() {
+  const lic = D.license;
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs>
+    <rect width="320" height="200" fill="url(#lg)"/>
+    <rect x="0" y="0" width="320" height="32" fill="#b45309"/>
+    <text x="160" y="14" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">BỘ GIAO THÔNG VẬN TẢI</text>
+    <text x="160" y="26" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">GIẤY PHÉP LÁI XE</text>
+    ${D.photo?`<image href="${D.photo}" x="16" y="48" width="74" height="92" preserveAspectRatio="xMidYMid slice"/>`:`<rect x="16" y="48" width="74" height="92" fill="#fef3c7"/>`}
+    <rect x="16" y="48" width="74" height="92" fill="none" stroke="#7c2d12" stroke-width="1.5"/>
+    <text x="100" y="60" fill="#7c2d12" font-size="7">No.:</text>
+    <text x="100" y="74" fill="#1c1917" font-size="13" font-weight="800">${lic.no}</text>
+    <text x="100" y="90" fill="#7c2d12" font-size="7">Họ tên:</text>
+    <text x="100" y="102" fill="#1c1917" font-size="11" font-weight="700">${D.name.toUpperCase()}</text>
+    <text x="100" y="116" fill="#7c2d12" font-size="7">Cấp ngày: <tspan fill="#1c1917" font-weight="600">${dStr(lic.issue)}</tspan></text>
+    <text x="100" y="130" fill="#7c2d12" font-size="7">Có giá trị đến:</text>
+    <text x="100" y="142" fill="${daysUntil(lic.expire)<0?'#b91c1c':daysUntil(lic.expire)<=30?'#b91c1c':'#15803d'}" font-size="11" font-weight="800">${dStr(lic.expire)}</text>
+    <rect x="220" y="48" width="86" height="40" fill="#7c2d12" rx="3"/>
+    <text x="263" y="68" text-anchor="middle" fill="#fde68a" font-size="9">HẠNG / CLASS</text>
+    <text x="263" y="84" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">${lic.class}</text>
+    <text x="220" y="105" fill="#7c2d12" font-size="7">Nơi cấp:</text>
+    <text x="220" y="117" fill="#1c1917" font-size="8" font-weight="600">${lic.place}</text>
+    <circle cx="263" cy="160" r="22" fill="none" stroke="#b91c1c" stroke-width="1.5" opacity="0.6"/>
+    <text x="263" y="158" text-anchor="middle" fill="#b91c1c" font-size="6" opacity="0.7">SỞ GTVT</text>
+    <text x="263" y="167" text-anchor="middle" fill="#b91c1c" font-size="6" opacity="0.7">TP.HCM</text>
+  </svg>`;
+}
+function svgRegister() {
+  const r = D.register;
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="320" height="200" fill="#dbeafe"/>
+    <rect x="0" y="0" width="320" height="36" fill="#1e3a8a"/>
+    <text x="160" y="15" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">CỤC ĐĂNG KIỂM VIỆT NAM</text>
+    <text x="160" y="29" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">GIẤY CHỨNG NHẬN ĐĂNG KIỂM</text>
+    <text x="20" y="56" fill="#1e3a8a" font-size="9">Biển số:</text>
+    <text x="20" y="74" fill="#0f172a" font-size="20" font-weight="800" font-family="Courier New">${D.truck}</text>
+    <text x="20" y="92" fill="#1e3a8a" font-size="9">Số đăng kiểm: <tspan fill="#0f172a" font-weight="700">${r.no}</tspan></text>
+    <text x="20" y="108" fill="#1e3a8a" font-size="9">Loại xe: <tspan fill="#0f172a" font-weight="700">${D.truckType}</tspan></text>
+    <text x="20" y="124" fill="#1e3a8a" font-size="9">Tải trọng: <tspan fill="#0f172a" font-weight="700">${D.weightLbl}</tspan></text>
+    <text x="20" y="140" fill="#1e3a8a" font-size="9">Nhãn hiệu: <tspan fill="#0f172a" font-weight="700">${D.truckBrand} (${D.truckYear})</tspan></text>
+    <line x1="20" y1="150" x2="300" y2="150" stroke="#94a3b8"/>
+    <text x="20" y="166" fill="#1e3a8a" font-size="9">Có hiệu lực đến:</text>
+    <text x="20" y="184" fill="${daysUntil(r.expire)<0?'#b91c1c':daysUntil(r.expire)<=30?'#b45309':'#15803d'}" font-size="14" font-weight="800">${dStr(r.expire)}</text>
+    <rect x="220" y="60" width="80" height="80" fill="#fff" stroke="#1e3a8a" stroke-width="1"/>
+    <text x="260" y="100" text-anchor="middle" fill="#1e3a8a" font-size="28" font-weight="800">${r.no.slice(-2)}</text>
+    <text x="260" y="120" text-anchor="middle" fill="#1e3a8a" font-size="9" font-weight="700">TEM ĐK</text>
+  </svg>`;
+}
+function svgInsurance() {
+  const ins = D.insurance;
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="320" height="200" fill="#fff"/>
+    <rect x="0" y="0" width="320" height="36" fill="#15803d"/>
+    <text x="160" y="15" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">${ins.company.toUpperCase()}</text>
+    <text x="160" y="29" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">CHỨNG NHẬN BẢO HIỂM TNDS</text>
+    <text x="20" y="56" fill="#475569" font-size="9">Số đơn: <tspan fill="#0f172a" font-weight="800" font-family="Courier New">${ins.no}</tspan></text>
+    <text x="20" y="74" fill="#475569" font-size="9">Chủ xe: <tspan fill="#0f172a" font-weight="700">${D.name}</tspan></text>
+    <text x="20" y="90" fill="#475569" font-size="9">Biển số: <tspan fill="#0f172a" font-weight="800" font-family="Courier New">${D.truck}</tspan></text>
+    <text x="20" y="106" fill="#475569" font-size="9">Loại xe: <tspan fill="#0f172a" font-weight="700">${D.truckType} – ${D.weightLbl}</tspan></text>
+    <line x1="20" y1="116" x2="300" y2="116" stroke="#e2e8f0"/>
+    <text x="20" y="134" fill="#15803d" font-size="9" font-weight="700">PHẠM VI: TNDS bắt buộc + tự nguyện</text>
+    <text x="20" y="150" fill="#475569" font-size="8">• Mức trách nhiệm: 150 triệu/người · 50 triệu/vụ tài sản</text>
+    <text x="20" y="164" fill="#475569" font-size="9">Có hiệu lực đến:</text>
+    <text x="20" y="184" fill="${daysUntil(ins.expire)<0?'#b91c1c':daysUntil(ins.expire)<=30?'#b45309':'#15803d'}" font-size="14" font-weight="800">${dStr(ins.expire)}</text>
+    <circle cx="260" cy="160" r="26" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.6"/>
+    <text x="260" y="160" text-anchor="middle" fill="#15803d" font-size="6">CTY BẢO HIỂM</text>
+    <text x="260" y="170" text-anchor="middle" fill="#15803d" font-size="6">ĐÃ KÝ</text>
+  </svg>`;
+}
+
+/* ===== SVG xe (mockup theo loại) ===== */
+function svgTruck() {
+  const t = D.truckImg;
+  const plate = D.truck;
+  const colorBody = D.truckColor==='Đỏ' ? '#dc2626'
+                  : D.truckColor==='Xanh dương' ? '#1d4ed8'
+                  : '#e5e7eb';
+  // background
+  let svg = `<svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#dbeafe"/><stop offset="100%" stop-color="#fef3c7"/></linearGradient>
+      <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${colorBody}"/><stop offset="100%" stop-color="${shade(colorBody,-30)}"/></linearGradient>
+      <linearGradient id="cab" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${colorBody}"/><stop offset="100%" stop-color="${shade(colorBody,-40)}"/></linearGradient>
+    </defs>
+    <rect width="480" height="240" fill="url(#sky)"/>
+    <rect y="180" width="480" height="60" fill="#94a3b8"/>
+    <line x1="0" y1="200" x2="480" y2="200" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="14,10"/>`;
+
+  if (t==='truckCont' || t==='truckHead') {
+    // đầu kéo + container
+    svg += `
+      <!-- container -->
+      <rect x="120" y="60" width="270" height="115" fill="${t==='truckCont'?'#1d4ed8':'#fff'}" stroke="#0f172a" stroke-width="2"/>
+      <line x1="170" y1="60" x2="170" y2="175" stroke="#0f172a" stroke-width="1"/>
+      <line x1="220" y1="60" x2="220" y2="175" stroke="#0f172a" stroke-width="1"/>
+      <line x1="270" y1="60" x2="270" y2="175" stroke="#0f172a" stroke-width="1"/>
+      <line x1="320" y1="60" x2="320" y2="175" stroke="#0f172a" stroke-width="1"/>
+      <text x="255" y="125" text-anchor="middle" fill="${t==='truckCont'?'#fff':'#0f172a'}" font-size="22" font-weight="800" font-family="Arial">VANCHUYỂN</text>
+      <text x="255" y="148" text-anchor="middle" fill="${t==='truckCont'?'#fef3c7':'#475569'}" font-size="11">PRO LOGISTICS</text>
+      <!-- cabin -->
+      <path d="M 50 175 L 50 110 Q 50 95 65 95 L 110 95 L 120 130 L 120 175 Z" fill="url(#cab)" stroke="#0f172a" stroke-width="2"/>
+      <rect x="60" y="105" width="50" height="28" fill="#bfdbfe" stroke="#0f172a"/>
+      <circle cx="110" cy="160" r="6" fill="#fbbf24"/>
+      <!-- wheels -->
+      <circle cx="80" cy="195" r="18" fill="#1f2937"/><circle cx="80" cy="195" r="8" fill="#9ca3af"/>
+      <circle cx="170" cy="195" r="18" fill="#1f2937"/><circle cx="170" cy="195" r="8" fill="#9ca3af"/>
+      <circle cx="210" cy="195" r="18" fill="#1f2937"/><circle cx="210" cy="195" r="8" fill="#9ca3af"/>
+      <circle cx="350" cy="195" r="18" fill="#1f2937"/><circle cx="350" cy="195" r="8" fill="#9ca3af"/>
+      <!-- plate -->
+      <rect x="40" y="180" width="40" height="14" fill="#fff" stroke="#0f172a"/>
+      <text x="60" y="190" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800" font-family="Courier New">${plate}</text>`;
+  } else if (t==='truckTarp') {
+    // thùng bạt
+    svg += `
+      <rect x="160" y="80" width="240" height="95" fill="#16a34a" stroke="#0f172a" stroke-width="2"/>
+      <path d="M 160 80 Q 280 65 400 80" fill="none" stroke="#15803d" stroke-width="3"/>
+      <line x1="200" y1="80" x2="200" y2="175" stroke="#0f172a" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="240" y1="80" x2="240" y2="175" stroke="#0f172a" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="280" y1="80" x2="280" y2="175" stroke="#0f172a" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="320" y1="80" x2="320" y2="175" stroke="#0f172a" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="360" y1="80" x2="360" y2="175" stroke="#0f172a" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="280" y="135" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">VANCHUYỂN PRO</text>
+      <!-- cabin -->
+      <path d="M 80 175 L 80 115 Q 80 100 95 100 L 140 100 L 160 130 L 160 175 Z" fill="url(#cab)" stroke="#0f172a" stroke-width="2"/>
+      <rect x="90" y="108" width="55" height="24" fill="#bfdbfe" stroke="#0f172a"/>
+      <circle cx="110" cy="195" r="16" fill="#1f2937"/><circle cx="110" cy="195" r="7" fill="#9ca3af"/>
+      <circle cx="220" cy="195" r="16" fill="#1f2937"/><circle cx="220" cy="195" r="7" fill="#9ca3af"/>
+      <circle cx="350" cy="195" r="16" fill="#1f2937"/><circle cx="350" cy="195" r="7" fill="#9ca3af"/>
+      <rect x="70" y="180" width="40" height="14" fill="#fff" stroke="#0f172a"/>
+      <text x="90" y="190" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800" font-family="Courier New">${plate}</text>`;
+  } else {
+    // truckBox – thùng kín
+    svg += `
+      <rect x="160" y="75" width="240" height="100" fill="${colorBody}" stroke="#0f172a" stroke-width="2"/>
+      <rect x="170" y="85" width="220" height="80" fill="#fff" stroke="#cbd5e1"/>
+      <text x="280" y="125" text-anchor="middle" fill="${colorBody}" font-size="22" font-weight="800">VANCHUYỂN</text>
+      <text x="280" y="148" text-anchor="middle" fill="#475569" font-size="11" font-weight="700">PRO LOGISTICS · ☎ 1900 1234</text>
+      <!-- cabin -->
+      <path d="M 80 175 L 80 110 Q 80 95 95 95 L 140 95 L 160 130 L 160 175 Z" fill="url(#cab)" stroke="#0f172a" stroke-width="2"/>
+      <rect x="90" y="105" width="55" height="26" fill="#bfdbfe" stroke="#0f172a"/>
+      <circle cx="135" cy="160" r="5" fill="#fbbf24"/>
+      <!-- door divider -->
+      <line x1="280" y1="75" x2="280" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+      <circle cx="275" cy="125" r="3" fill="#0f172a"/>
+      <circle cx="285" cy="125" r="3" fill="#0f172a"/>
+      <!-- wheels -->
+      <circle cx="110" cy="195" r="16" fill="#1f2937"/><circle cx="110" cy="195" r="7" fill="#9ca3af"/>
+      <circle cx="220" cy="195" r="16" fill="#1f2937"/><circle cx="220" cy="195" r="7" fill="#9ca3af"/>
+      <circle cx="350" cy="195" r="16" fill="#1f2937"/><circle cx="350" cy="195" r="7" fill="#9ca3af"/>
+      <rect x="70" y="180" width="40" height="14" fill="#fff" stroke="#0f172a"/>
+      <text x="90" y="190" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800" font-family="Courier New">${plate}</text>`;
+  }
+  svg += `</svg>`;
+  return svg;
+}
+function shade(hex, percent) {
+  if (hex.startsWith('#') && hex.length===7) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    const f = (c) => Math.max(0, Math.min(255, Math.round(c + (percent/100)*255)));
+    return `rgb(${f(r)},${f(g)},${f(b)})`;
+  }
+  return hex;
+}
+
+/* ===== Render ===== */
+function expCls(d){ const x=daysUntil(d); return x<0?'exp-out':(x<=30?'exp-warn':'exp-ok'); }
+function expTxt(d){ const x=daysUntil(d); return x<0?`⚠ Hết hạn ${-x}d trước`:(x<=30?`⏰ Còn ${x} ngày`:`✓ ${dStr(d)}`); }
+function statusBadge() {
+  if (D.status==='free') return `<span class="b b-free">🟢 Đang rảnh</span>`;
+  if (D.status==='busy') return `<span class="b b-busy">🚚 Đang chạy</span>`;
+  return `<span class="b b-off">⏸ Tạm ngưng</span>`;
+}
+function liveCls() { return D.status==='free'?'liv-on':D.status==='busy'?'liv-busy':'liv-off'; }
+function liveTxt() { return D.status==='free'?'● ONLINE':D.status==='busy'?'● ĐANG CHẠY':'● OFFLINE'; }
+function starsRow(r) {
+  const full = Math.floor(r), half = (r-full)>=0.5;
+  let s = '';
+  for (let i=0;i<5;i++) s += i<full ? '★' : (i===full && half ? '★' : '<span class="empty">★</span>');
+  return `<span class="stars">${s}</span> <b>${r.toFixed(1)}</b>`;
+}
+
+function renderHero() {
+  const av = D.photo
+    ? `<img src="${D.photo}" alt="${D.name}" onerror="this.parentNode.innerHTML='${D.avatar}'+'<span class=\\'liv ${liveCls()}\\'>${liveTxt()}</span>'">`
+    : (D.type==='company' ? '🏢' : D.avatar);
+  document.getElementById('hero').innerHTML = `
+    <div class="drv-photo" style="background:${D.bg};color:${D.fg};">
+      ${av}
+      <span class="liv ${liveCls()}">${liveTxt()}</span>
+    </div>
+    <div class="hero-info">
+      <h1>${D.name}</h1>
+      <div class="sub">${D.id} · ${D.type==='company'?'🏢 Công ty / Nhà xe':'👤 Tài xế cá nhân'} · Hợp tác từ ${dStr(D.joinDate)}</div>
+      <div class="meta-row">
+        <div><span class="ml">📞 SĐT</span><span class="mv">${D.phone}</span></div>
+        <div><span class="ml">${D.type==='company'?'MST':'CCCD'}</span><span class="mv">${D.type==='company'?D.taxCode:D.cccd}</span></div>
+        <div><span class="ml">🚛 Xe</span><span class="mv">${D.truck} · ${D.weightLbl}</span></div>
+        <div><span class="ml">🎫 Hạng bằng</span><span class="mv">${D.license.class}</span></div>
+        <div><span class="ml">⭐ Đánh giá</span><span class="mv">${starsRow(D.rating)}</span></div>
+        <div><span class="ml">💼 Tổng chuyến</span><span class="mv">${D.totalTrips}</span></div>
+      </div>
+    </div>
+    <div class="hero-act">
+      ${statusBadge()}
+      <button class="btn btn-secondary btn-sm" onclick="window.location.href='m2-dieu-phoi.html'">🎯 Phân chuyến</button>
+      <button class="btn btn-secondary btn-sm" onclick="window.location.href='m6-thu-chi.html'">💵 Thanh toán</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('Gọi ${D.phone}')">📞 Gọi ngay</button>
+    </div>`;
+}
+
+function renderInfo() {
+  return `<div class="grid-2">
+    <div class="info-card">
+      <h3>Thông tin cá nhân / Doanh nghiệp</h3>
+      ${D.type==='company' ? `
+        <div class="info-row"><span class="lbl">Tên doanh nghiệp</span><span class="val">${D.company}</span></div>
+        <div class="info-row"><span class="lbl">Mã số thuế</span><span class="val">${D.taxCode}</span></div>
+        <div class="info-row"><span class="lbl">Đại diện pháp luật</span><span class="val">${D.name}</span></div>
+      ` : `
+        <div class="info-row"><span class="lbl">Họ và tên</span><span class="val">${D.name}</span></div>
+        <div class="info-row"><span class="lbl">Ngày sinh</span><span class="val">${D.dob?dStr(D.dob):'—'}</span></div>
+        <div class="info-row"><span class="lbl">Giới tính</span><span class="val">${D.gender}</span></div>
+        <div class="info-row"><span class="lbl">CCCD</span><span class="val">${D.cccd}</span></div>
+      `}
+      <div class="info-row"><span class="lbl">Điện thoại</span><span class="val">${D.phone}</span></div>
+      <div class="info-row"><span class="lbl">Email</span><span class="val">${D.email}</span></div>
+      <div class="info-row"><span class="lbl">Địa chỉ</span><span class="val">${D.address}</span></div>
+    </div>
+    <div class="info-card">
+      <h3>Hợp tác & Thanh toán</h3>
+      <div class="info-row"><span class="lbl">Mã đối tác</span><span class="val">${D.id}</span></div>
+      <div class="info-row"><span class="lbl">Loại</span><span class="val">${D.type==='company'?'Công ty / Nhà xe':'Cá nhân tự do'}</span></div>
+      <div class="info-row"><span class="lbl">Ngày bắt đầu hợp tác</span><span class="val">${dStr(D.joinDate)}</span></div>
+      <div class="info-row"><span class="lbl">Hoa hồng</span><span class="val">${D.commission.type==='pct'?D.commission.value+'% doanh thu':D.commission.type==='trip'?FMT(D.commission.value)+' / chuyến':FMT(D.commission.value)+' / tháng'}</span></div>
+      <div class="info-row"><span class="lbl">Ngân hàng</span><span class="val">${D.bank}</span></div>
+      <div class="info-row"><span class="lbl">Số tài khoản</span><span class="val" style="font-family:Courier New;">${D.bankNo}</span></div>
+      <div class="info-row"><span class="lbl">Chủ tài khoản</span><span class="val">${D.bankName}</span></div>
+      <div class="info-row"><span class="lbl">Ghi chú</span><span class="val" style="color:#475569;font-weight:500;">${D.note||'—'}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderVehicle() {
+  const r = D.register;
+  return `
+    <div class="info-card" style="background:#fff;padding:0;overflow:hidden;margin-bottom:14px;">
+      <div style="background:#f8fafc;border-bottom:1px solid var(--border);">${svgTruck()}</div>
+      <div style="padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div>
+            <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:700;">Biển kiểm soát</div>
+            <div style="font-size:24px;font-weight:800;font-family:Courier New;color:#0f172a;">${D.truck}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:#64748b;">Tải trọng</div>
+            <div style="font-size:18px;font-weight:800;color:var(--primary);">${D.weightLbl}</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="info-row"><span class="lbl">Loại xe</span><span class="val">${D.truckType}</span></div>
+            <div class="info-row"><span class="lbl">Nhãn hiệu</span><span class="val">${D.truckBrand}</span></div>
+            <div class="info-row"><span class="lbl">Năm sản xuất</span><span class="val">${D.truckYear}</span></div>
+            <div class="info-row"><span class="lbl">Màu xe</span><span class="val">${D.truckColor}</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="lbl">Số đăng kiểm</span><span class="val">${r.no}</span></div>
+            <div class="info-row"><span class="lbl">Đăng kiểm tại</span><span class="val">${r.place}</span></div>
+            <div class="info-row"><span class="lbl">Hết hạn ĐK</span><span class="val ${expCls(r.expire)}">${expTxt(r.expire)}</span></div>
+            <div class="info-row"><span class="lbl">Hết hạn BH</span><span class="val ${expCls(D.insurance.expire)}">${expTxt(D.insurance.expire)}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderDocs() {
+  const lic = D.license, ins = D.insurance, reg = D.register;
+  return `<div class="docs-grid">
+    <div class="doc-card">
+      <div class="doc-img">${svgCCCD()}</div>
+      <div class="doc-meta"><span><b>${D.type==='company'?'GCN ĐKKD':'CCCD'}</b><br>${D.type==='company'?'MST '+D.taxCode:D.cccd}</span><span class="exp-ok">✓ Hợp lệ</span></div>
+    </div>
+    <div class="doc-card">
+      <div class="doc-img">${svgLicense()}</div>
+      <div class="doc-meta"><span><b>GPLX hạng ${lic.class}</b><br>${lic.no}</span><span class="doc-exp ${expCls(lic.expire)}">${expTxt(lic.expire)}</span></div>
+    </div>
+    <div class="doc-card">
+      <div class="doc-img">${svgRegister()}</div>
+      <div class="doc-meta"><span><b>Đăng kiểm xe</b><br>${reg.no}</span><span class="doc-exp ${expCls(reg.expire)}">${expTxt(reg.expire)}</span></div>
+    </div>
+    <div class="doc-card">
+      <div class="doc-img">${svgInsurance()}</div>
+      <div class="doc-meta"><span><b>BH TNDS – ${ins.company}</b><br>${ins.no}</span><span class="doc-exp ${expCls(ins.expire)}">${expTxt(ins.expire)}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderTrips() {
+  const totRev = TRIPS.filter(t=>t.st==='done').reduce((s,t)=>s+t.rev,0);
+  const totCom = TRIPS.filter(t=>t.st==='done').reduce((s,t)=>s+t.com,0);
+  const totKm  = TRIPS.filter(t=>t.st==='done').reduce((s,t)=>s+t.km,0);
+  return `
+    <div class="kpi4">
+      <div class="kbox blue"><div class="l">Chuyến đã chạy</div><div class="v">${TRIPS.filter(t=>t.st==='done').length}</div></div>
+      <div class="kbox in"><div class="l">Tổng KM</div><div class="v">${totKm.toLocaleString('vi-VN')} km</div></div>
+      <div class="kbox in"><div class="l">Doanh thu mang về</div><div class="v">${FMTM(totRev)}</div></div>
+      <div class="kbox warn"><div class="l">Hoa hồng phải trả</div><div class="v">${FMTM(totCom)}</div></div>
+    </div>
+    <table class="t">
+      <thead><tr><th>Ngày</th><th>Mã chuyến</th><th>Tuyến</th><th style="text-align:right;">KM</th><th style="text-align:right;">Doanh thu</th><th style="text-align:right;">Hoa hồng</th><th>Trạng thái</th></tr></thead>
+      <tbody>
+        ${TRIPS.map(t=>`
+          <tr>
+            <td>${dStr(t.date)}</td>
+            <td><b style="color:#1d4ed8;">${t.code}</b></td>
+            <td>${t.route}</td>
+            <td style="text-align:right;">${t.km}</td>
+            <td style="text-align:right;color:#15803d;font-weight:700;">${FMT(t.rev)}</td>
+            <td style="text-align:right;color:#b45309;font-weight:700;">${FMT(t.com)}</td>
+            <td>${t.st==='done'?'<span class="pill" style="background:#dcfce7;color:#15803d;">✓ Hoàn tất</span>':'<span class="pill" style="background:#fee2e2;color:#b91c1c;">✕ Huỷ</span>'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderPay() {
+  const totCom = PAY_HIST.reduce((s,p)=>s+p.com,0);
+  const totPaid = PAY_HIST.reduce((s,p)=>s+p.paid,0);
+  const debt = totCom - totPaid;
+  return `
+    <div class="pay-bar">
+      <div>
+        <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:700;">Còn phải trả đối tác</div>
+        <div style="font-size:22px;font-weight:800;color:#b45309;">${FMT(debt)}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">Đã trả ${FMT(totPaid)} / ${FMT(totCom)} (6 tháng gần nhất)</div>
+      </div>
+      <div>
+        <button class="btn btn-secondary btn-sm">📄 Xuất bảng kê</button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='m6-thu-chi.html'">💵 Thanh toán ngay</button>
+      </div>
+    </div>
+    <div class="info-card" style="background:#fff;margin-bottom:10px;">
+      <h3>Cấu trúc hoa hồng</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div style="background:#f5f3ff;padding:10px;border-radius:8px;text-align:center;">
+          <div style="font-size:11px;color:#64748b;">Loại hoa hồng</div>
+          <div style="font-size:14px;font-weight:800;color:var(--primary);margin-top:3px;">${D.commission.type==='pct'?'% doanh thu':D.commission.type==='trip'?'Cố định/chuyến':'Cố định/tháng'}</div>
+        </div>
+        <div style="background:#dcfce7;padding:10px;border-radius:8px;text-align:center;">
+          <div style="font-size:11px;color:#64748b;">Mức hưởng</div>
+          <div style="font-size:14px;font-weight:800;color:#15803d;margin-top:3px;">${D.commission.type==='pct'?D.commission.value+'%':FMT(D.commission.value)}</div>
+        </div>
+        <div style="background:#fef3c7;padding:10px;border-radius:8px;text-align:center;">
+          <div style="font-size:11px;color:#64748b;">Phần Cty giữ (T5)</div>
+          <div style="font-size:14px;font-weight:800;color:#b45309;margin-top:3px;">${FMTM(D.revM - D.payM)}</div>
+        </div>
+      </div>
+    </div>
+    <table class="t">
+      <thead><tr><th>Tháng</th><th style="text-align:right;">Chuyến</th><th style="text-align:right;">Doanh thu</th><th style="text-align:right;">Hoa hồng</th><th style="text-align:right;">Đã trả</th><th>Tiến độ</th><th>Trạng thái</th><th>Ngày trả</th></tr></thead>
+      <tbody>
+        ${PAY_HIST.map(p=>{
+          const pct = p.com? Math.round(p.paid/p.com*100):0;
+          const stCls = p.st==='paid'?'background:#dcfce7;color:#15803d;':p.paid>0?'background:#fef3c7;color:#b45309;':'background:#fee2e2;color:#b91c1c;';
+          const stTxt = p.st==='paid'?'✓ Đã trả':p.paid>0?'⏳ Trả 1 phần':'❌ Chưa trả';
+          return `<tr>
+            <td><b>${p.month}</b></td>
+            <td style="text-align:right;">${p.trips}</td>
+            <td style="text-align:right;">${FMT(p.rev)}</td>
+            <td style="text-align:right;color:#b45309;font-weight:700;">${FMT(p.com)}</td>
+            <td style="text-align:right;color:#15803d;font-weight:700;">${FMT(p.paid)}</td>
+            <td><div class="paybar-mini" style="width:100px;"><i style="width:${pct}%;background:${pct===100?'#16a34a':pct>0?'#f59e0b':'#dc2626'};"></i></div> <b style="font-size:11px;">${pct}%</b></td>
+            <td><span class="pill" style="${stCls}">${stTxt}</span></td>
+            <td>${p.date?dStr(p.date):'—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+const RENDERS = { info:renderInfo, vehicle:renderVehicle, docs:renderDocs, trips:renderTrips, pay:renderPay };
+function setTab(t) {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab===t));
+  document.getElementById('panel').innerHTML = RENDERS[t]();
+}
+
+renderHero();
+setTab('info');
+document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+</script>
+</body>
+</html>

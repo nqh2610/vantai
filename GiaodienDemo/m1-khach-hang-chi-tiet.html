@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết khách hàng – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* ===== Layout compact ===== */
+    .page-content { padding: 10px 14px !important; }
+
+    /* ===== Header card ===== */
+    .cust-head {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 8px;
+      display: flex; gap: 14px; align-items: center;
+    }
+    .cust-avatar {
+      width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800;
+    }
+    .cust-info { flex: 1; min-width: 0; }
+    .cust-name { font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 2px; }
+    .cust-meta { font-size: 12px; color: #64748b; display: flex; gap: 12px; flex-wrap: wrap; }
+    .cust-meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .cust-tags { display: flex; gap: 4px; margin-top: 4px; }
+    .cust-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .back-link {
+      font-size: 12px; color: var(--primary); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ===== KPI strip ===== */
+    .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 8px; }
+    .kpi-mini {
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px 8px 12px; position: relative;
+    }
+    .kpi-mini::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 8px 0 0 8px;
+    }
+    .kpi-mini.c1::before { background: #4f46e5; }
+    .kpi-mini.c2::before { background: #16a34a; }
+    .kpi-mini.c3::before { background: #f59e0b; }
+    .kpi-mini.c4::before { background: #dc2626; }
+    .kpi-mini.c5::before { background: #0891b2; }
+    .km-lbl { font-size: 10.5px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+    .km-val { font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.15; margin-top: 2px; }
+    .km-sub { font-size: 11px; color: #64748b; margin-top: 1px; }
+    .km-val.in    { color: #15803d; }
+    .km-val.out   { color: #b91c1c; }
+    .km-val.warn  { color: #b45309; }
+
+    /* ===== Tabs ===== */
+    .tab-strip {
+      display: flex; gap: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 4px; margin-bottom: 8px;
+    }
+    .tab-strip button {
+      flex: 1; border: 0; background: transparent; padding: 8px 12px; border-radius: 5px;
+      font-size: 13px; font-weight: 600; color: #475569; cursor: pointer;
+    }
+    .tab-strip button.active { background: var(--primary); color: #fff; }
+    .tab-strip .pill {
+      display: inline-block; background: rgba(255,255,255,0.25); padding: 1px 7px;
+      border-radius: 10px; font-size: 11px; margin-left: 4px;
+    }
+    .tab-strip button:not(.active) .pill { background: #f1f5f9; color: #475569; }
+
+    /* ===== Card ===== */
+    .panel {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 8px;
+    }
+    .panel-head {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+      padding-bottom: 6px; border-bottom: 1px solid #f1f5f9;
+    }
+    .panel-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+
+    /* ===== Two-col overview ===== */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .info-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px; padding: 5px 0; font-size: 12.5px; }
+    .info-row .lbl { color: #64748b; font-weight: 600; }
+    .info-row .val { color: #0f172a; }
+
+    /* ===== Tables ===== */
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; }
+    .data-table thead th {
+      background: #f8fafc; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px;
+      color: #64748b; font-weight: 700; padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .data-table tbody td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .data-table tbody tr:hover { background: #f8fafc; }
+    .data-table tbody tr:last-child td { border-bottom: 0; }
+    .data-table tfoot td {
+      padding: 8px 10px; font-weight: 700; background: #f8fafc; border-top: 2px solid var(--border); font-size: 12.5px;
+    }
+    .nowrap { white-space: nowrap; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+
+    /* ===== Filter ===== */
+    .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .toolbar input, .toolbar select {
+      height: 30px; padding: 0 8px; font-size: 12.5px;
+      border: 1px solid var(--border); border-radius: 6px; background: #fff;
+    }
+
+    /* ===== Trend chart (mini) ===== */
+    .mini-chart {
+      display: flex; align-items: flex-end; gap: 4px; height: 80px;
+      padding: 4px 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .mini-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .mini-bar { width: 100%; background: linear-gradient(180deg, #818cf8, #4f46e5); border-radius: 3px 3px 0 0; min-height: 2px; }
+    .mini-lbl { font-size: 9.5px; color: #64748b; font-weight: 600; }
+
+    /* ===== Activity timeline ===== */
+    .timeline { position: relative; padding-left: 20px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px;
+      width: 2px; background: #e2e8f0;
+    }
+    .tl-item { position: relative; padding-bottom: 10px; }
+    .tl-item::before {
+      content: ''; position: absolute; left: -18px; top: 4px;
+      width: 10px; height: 10px; border-radius: 50%; background: var(--primary); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--primary-light);
+    }
+    .tl-item.in::before  { background: #16a34a; box-shadow: 0 0 0 2px #bbf7d0; }
+    .tl-item.out::before { background: #dc2626; box-shadow: 0 0 0 2px #fecaca; }
+    .tl-day { font-size: 11px; color: #64748b; font-weight: 600; }
+    .tl-text { font-size: 12.5px; color: #0f172a; margin-top: 1px; }
+    .tl-amt { font-size: 12px; font-weight: 700; }
+
+    /* ===== Status badges (custom) ===== */
+    .b { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .b-green   { background: #dcfce7; color: #15803d; }
+    .b-red     { background: #fee2e2; color: #b91c1c; }
+    .b-yellow  { background: #fef3c7; color: #b45309; }
+    .b-blue    { background: #dbeafe; color: #1d4ed8; }
+    .b-gray    { background: #f1f5f9; color: #475569; }
+
+    /* ===== Debt aging bar ===== */
+    .aging-bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: #f1f5f9; margin-bottom: 4px; }
+    .aging-seg { display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 700; }
+    .aging-legend { display: flex; gap: 12px; font-size: 11px; color: #475569; flex-wrap: wrap; }
+    .aging-legend .ld { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+
+    @media (max-width: 1100px) {
+      .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item active"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Dòng tiền</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 1</span><span class="sep">›</span>
+      <a href="m1-khach-hang.html" class="parent" style="text-decoration:none;color:inherit;">Khách hàng</a>
+      <span class="sep">›</span><span class="current" id="bcCustName">Chi tiết</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <a href="m1-khach-hang.html" class="back-link">‹ Quay lại danh sách khách hàng</a>
+
+    <!-- ===== Customer header card ===== -->
+    <div class="cust-head">
+      <div class="cust-avatar" id="custAvatar" style="background:#e0e7ff;color:#3730a3;">M</div>
+      <div class="cust-info">
+        <div class="cust-name" id="custName">—</div>
+        <div class="cust-meta" id="custMeta"></div>
+        <div class="cust-tags" id="custTags"></div>
+      </div>
+      <div class="cust-actions">
+        <button class="btn btn-secondary btn-sm" onclick="alert('Sửa hồ sơ')">✏️ Sửa</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='m6-cong-no.html'">📒 Công nợ</button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='m1-bao-gia.html'">+ Tạo đơn</button>
+      </div>
+    </div>
+
+    <!-- ===== KPI strip ===== -->
+    <div class="kpi-strip">
+      <div class="kpi-mini c1">
+        <div class="km-lbl">📦 Tổng đơn</div>
+        <div class="km-val" id="kpiOrders">0</div>
+        <div class="km-sub" id="kpiOrdersSub">—</div>
+      </div>
+      <div class="kpi-mini c2">
+        <div class="km-lbl">💰 Doanh thu</div>
+        <div class="km-val in" id="kpiRevenue">0</div>
+        <div class="km-sub" id="kpiRevenueSub">—</div>
+      </div>
+      <div class="kpi-mini c3">
+        <div class="km-lbl">✅ Đã thu</div>
+        <div class="km-val in" id="kpiPaid">0</div>
+        <div class="km-sub" id="kpiPaidSub">—</div>
+      </div>
+      <div class="kpi-mini c4">
+        <div class="km-lbl">⏳ Còn nợ</div>
+        <div class="km-val out" id="kpiDebt">0</div>
+        <div class="km-sub" id="kpiDebtSub">—</div>
+      </div>
+      <div class="kpi-mini c5">
+        <div class="km-lbl">📅 Đơn gần nhất</div>
+        <div class="km-val" id="kpiLast" style="font-size:14px;">—</div>
+        <div class="km-sub" id="kpiLastSub">—</div>
+      </div>
+    </div>
+
+    <!-- ===== Tabs ===== -->
+    <div class="tab-strip">
+      <button class="active" data-tab="overview" onclick="setTab('overview')">📊 Tổng quan</button>
+      <button data-tab="orders" onclick="setTab('orders')">📦 Đơn hàng <span class="pill" id="pillOrders">0</span></button>
+      <button data-tab="debt" onclick="setTab('debt')">📒 Công nợ <span class="pill" id="pillDebt">0</span></button>
+    </div>
+
+    <!-- ===== TAB: Tổng quan ===== -->
+    <div id="tab-overview">
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">📋 Thông tin liên hệ</div></div>
+          <div class="info-row"><div class="lbl">Loại KH</div><div class="val" id="iType">—</div></div>
+          <div class="info-row"><div class="lbl">MST</div><div class="val" id="iMst">—</div></div>
+          <div class="info-row"><div class="lbl">Người liên hệ</div><div class="val" id="iContact">—</div></div>
+          <div class="info-row"><div class="lbl">Điện thoại</div><div class="val" id="iPhone">—</div></div>
+          <div class="info-row"><div class="lbl">Email</div><div class="val" id="iEmail">—</div></div>
+          <div class="info-row"><div class="lbl">Địa chỉ</div><div class="val" id="iAddr">—</div></div>
+          <div class="info-row"><div class="lbl">KH từ</div><div class="val" id="iSince">—</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">⚙️ Điều khoản & Hạn mức</div></div>
+          <div class="info-row"><div class="lbl">Hạn thanh toán</div><div class="val" id="iTerms">— ngày</div></div>
+          <div class="info-row"><div class="lbl">Hạn mức nợ</div><div class="val" id="iLimit">—</div></div>
+          <div class="info-row"><div class="lbl">% nợ/hạn mức</div><div class="val" id="iLimitPct">—</div></div>
+          <div class="info-row"><div class="lbl">Phương thức TT</div><div class="val">💳 Chuyển khoản · 💵 Tiền mặt</div></div>
+          <div class="info-row"><div class="lbl">Mã KH</div><div class="val" id="iCode">—</div></div>
+          <div class="info-row"><div class="lbl">Phụ trách</div><div class="val">Nguyễn Văn A (Sales)</div></div>
+          <div class="info-row"><div class="lbl">Ghi chú</div><div class="val" id="iNote" style="font-size:12px;color:#64748b;">—</div></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">📈 Doanh thu 6 tháng gần đây</div>
+            <div style="font-size:11px;color:#64748b;" id="trend6mTot">—</div>
+          </div>
+          <div class="mini-chart" id="trend6m"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">🕒 Hoạt động gần đây</div></div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: Đơn hàng ===== -->
+    <div id="tab-orders" style="display:none;">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📦 Lịch sử đơn hàng</div>
+          <div class="toolbar" style="margin:0;">
+            <input type="text" id="ordSearch" placeholder="🔍 Mã đơn, tuyến..." oninput="renderOrders()">
+            <select id="ordStatus" onchange="renderOrders()">
+              <option value="">Mọi trạng thái</option>
+              <option value="done">Hoàn thành</option>
+              <option value="running">Đang chạy</option>
+              <option value="cancel">Huỷ</option>
+            </select>
+            <select id="ordPay" onchange="renderOrders()">
+              <option value="">Mọi TT</option>
+              <option value="paid">Đã thanh toán</option>
+              <option value="partial">Thu một phần</option>
+              <option value="unpaid">Chưa thu</option>
+            </select>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã đơn</th>
+              <th>Ngày</th>
+              <th>Tuyến</th>
+              <th class="center">Trọng tải</th>
+              <th>Trạng thái</th>
+              <th>Thanh toán</th>
+              <th class="right">Giá trị</th>
+              <th class="right">Đã thu</th>
+              <th class="right">Còn nợ</th>
+              <th class="center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="ordBody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="6">Tổng <span id="ordCount">0</span> đơn</td>
+              <td class="right" id="ordTotal">0</td>
+              <td class="right" id="ordPaid" style="color:#15803d;">0</td>
+              <td class="right" id="ordDebt" style="color:#b91c1c;">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== TAB: Công nợ ===== -->
+    <div id="tab-debt" style="display:none;">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📊 Tuổi nợ (Aging analysis)</div>
+          <div style="font-size:11px;color:#64748b;">Tổng còn phải thu: <b id="agTotal" style="color:#b91c1c;">0</b></div>
+        </div>
+        <div class="aging-bar" id="agingBar"></div>
+        <div class="aging-legend">
+          <span><span class="ld" style="background:#16a34a;"></span>Trong hạn (≤30d): <b id="agOk">0</b></span>
+          <span><span class="ld" style="background:#f59e0b;"></span>Quá hạn 31-60d: <b id="agWarn">0</b></span>
+          <span><span class="ld" style="background:#dc2626;"></span>Quá hạn &gt;60d: <b id="agBad">0</b></span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">📋 Chuyến/HĐ chưa thu xong</div>
+            <span style="font-size:11px;color:#64748b;" id="debtCount">0 mục</span>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Mã HĐ</th><th>Ngày</th><th>Hạn</th><th>Tuyến</th><th class="right">Còn nợ</th></tr></thead>
+            <tbody id="debtBody"></tbody>
+            <tfoot><tr><td colspan="4">Tổng còn nợ</td><td class="right" id="debtTotalFt" style="color:#b91c1c;">0</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">💵 Lịch sử thanh toán</div>
+            <span style="font-size:11px;color:#64748b;" id="payCount">0 lần</span>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Ngày</th><th>Hình thức</th><th>Ghi chú</th><th class="right">Số tiền</th></tr></thead>
+            <tbody id="payBody"></tbody>
+            <tfoot><tr><td colspan="3">Tổng đã thu</td><td class="right" id="payTotalFt" style="color:#15803d;">0</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;justify-content:flex-end;">
+        <button class="btn btn-secondary btn-sm" onclick="alert('Mở cửa sổ in Bảng kê công nợ')">🖨️ Bảng kê</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Mở QR chuyển khoản')">📲 QR chuyển khoản</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Gửi nhắc nợ')">📧 Nhắc nợ</button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='m6-cong-no.html'">💰 Ghi nhận thu nợ</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+/* ============================================================
+   CHI TIẾT KHÁCH HÀNG
+   ============================================================ */
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => {
+  const v = Math.abs(n||0);
+  if (v >= 1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'') + ' tỷ';
+  if (v >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (v >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const dShort = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+const monthsBetween = (a, b) => (b.getFullYear()-a.getFullYear())*12 + (b.getMonth()-a.getMonth());
+
+/* ===== CUSTOMERS DB (gắn với module công nợ) ===== */
+const CUSTOMERS = {
+  KH01: {
+    id:'KH01', code:'KH-2024-001', name:'Công ty TNHH Minh Phú', short:'Minh Phú',
+    type:'Doanh nghiệp', mst:'0301234567', phone:'0901 234 567', email:'minhphu@logistics.vn',
+    contact:'Anh Tuấn (Trưởng phòng MUA)',
+    addr:'12 Lê Lợi, Q.1, TP.HCM',
+    avatar:'M', bg:'#e0e7ff', fg:'#3730a3',
+    since: new Date(2023, 2, 10), terms: 30, limit: 200_000_000,
+    note:'KH lâu năm, ưu tiên xe lạnh tuyến HCM-HN.',
+    status:'overdue'
+  },
+  KH02: {
+    id:'KH02', code:'KH-2024-002', name:'Công ty CP An Khang', short:'An Khang',
+    type:'Doanh nghiệp', mst:'0302345678', phone:'0912 345 678', email:'ankhang@trading.vn',
+    contact:'Chị Hoa (Kế toán)',
+    addr:'45 Trần Hưng Đạo, Q.5, TP.HCM',
+    avatar:'A', bg:'#dcfce7', fg:'#15803d',
+    since: new Date(2024, 5, 1), terms: 45, limit: 150_000_000,
+    note:'Thường yêu cầu xuất hoá đơn ngay.',
+    status:'open'
+  },
+  KH03: {
+    id:'KH03', code:'KH-2024-003', name:'Tập đoàn Hoàng Gia', short:'Hoàng Gia',
+    type:'Doanh nghiệp', mst:'0303456789', phone:'0908 765 432', email:'hg@hoanggia.com.vn',
+    contact:'Chị Lan (Trưởng nhóm)',
+    addr:'88 Nguyễn Huệ, Q.1, TP.HCM',
+    avatar:'H', bg:'#fef3c7', fg:'#b45309',
+    since: new Date(2023, 8, 15), terms: 30, limit: 300_000_000,
+    note:'KH VIP. Tuyến cố định HCM ↔ Đà Nẵng.',
+    status:'duesoon'
+  }
+};
+
+/* ===== ORDERS ===== */
+const ORDERS = [];
+let _seq = 1;
+function addOrder(custId, year, month, day, route, weight, value, paid, status='done', note='') {
+  ORDERS.push({
+    id: `DH-2026-${String(_seq++).padStart(4,'0')}`,
+    custId, date: new Date(year, month-1, day),
+    route, weight, value, paid,
+    debt: value - paid,
+    status,
+    payStatus: paid >= value ? 'paid' : (paid > 0 ? 'partial' : 'unpaid'),
+    note
+  });
+}
+// KH01 - Minh Phú
+addOrder('KH01',2025,11, 5,'HCM → Hà Nội','12T',  18_500_000, 18_500_000);
+addOrder('KH01',2025,12,12,'HCM → Hà Nội','15T',  22_300_000, 22_300_000);
+addOrder('KH01',2026, 1, 8,'HCM → Hải Phòng','10T',16_200_000, 16_200_000);
+addOrder('KH01',2026, 2,15,'HCM → Hà Nội','12T',  19_000_000, 19_000_000);
+addOrder('KH01',2026, 3, 3,'HCM → Hà Nội','15T',  24_500_000, 12_000_000);
+addOrder('KH01',2026, 3,22,'HCM → Đà Nẵng','12T', 14_800_000, 0);
+addOrder('KH01',2026, 4, 7,'HCM → Hà Nội','15T',  23_700_000, 0);
+addOrder('KH01',2026, 4,18,'HCM → Hà Nội','12T',  18_900_000, 0);
+addOrder('KH01',2026, 5, 2,'HCM → Hải Phòng','10T',15_400_000, 0,'running');
+addOrder('KH01',2026, 5,10,'HCM → Hà Nội','15T',  25_100_000, 0,'running');
+
+// KH02 - An Khang
+addOrder('KH02',2026, 2,10,'HCM → Cần Thơ','8T',   8_500_000,  8_500_000);
+addOrder('KH02',2026, 3, 5,'HCM → Vũng Tàu','5T',  6_200_000,  6_200_000);
+addOrder('KH02',2026, 3,28,'HCM → Cần Thơ','8T',   9_100_000,  9_100_000);
+addOrder('KH02',2026, 4,14,'HCM → Vũng Tàu','5T',  6_800_000,  6_800_000);
+addOrder('KH02',2026, 5, 6,'HCM → Cần Thơ','8T',   8_800_000,  4_000_000);
+
+// KH03 - Hoàng Gia
+addOrder('KH03',2025,12, 8,'HCM → Đà Nẵng','15T', 22_500_000, 22_500_000);
+addOrder('KH03',2026, 1,18,'HCM → Đà Nẵng','15T', 23_100_000, 23_100_000);
+addOrder('KH03',2026, 2,25,'HCM → Đà Nẵng','12T', 19_800_000, 19_800_000);
+addOrder('KH03',2026, 3,12,'Đà Nẵng → Huế','5T',  7_500_000,  7_500_000);
+addOrder('KH03',2026, 4, 9,'HCM → Đà Nẵng','15T', 24_200_000, 12_000_000);
+addOrder('KH03',2026, 4,28,'HCM → Đà Nẵng','15T', 23_800_000, 0);
+addOrder('KH03',2026, 5, 5,'HCM → Đà Nẵng','12T', 20_100_000, 0,'running');
+
+/* ===== PAYMENTS ===== */
+const PAYMENTS = {
+  KH01: [
+    { date:new Date(2025,11,30), amt: 22_300_000, method:'bank', note:'TT đơn DH-...0002' },
+    { date:new Date(2026, 1,28), amt: 16_200_000, method:'bank', note:'TT đơn T01' },
+    { date:new Date(2026, 3,15), amt: 31_000_000, method:'bank', note:'TT 2 đơn T02 + 1 phần T03' },
+  ],
+  KH02: [
+    { date:new Date(2026, 2,28), amt:  8_500_000, method:'bank', note:'TT cong no T02' },
+    { date:new Date(2026, 4, 5), amt: 22_100_000, method:'bank', note:'TT cong no T03+T04' },
+    { date:new Date(2026, 5,10), amt:  4_000_000, method:'cash', note:'Ứng trước' },
+  ],
+  KH03: [
+    { date:new Date(2025,11,28), amt: 22_500_000, method:'bank', note:'TT T11' },
+    { date:new Date(2026, 1,30), amt: 23_100_000, method:'bank', note:'TT T01' },
+    { date:new Date(2026, 3,25), amt: 27_300_000, method:'bank', note:'TT T02 + chuyến Huế' },
+    { date:new Date(2026, 4,28), amt: 12_000_000, method:'bank', note:'TT 1 phần đơn T04' },
+  ]
+};
+
+/* ===== State ===== */
+let curId = (new URLSearchParams(location.search).get('id')) || 'KH01';
+if (!CUSTOMERS[curId]) curId = 'KH01';
+
+/* ===== Helpers ===== */
+function statusBadge(s) {
+  switch (s) {
+    case 'overdue':  return '<span class="b b-red">⚠ Có nợ quá hạn</span>';
+    case 'duesoon':  return '<span class="b b-yellow">⏰ Sắp đến hạn</span>';
+    case 'open':     return '<span class="b b-green">✓ Tốt</span>';
+    case 'paid':     return '<span class="b b-green">✓ Đã thu đủ</span>';
+    default:         return '<span class="b b-gray">—</span>';
+  }
+}
+function ordStatusBadge(s) {
+  return s==='done' ? '<span class="b b-green">Hoàn thành</span>'
+       : s==='running' ? '<span class="b b-blue">Đang chạy</span>'
+       : '<span class="b b-gray">Huỷ</span>';
+}
+function payStatusBadge(s) {
+  return s==='paid' ? '<span class="b b-green">✓ Đã thu</span>'
+       : s==='partial' ? '<span class="b b-yellow">Thu một phần</span>'
+       : '<span class="b b-red">Chưa thu</span>';
+}
+
+/* ===== Rendering ===== */
+function render() {
+  const c = CUSTOMERS[curId];
+  document.title = `${c.name} – VanChuyển Pro`;
+  document.getElementById('bcCustName').textContent = c.short;
+  // Header
+  const av = document.getElementById('custAvatar');
+  av.textContent = c.avatar; av.style.background = c.bg; av.style.color = c.fg;
+  document.getElementById('custName').textContent = c.name;
+  document.getElementById('custMeta').innerHTML = `
+    <span>🏷️ ${c.code}</span>
+    <span>🏛️ MST: ${c.mst}</span>
+    <span>📞 ${c.phone}</span>
+    <span>✉ ${c.email}</span>`;
+  document.getElementById('custTags').innerHTML =
+    `<span class="b b-blue">${c.type}</span>${statusBadge(c.status)}<span class="b b-gray">${monthsBetween(c.since, TODAY)} tháng</span>`;
+
+  // Orders & debt of this customer
+  const orders = ORDERS.filter(o => o.custId === c.id);
+  const totalRev = orders.reduce((s,o)=>s+o.value,0);
+  const totalPaid = orders.reduce((s,o)=>s+o.paid,0);
+  const totalDebt = totalRev - totalPaid;
+  const debtOrders = orders.filter(o => o.debt > 0);
+  const lastOrd = orders.length ? orders.reduce((a,b)=>a.date>b.date?a:b) : null;
+  const pays = PAYMENTS[c.id] || [];
+
+  // KPI
+  document.getElementById('kpiOrders').textContent = orders.length;
+  document.getElementById('kpiOrdersSub').textContent = `${orders.filter(o=>o.status==='running').length} đang chạy`;
+  document.getElementById('kpiRevenue').textContent = FMTM(totalRev);
+  document.getElementById('kpiRevenueSub').textContent = `Trung bình ${FMTM(totalRev/Math.max(1,orders.length))}/đơn`;
+  document.getElementById('kpiPaid').textContent = FMTM(totalPaid);
+  document.getElementById('kpiPaidSub').textContent = `${pays.length} lần TT`;
+  document.getElementById('kpiDebt').textContent = FMTM(totalDebt);
+  document.getElementById('kpiDebtSub').textContent = `${debtOrders.length} đơn chưa thu xong`;
+  if (lastOrd) {
+    document.getElementById('kpiLast').textContent = dStr(lastOrd.date);
+    const days = Math.round((TODAY - lastOrd.date) / 86400000);
+    document.getElementById('kpiLastSub').textContent = days <= 0 ? 'Hôm nay' : `${days} ngày trước`;
+  }
+
+  // Pills
+  document.getElementById('pillOrders').textContent = orders.length;
+  document.getElementById('pillDebt').textContent = debtOrders.length;
+
+  // Overview info
+  document.getElementById('iType').textContent = c.type;
+  document.getElementById('iMst').textContent = c.mst;
+  document.getElementById('iContact').textContent = c.contact;
+  document.getElementById('iPhone').textContent = c.phone;
+  document.getElementById('iEmail').textContent = c.email;
+  document.getElementById('iAddr').textContent = c.addr;
+  document.getElementById('iSince').textContent = `${dStr(c.since)} (${monthsBetween(c.since, TODAY)} tháng)`;
+  document.getElementById('iTerms').textContent = `${c.terms} ngày`;
+  document.getElementById('iLimit').textContent = FMT(c.limit);
+  const usePct = (totalDebt / c.limit * 100);
+  const useColor = usePct >= 80 ? '#b91c1c' : usePct >= 50 ? '#b45309' : '#15803d';
+  document.getElementById('iLimitPct').innerHTML = `<b style="color:${useColor};">${usePct.toFixed(1)}%</b> · còn ${FMTM(c.limit-totalDebt)}`;
+  document.getElementById('iCode').textContent = c.code;
+  document.getElementById('iNote').textContent = c.note;
+
+  // 6-month trend
+  const trend = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(TODAY.getFullYear(), TODAY.getMonth()-i, 1);
+    const monthOrders = orders.filter(o => o.date.getFullYear()===d.getFullYear() && o.date.getMonth()===d.getMonth());
+    const sum = monthOrders.reduce((s,o)=>s+o.value,0);
+    trend.push({ label: `T${String(d.getMonth()+1).padStart(2,'0')}`, value: sum });
+  }
+  const maxT = Math.max(1, ...trend.map(t=>t.value));
+  document.getElementById('trend6m').innerHTML = trend.map(t => `
+    <div class="mini-col" title="${t.label}: ${FMT(t.value)}">
+      <div class="mini-bar" style="height:${t.value/maxT*68}px;"></div>
+      <div class="mini-lbl">${t.label}</div>
+      <div class="mini-lbl" style="color:#0f172a;font-weight:700;">${FMTM(t.value)}</div>
+    </div>`).join('');
+  document.getElementById('trend6mTot').textContent = `Tổng 6 tháng: ${FMT(trend.reduce((s,t)=>s+t.value,0))}`;
+
+  // Timeline
+  const events = [];
+  orders.slice(-6).forEach(o => events.push({ d:o.date, t:'order', text:`Đặt đơn <b>${o.id}</b> · ${o.route}`, amt:o.value }));
+  pays.slice(-4).forEach(p => events.push({ d:p.date, t:'pay', text:`Thanh toán <b>${p.method==='bank'?'CK':'TM'}</b> · ${p.note}`, amt:p.amt }));
+  events.sort((a,b)=>b.d-a.d);
+  document.getElementById('timeline').innerHTML = events.slice(0,8).map(e => `
+    <div class="tl-item ${e.t==='pay'?'in':'out'}">
+      <div class="tl-day">${dStr(e.d)}</div>
+      <div class="tl-text">${e.text} <span class="tl-amt" style="color:${e.t==='pay'?'#15803d':'var(--primary)'};">${e.t==='pay'?'+':''}${FMT(e.amt)}</span></div>
+    </div>`).join('') || '<div style="color:#94a3b8;font-style:italic;font-size:12px;">Chưa có hoạt động</div>';
+
+  // Aging
+  const buckets = { ok:0, warn:0, bad:0 };
+  debtOrders.forEach(o => {
+    const due = new Date(o.date.getFullYear(), o.date.getMonth(), o.date.getDate() + c.terms);
+    const od = Math.floor((TODAY - due) / 86400000);
+    if (od <= 0)        buckets.ok   += o.debt;
+    else if (od <= 30)  buckets.warn += o.debt;
+    else                buckets.bad  += o.debt;
+  });
+  const tot = buckets.ok + buckets.warn + buckets.bad;
+  document.getElementById('agTotal').textContent = FMT(tot);
+  document.getElementById('agOk').textContent   = FMT(buckets.ok);
+  document.getElementById('agWarn').textContent = FMT(buckets.warn);
+  document.getElementById('agBad').textContent  = FMT(buckets.bad);
+  if (tot === 0) {
+    document.getElementById('agingBar').innerHTML = '<div class="aging-seg" style="background:#16a34a;flex:1;">Không có nợ</div>';
+  } else {
+    document.getElementById('agingBar').innerHTML = `
+      ${buckets.ok>0   ? `<div class="aging-seg" style="background:#16a34a;flex:${buckets.ok};">${(buckets.ok/tot*100).toFixed(0)}%</div>`:''}
+      ${buckets.warn>0 ? `<div class="aging-seg" style="background:#f59e0b;flex:${buckets.warn};">${(buckets.warn/tot*100).toFixed(0)}%</div>`:''}
+      ${buckets.bad>0  ? `<div class="aging-seg" style="background:#dc2626;flex:${buckets.bad};">${(buckets.bad/tot*100).toFixed(0)}%</div>`:''}`;
+  }
+
+  // Debt table
+  if (debtOrders.length === 0) {
+    document.getElementById('debtBody').innerHTML = '<tr><td colspan="5" class="center" style="color:#94a3b8;font-style:italic;padding:18px;">— Không có khoản nợ nào —</td></tr>';
+  } else {
+    document.getElementById('debtBody').innerHTML = debtOrders.sort((a,b)=>a.date-b.date).map(o => {
+      const due = new Date(o.date.getFullYear(), o.date.getMonth(), o.date.getDate() + c.terms);
+      const od = Math.floor((TODAY - due) / 86400000);
+      const ovTag = od > 0 ? `<span class="b b-red" style="margin-left:4px;">QH ${od}d</span>` : '';
+      return `<tr>
+        <td><b>${o.id}</b></td>
+        <td class="nowrap">${dShort(o.date)}</td>
+        <td class="nowrap">${dShort(due)}${ovTag}</td>
+        <td>${o.route}</td>
+        <td class="right" style="color:#b91c1c;font-weight:700;">${FMT(o.debt)}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('debtCount').textContent = `${debtOrders.length} mục`;
+  document.getElementById('debtTotalFt').textContent = FMT(totalDebt);
+
+  // Payments
+  if (pays.length === 0) {
+    document.getElementById('payBody').innerHTML = '<tr><td colspan="4" class="center" style="color:#94a3b8;font-style:italic;padding:18px;">— Chưa có khoản TT nào —</td></tr>';
+  } else {
+    document.getElementById('payBody').innerHTML = pays.slice().sort((a,b)=>b.date-a.date).map(p => `
+      <tr>
+        <td class="nowrap">${dStr(p.date)}</td>
+        <td>${p.method==='bank'?'💳 CK':'💵 TM'}</td>
+        <td style="font-size:12px;color:#475569;">${p.note}</td>
+        <td class="right" style="color:#15803d;font-weight:700;">+${FMT(p.amt)}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('payCount').textContent = `${pays.length} lần`;
+  document.getElementById('payTotalFt').textContent = FMT(totalPaid);
+
+  renderOrders();
+}
+
+function renderOrders() {
+  const c = CUSTOMERS[curId];
+  let list = ORDERS.filter(o => o.custId === c.id);
+  const q = (document.getElementById('ordSearch')?.value||'').trim().toLowerCase();
+  const fs = document.getElementById('ordStatus')?.value;
+  const fp = document.getElementById('ordPay')?.value;
+  if (q)  list = list.filter(o => (o.id+o.route).toLowerCase().includes(q));
+  if (fs) list = list.filter(o => o.status === fs);
+  if (fp) list = list.filter(o => o.payStatus === fp);
+  list.sort((a,b)=>b.date-a.date);
+
+  const body = document.getElementById('ordBody');
+  if (list.length === 0) {
+    body.innerHTML = '<tr><td colspan="10" class="center" style="color:#94a3b8;font-style:italic;padding:20px;">— Không có đơn nào —</td></tr>';
+  } else {
+    body.innerHTML = list.map(o => `
+      <tr>
+        <td><b style="color:var(--primary);">${o.id}</b></td>
+        <td class="nowrap">${dStr(o.date)}</td>
+        <td>${o.route}</td>
+        <td class="center">${o.weight}</td>
+        <td>${ordStatusBadge(o.status)}</td>
+        <td>${payStatusBadge(o.payStatus)}</td>
+        <td class="right">${FMT(o.value)}</td>
+        <td class="right" style="color:#15803d;">${FMT(o.paid)}</td>
+        <td class="right" style="color:${o.debt>0?'#b91c1c':'#15803d'};font-weight:${o.debt>0?700:500};">${o.debt>0?FMT(o.debt):'—'}</td>
+        <td class="center"><button class="btn btn-secondary btn-sm" onclick="alert('Xem chi tiết ${o.id}')">⋯</button></td>
+      </tr>`).join('');
+  }
+  // Footer totals (filtered)
+  const tVal  = list.reduce((s,o)=>s+o.value,0);
+  const tPaid = list.reduce((s,o)=>s+o.paid,0);
+  document.getElementById('ordCount').textContent = list.length;
+  document.getElementById('ordTotal').textContent = FMT(tVal);
+  document.getElementById('ordPaid').textContent  = FMT(tPaid);
+  document.getElementById('ordDebt').textContent  = FMT(tVal - tPaid);
+}
+
+function setTab(name) {
+  document.querySelectorAll('.tab-strip button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  ['overview','orders','debt'].forEach(n => {
+    document.getElementById('tab-'+n).style.display = (n === name) ? '' : 'none';
+  });
+}
+
+/* ===== Init ===== */
+render();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => { document.body.classList.toggle('sidebar-open'); });
+if (sbo) sbo.addEventListener('click', () => { document.body.classList.remove('sidebar-open'); });
+</script>
+</body>
+</html>

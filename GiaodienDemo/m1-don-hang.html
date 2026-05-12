@@ -6,10 +6,136 @@
   <title>Đơn hàng – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .order-id { font-weight: 700; color: var(--primary); font-size: 13px; }
-    .status-timeline { display: flex; gap: 0; align-items: center; }
-    .st-step { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
-    .st-line { width: 12px; height: 1px; background: var(--border); }
+    .page-content { padding: 10px 14px !important; }
+
+    .head-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:12px; }
+    .ph-title { font-size:16px; font-weight:800; color:#0f172a; line-height:1.1; }
+    .ph-sub   { font-size:11.5px; color:#64748b; margin-top:1px; }
+    .ph-actions { display:flex; gap:6px; }
+
+    /* KPI strip */
+    .kpi-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:8px; }
+    .kpi-mini {
+      background:#fff; border:1px solid var(--border); border-radius:8px;
+      padding:8px 10px 8px 12px; position:relative; cursor:pointer;
+      transition:border-color .12s, box-shadow .12s;
+    }
+    .kpi-mini:hover { border-color:var(--primary); box-shadow:0 2px 6px rgba(79,70,229,.08); }
+    .kpi-mini.active { border-color:var(--primary); background:#f5f3ff; }
+    .kpi-mini::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:8px 0 0 8px; }
+    .kpi-mini.c1::before { background:#4f46e5; }
+    .kpi-mini.c2::before { background:#0891b2; }
+    .kpi-mini.c3::before { background:#f59e0b; }
+    .kpi-mini.c4::before { background:#16a34a; }
+    .kpi-mini.c5::before { background:#dc2626; }
+    .km-lbl { font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+    .km-val { font-size:18px; font-weight:800; color:#0f172a; line-height:1.15; margin-top:2px; }
+    .km-sub { font-size:11px; color:#64748b; margin-top:1px; }
+    .km-val.in   { color:#15803d; }
+    .km-val.out  { color:#b91c1c; }
+    .km-val.warn { color:#b45309; }
+    .km-val.blue { color:#1d4ed8; }
+
+    /* Filter bar */
+    .filter-bar {
+      background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 8px;
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;
+    }
+    .filter-bar input, .filter-bar select {
+      height:30px; padding:0 8px; font-size:12.5px;
+      border:1px solid var(--border); border-radius:6px; background:#fff;
+    }
+    .filter-bar input.search { flex:1; min-width:220px; }
+    .seg { display:inline-flex; background:#f1f5f9; border-radius:6px; padding:2px; gap:2px; flex-wrap:wrap; }
+    .seg button {
+      border:0; background:transparent; padding:4px 9px; border-radius:4px;
+      font-size:11.5px; font-weight:600; color:#475569; cursor:pointer; white-space:nowrap;
+    }
+    .seg button.active { background:#fff; color:var(--primary); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+    .seg button .ct {
+      background:#e2e8f0; color:#475569; padding:0 5px; border-radius:8px; margin-left:4px; font-size:10.5px;
+    }
+    .seg button.active .ct { background:var(--primary-light); color:var(--primary); }
+
+    /* Bulk action bar */
+    .bulk-bar {
+      background:#eef2ff; border:1px solid #c7d2fe; border-radius:8px;
+      padding:6px 10px; display:none; align-items:center; gap:8px; margin-bottom:8px;
+      font-size:12.5px;
+    }
+    .bulk-bar.show { display:flex; }
+    .bulk-bar b { color:var(--primary); }
+
+    /* Table */
+    .panel { background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .data-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+    .data-table thead th {
+      background:#f8fafc; font-size:10.5px; text-transform:uppercase; letter-spacing:.3px;
+      color:#64748b; font-weight:700; padding:8px 10px; text-align:left;
+      border-bottom:1px solid var(--border); white-space:nowrap;
+      position:sticky; top:0; z-index:1;
+    }
+    .data-table tbody td { padding:8px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+    .data-table tbody tr { cursor:pointer; }
+    .data-table tbody tr:hover { background:#f8fafc; }
+    .data-table tbody tr.sel { background:#eef2ff; }
+    .data-table tbody tr:last-child td { border-bottom:0; }
+    .nowrap { white-space:nowrap; }
+    .right  { text-align:right; }
+    .center { text-align:center; }
+    .table-wrap { max-height: calc(100vh - 280px); overflow-y:auto; }
+
+    .ord-id { font-weight:800; color:var(--primary); font-size:12.5px; }
+    .ord-id-sub { font-size:10.5px; color:#94a3b8; }
+
+    .cust-cell { display:flex; align-items:center; gap:8px; min-width:0; }
+    .cust-av {
+      width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+      font-weight:800; font-size:12px; flex-shrink:0;
+    }
+    .cust-nm { font-weight:700; font-size:12.5px; color:#0f172a; line-height:1.2; }
+    .cust-cd { font-size:10.5px; color:#94a3b8; }
+    .cust-link { color:inherit; text-decoration:none; }
+    .cust-link:hover .cust-nm { color:var(--primary); text-decoration:underline; }
+
+    .route { font-size:12px; color:#0f172a; line-height:1.3; }
+    .route .arrow { color:#94a3b8; margin:0 4px; }
+    .route-sub { font-size:10.5px; color:#64748b; }
+
+    /* Status badge */
+    .b { display:inline-block; padding:2px 7px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .b-quote   { background:#f1f5f9; color:#475569; }
+    .b-confirm { background:#dbeafe; color:#1d4ed8; }
+    .b-pending { background:#fef3c7; color:#b45309; }
+    .b-running { background:#e0f2fe; color:#0369a1; }
+    .b-done    { background:#dcfce7; color:#15803d; }
+    .b-paid    { background:#cffafe; color:#0e7490; }
+    .b-cancel  { background:#fee2e2; color:#b91c1c; }
+    .b-late    { background:#fee2e2; color:#b91c1c; }
+
+    /* Pay status (mini) */
+    .paybar {
+      height:5px; border-radius:3px; background:#f1f5f9; overflow:hidden; margin-top:3px; min-width:70px;
+    }
+    .paybar-fill { height:100%; background:#16a34a; }
+
+    .row-act { display:inline-flex; gap:3px; opacity:0; transition:opacity .12s; }
+    tr:hover .row-act { opacity:1; }
+    tr.sel .row-act { opacity:1; }
+    .ico-btn {
+      width:24px; height:24px; border-radius:5px; border:1px solid var(--border); background:#fff;
+      display:inline-flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; color:#475569;
+    }
+    .ico-btn:hover { background:var(--primary-light); color:var(--primary); border-color:var(--primary); }
+
+    .table-foot {
+      padding:8px 12px; background:#f8fafc; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;
+      font-size:12px; color:#475569;
+    }
+    .table-foot b { color:#0f172a; }
+
+    @media (max-width:1100px) { .kpi-strip { grid-template-columns:repeat(3,1fr); } }
   </style>
 </head>
 <body>
@@ -44,7 +170,7 @@
     <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
     <div class="nav-group">Module 6 – Tài chính</div>
     <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
-    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">??</span>C�ng n? kh�ch h�ng</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
     <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
     <div class="nav-group">Module 7 – GPS</div>
     <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
@@ -66,8 +192,7 @@
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <div class="topbar-breadcrumb">
-      <span class="parent">Module 1</span><span class="sep">›</span>
-      <span class="current">Danh sách đơn hàng</span>
+      <span class="parent">Module 1</span><span class="sep">›</span><span class="current">Đơn hàng</span>
     </div>
     <div class="topbar-actions">
       <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
@@ -76,145 +201,442 @@
   </header>
 
   <main class="page-content">
-    <div class="page-header">
+    <div class="head-row">
       <div>
-        <div class="page-title">📦 Quản lý đơn hàng</div>
-        <div class="page-subtitle">Theo dõi vòng đời đơn hàng từ Báo giá → Thanh toán</div>
+        <div class="ph-title">📦 Quản lý đơn hàng</div>
+        <div class="ph-sub">Vòng đời: Báo giá → Xác nhận → Điều phối → Đang chạy → Hoàn thành → Thanh toán</div>
       </div>
-      <div class="page-actions">
-        <button class="btn btn-secondary">⬇ Xuất Excel</button>
-        <a href="m1-bao-gia.html" class="btn btn-primary">+ Tạo đơn mới</a>
+      <div class="ph-actions">
+        <button class="btn btn-secondary btn-sm" onclick="alert('Xuất Excel')">⬇ Xuất</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='m2-dieu-phoi.html'">🎯 Điều phối</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='m1-tao-don-nhanh.html'" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">⚡ Tạo đơn nhanh</button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='m1-bao-gia.html'">+ Tạo đơn mới</button>
       </div>
     </div>
 
-    <!-- Status summary -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid var(--primary);color:var(--primary);">Tất cả (54)</div>
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);">Báo giá (6)</div>
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);">Xác nhận (8)</div>
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);">Điều phối (5)</div>
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);">Đang chạy (6)</div>
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);">Hoàn thành (22)</div>
-      <div style="padding:8px 14px;border-radius:8px;background:white;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);">Thanh toán (7)</div>
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi-mini c1 active" data-quick="all" onclick="setQuick('all')">
+        <div class="km-lbl">📦 Tổng đơn (tháng)</div>
+        <div class="km-val" id="kAll">0</div>
+        <div class="km-sub" id="kAllSub">—</div>
+      </div>
+      <div class="kpi-mini c2" data-quick="running" onclick="setQuick('running')">
+        <div class="km-lbl">🚚 Đang chạy</div>
+        <div class="km-val blue" id="kRun">0</div>
+        <div class="km-sub" id="kRunSub">—</div>
+      </div>
+      <div class="kpi-mini c3" data-quick="pending" onclick="setQuick('pending')">
+        <div class="km-lbl">⏰ Chờ điều phối</div>
+        <div class="km-val warn" id="kPend">0</div>
+        <div class="km-sub" id="kPendSub">—</div>
+      </div>
+      <div class="kpi-mini c4" data-quick="done" onclick="setQuick('done')">
+        <div class="km-lbl">✅ Hoàn thành / chờ thu</div>
+        <div class="km-val in" id="kDone">0</div>
+        <div class="km-sub" id="kDoneSub">—</div>
+      </div>
+      <div class="kpi-mini c5" data-quick="late" onclick="setQuick('late')">
+        <div class="km-lbl">⚠ Trễ lịch / cần xử lý</div>
+        <div class="km-val out" id="kLate">0</div>
+        <div class="km-sub" id="kLateSub">—</div>
+      </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Filter bar -->
     <div class="filter-bar">
-      <input type="text" class="form-control search-input" placeholder="🔍 Tìm mã đơn, khách hàng...">
-      <input type="date" class="form-control" value="2026-05-01">
-      <span style="font-size:12px;color:var(--text-muted);">đến</span>
-      <input type="date" class="form-control" value="2026-05-11">
-      <select class="form-control"><option>Tất cả xe</option><option>1 tấn</option><option>2.5 tấn</option><option>5 tấn</option><option>10 tấn</option><option>15 tấn</option></select>
-      <select class="form-control"><option>Tất cả tuyến</option><option>TP.HCM → Bình Dương</option><option>TP.HCM → Đồng Nai</option><option>TP.HCM → Long An</option></select>
-      <button class="btn btn-secondary btn-sm">Lọc</button>
+      <input class="search" type="text" id="qSearch" placeholder="🔍 Mã đơn, khách hàng, biển số, tài xế..." oninput="render()">
+      <div class="seg" id="segStatus">
+        <button class="active" data-st="">Tất cả <span class="ct" id="ctAll">0</span></button>
+        <button data-st="quote">Báo giá <span class="ct" id="ctQuote">0</span></button>
+        <button data-st="confirm">Xác nhận <span class="ct" id="ctCfm">0</span></button>
+        <button data-st="pending">Chờ điều phối <span class="ct" id="ctPend">0</span></button>
+        <button data-st="running">Đang chạy <span class="ct" id="ctRun">0</span></button>
+        <button data-st="done">Hoàn thành <span class="ct" id="ctDone">0</span></button>
+        <button data-st="paid">Đã thu <span class="ct" id="ctPaid">0</span></button>
+        <button data-st="cancel">Huỷ <span class="ct" id="ctCcl">0</span></button>
+      </div>
+      <input type="date" id="dFrom" value="2026-04-12" onchange="render()">
+      <span style="font-size:11px;color:#94a3b8;">→</span>
+      <input type="date" id="dTo"   value="2026-05-12" onchange="render()">
+      <select id="fSort" onchange="render()">
+        <option value="recent">Sắp xếp: Mới nhất</option>
+        <option value="oldest">Cũ nhất</option>
+        <option value="value">Giá trị giảm dần</option>
+        <option value="cust">Theo khách hàng</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="clearFilters()" style="margin-left:auto;">↺ Xoá lọc</button>
     </div>
 
-    <div class="card">
+    <!-- Bulk action bar -->
+    <div class="bulk-bar" id="bulkBar">
+      <span>Đã chọn <b id="bulkCount">0</b> đơn</span>
+      <span style="color:#94a3b8;">·</span>
+      <button class="btn btn-secondary btn-sm" onclick="alert('Phân công hàng loạt')">🎯 Điều phối</button>
+      <button class="btn btn-secondary btn-sm" onclick="alert('Đổi trạng thái')">↻ Đổi trạng thái</button>
+      <button class="btn btn-secondary btn-sm" onclick="alert('Xuất các đơn đã chọn')">⬇ Xuất</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearSel()" style="margin-left:auto;">Bỏ chọn</button>
+    </div>
+
+    <!-- Table -->
+    <div class="panel">
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th><input type="checkbox" style="accent-color:var(--primary);"></th>
-              <th>Mã đơn</th><th>Khách hàng</th><th>Tuyến</th>
-              <th>Xe / Tài xế</th><th>Ngày chạy</th>
-              <th>Giá trị</th><th>Trạng thái</th><th>Thao tác</th>
+              <th style="width:30px;"><input type="checkbox" id="chkAll" onclick="toggleAll(this)"></th>
+              <th>Mã đơn</th>
+              <th style="width:18%;">Khách hàng</th>
+              <th>Tuyến</th>
+              <th>Xe / Tài xế</th>
+              <th class="nowrap">Lịch chạy</th>
+              <th class="right">Giá trị</th>
+              <th class="right">Đã thu</th>
+              <th>Trạng thái</th>
+              <th class="center" style="width:130px;">Thao tác</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0541</span></td>
-              <td><div style="font-weight:600;font-size:13px;">Cty TNHH Phú Hưng</div><div class="text-xs text-muted">Nguyễn Thị Lan · 0901 234 567</div></td>
-              <td><div>Quận 12, TP.HCM</div><div class="text-xs text-muted">→ Thủ Dầu Một, Bình Dương · 32km</div></td>
-              <td><div>5 tấn · 51C-12345</div><div class="text-xs text-muted">Nguyễn Văn An</div></td>
-              <td><div>11/05/2026</div><div class="text-xs text-muted">08:00</div></td>
-              <td style="font-weight:700;">3.200.000 ₫</td>
-              <td><span class="badge badge-blue">Đang chạy</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-secondary btn-sm">Xem</button><button class="btn btn-secondary btn-sm">Sửa</button></div></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0540</span></td>
-              <td><div style="font-weight:600;">Siêu thị Big C</div><div class="text-xs text-muted">Trần Văn Bình · 0912 456 789</div></td>
-              <td><div>Đồng Nai KCN Long Bình</div><div class="text-xs text-muted">→ Quận 7, TP.HCM · 48km</div></td>
-              <td><div>10 tấn · 51D-56789</div><div class="text-xs text-muted">Trần Minh Khoa</div></td>
-              <td><div>11/05/2026</div><div class="text-xs text-muted">06:30</div></td>
-              <td style="font-weight:700;">5.800.000 ₫</td>
-              <td><span class="badge badge-green">Hoàn thành</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-secondary btn-sm">Xem</button><button class="btn btn-success btn-sm">Thanh toán</button></div></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0539</span></td>
-              <td><div style="font-weight:600;">Cty CP Thép Miền Nam</div><div class="text-xs text-muted">Lê Thị Hoa · 0908 654 321</div></td>
-              <td><div>Bình Dương KCN Mỹ Phước</div><div class="text-xs text-muted">→ Tây Ninh · 95km</div></td>
-              <td><div>15 tấn · 51E-90123</div><div class="text-xs text-muted">Phạm Quốc Hùng</div></td>
-              <td><div>11/05/2026</div><div class="text-xs text-muted">05:00</div></td>
-              <td style="font-weight:700;">7.500.000 ₫</td>
-              <td><span class="badge badge-blue">Đang chạy</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-secondary btn-sm">Xem</button><button class="btn btn-secondary btn-sm">GPS</button></div></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0538</span></td>
-              <td><div style="font-weight:600;">Công ty Nhựa Nam Việt</div><div class="text-xs text-muted">Phạm Thị Mai · 0933 111 222</div></td>
-              <td><div>KCN Bình Dương</div><div class="text-xs text-muted">→ Long An · 65km</div></td>
-              <td><div>1 tấn</div><div class="text-xs text-muted">Chưa phân công</div></td>
-              <td><div>12/05/2026</div><div class="text-xs text-muted">09:00</div></td>
-              <td style="font-weight:700;">1.850.000 ₫</td>
-              <td><span class="badge badge-yellow">Chờ điều phối</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-primary btn-sm">Điều phối</button></div></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0537</span></td>
-              <td><div style="font-weight:600;">Cty May Mặc Xuân Hòa</div><div class="text-xs text-muted">Hoàng Văn Nam · 0977 333 444</div></td>
-              <td><div>Quận 1, TP.HCM</div><div class="text-xs text-muted">→ Vũng Tàu · 120km</div></td>
-              <td><div>3 tấn · 51F-23456</div><div class="text-xs text-muted">Lê Văn Bình</div></td>
-              <td><div>10/05/2026</div><div class="text-xs text-muted">07:00</div></td>
-              <td style="font-weight:700;">4.200.000 ₫</td>
-              <td><span class="badge badge-teal">Đã thanh toán</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-secondary btn-sm">Xem</button><button class="btn btn-secondary btn-sm">In HĐ</button></div></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0536</span></td>
-              <td><div style="font-weight:600;">Công ty ABC Trading</div><div class="text-xs text-muted">Đinh Thị Thảo · 0944 555 666</div></td>
-              <td><div>Quận Gò Vấp, TP.HCM</div><div class="text-xs text-muted">→ Cần Thơ · 170km</div></td>
-              <td><div>7 tấn · 51G-34567</div><div class="text-xs text-muted">Đỗ Thanh Tùng</div></td>
-              <td><div>10/05/2026</div><div class="text-xs text-muted">05:30</div></td>
-              <td style="font-weight:700;">9.100.000 ₫</td>
-              <td><span class="badge badge-yellow">Chờ thanh toán</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-secondary btn-sm">Xem</button><button class="btn btn-success btn-sm">Thu tiền</button></div></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" style="accent-color:var(--primary);"></td>
-              <td><span class="order-id">CX-0535</span></td>
-              <td><div style="font-weight:600;">KCN Linh Trung I</div><div class="text-xs text-muted">Vũ Thị Thu · 0955 777 888</div></td>
-              <td><div>Thủ Đức, TP.HCM</div><div class="text-xs text-muted">→ Quảng Nam · 850km</div></td>
-              <td><div>Chưa chọn xe</div><div class="text-xs text-muted">Yêu cầu báo giá</div></td>
-              <td><div>13/05/2026</div><div class="text-xs text-muted">06:00</div></td>
-              <td style="font-weight:700;">–</td>
-              <td><span class="badge badge-gray">Báo giá</span></td>
-              <td><div style="display:flex;gap:4px;"><button class="btn btn-primary btn-sm">Báo giá</button></div></td>
-            </tr>
-          </tbody>
+          <tbody id="tbody"></tbody>
         </table>
       </div>
-      <div class="pagination">
-        <span class="pagination-info">Hiển thị 1–7 / 54 đơn hàng</span>
-        <div class="pagination-pages">
-          <button class="page-btn active">1</button>
-          <button class="page-btn">2</button>
-          <button class="page-btn">3</button>
-          <span style="padding:0 4px;color:var(--text-muted);font-size:13px;">…</span>
-          <button class="page-btn">8</button>
-          <button class="page-btn" style="width:auto;padding:0 8px;">›</button>
+      <div class="table-foot">
+        <div>Hiển thị <b id="ftCount">0</b> / <b id="ftTotal">0</b> đơn</div>
+        <div>
+          Giá trị: <b id="ftVal">0</b>
+          · Đã thu: <b style="color:#15803d;" id="ftPaid">0</b>
+          · Còn nợ: <b style="color:#b91c1c;" id="ftDebt">0</b>
         </div>
       </div>
     </div>
+
   </main>
 </div>
+
 <script src="assets/app.js"></script>
+<script>
+/* ==============================================================
+   ĐƠN HÀNG – Module 1
+   Liên kết: Khách hàng (m1-khach-hang-chi-tiet) · Điều phối (m2)
+            · GPS (m7) · Công nợ (m6-cong-no) · Báo giá (m1-bao-gia)
+   ============================================================== */
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => {
+  const v = Math.abs(n||0);
+  if (v >= 1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'') + ' tỷ';
+  if (v >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (v >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const dShort= d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+const tStr  = d => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+const dKey  = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+/* ===== Customers (đồng bộ với m1-khach-hang) ===== */
+const CUSTS = {
+  KH01:{id:'KH01',name:'Cty TNHH Minh Phú',short:'Minh Phú',avatar:'M',bg:'#e0e7ff',fg:'#3730a3'},
+  KH02:{id:'KH02',name:'Cty CP An Khang',short:'An Khang',avatar:'A',bg:'#dcfce7',fg:'#15803d'},
+  KH03:{id:'KH03',name:'Tập đoàn Hoàng Gia',short:'Hoàng Gia',avatar:'H',bg:'#fef3c7',fg:'#b45309'},
+  KH04:{id:'KH04',name:'Cty TNHH Đại Phát',short:'Đại Phát',avatar:'D',bg:'#fee2e2',fg:'#b91c1c'},
+  KH05:{id:'KH05',name:'Cty TNHH Phương Nam',short:'Phương Nam',avatar:'P',bg:'#dbeafe',fg:'#1d4ed8'},
+  KH07:{id:'KH07',name:'Siêu thị Big C',short:'Big C',avatar:'B',bg:'#ccfbf1',fg:'#0f766e'},
+  KH08:{id:'KH08',name:'Cty CP Thép Miền Nam',short:'Thép MN',avatar:'T',bg:'#ffedd5',fg:'#c2410c'},
+  KH09:{id:'KH09',name:'Cty May Mặc Xuân Hoà',short:'Xuân Hoà',avatar:'X',bg:'#f3e8ff',fg:'#7e22ce'},
+  KH10:{id:'KH10',name:'Cty ABC Trading',short:'ABC',avatar:'A',bg:'#fef9c3',fg:'#854d0e'},
+  KH12:{id:'KH12',name:'Cty TNHH Tân Tiến',short:'Tân Tiến',avatar:'T',bg:'#fee2e2',fg:'#b91c1c'},
+};
+
+/* ===== ORDERS =====
+   status: quote | confirm | pending | running | done | paid | cancel
+*/
+const ORDERS = [
+  // Hôm nay & sắp tới
+  { id:'DH-2026-0541', custId:'KH01', from:'KCN Tân Bình, TP.HCM', to:'Hà Nội', km:1720,
+    weight:'15T', truck:'51C-12345', driver:'Nguyễn Văn An',
+    schedule:new Date(2026,4,12,8,0), value:25_100_000, paid:0, status:'running' },
+  { id:'DH-2026-0540', custId:'KH07', from:'KCN Long Bình, Đồng Nai', to:'Q.7, TP.HCM', km:48,
+    weight:'10T', truck:'51D-56789', driver:'Trần Minh Khoa',
+    schedule:new Date(2026,4,12,6,30), value:5_800_000, paid:5_800_000, status:'done' },
+  { id:'DH-2026-0539', custId:'KH08', from:'KCN Mỹ Phước, BD', to:'Tây Ninh', km:95,
+    weight:'15T', truck:'51E-90123', driver:'Phạm Quốc Hùng',
+    schedule:new Date(2026,4,12,5,0), value:7_500_000, paid:0, status:'running' },
+  { id:'DH-2026-0538', custId:'KH02', from:'KCN Bình Dương', to:'Long An', km:65,
+    weight:'1T', truck:null, driver:null,
+    schedule:new Date(2026,4,12,9,0), value:1_850_000, paid:0, status:'pending' },
+  { id:'DH-2026-0537', custId:'KH09', from:'Q.1, TP.HCM', to:'Vũng Tàu', km:120,
+    weight:'3T', truck:'51F-23456', driver:'Lê Văn Bình',
+    schedule:new Date(2026,4,12,7,0), value:4_200_000, paid:4_200_000, status:'paid' },
+  { id:'DH-2026-0536', custId:'KH10', from:'Gò Vấp, TP.HCM', to:'Cần Thơ', km:170,
+    weight:'7T', truck:'51G-34567', driver:'Đỗ Thanh Tùng',
+    schedule:new Date(2026,4,11,5,30), value:9_100_000, paid:0, status:'done' },
+  { id:'DH-2026-0535', custId:'KH05', from:'Thủ Đức, TP.HCM', to:'Quảng Nam', km:850,
+    weight:'10T', truck:null, driver:null,
+    schedule:new Date(2026,4,13,6,0), value:0, paid:0, status:'quote' },
+
+  // Tuần trước
+  { id:'DH-2026-0534', custId:'KH03', from:'Q.1, TP.HCM', to:'Đà Nẵng', km:960,
+    weight:'12T', truck:'51H-44556', driver:'Vũ Hồng Phúc',
+    schedule:new Date(2026,4,9,4,0), value:20_100_000, paid:0, status:'running' },
+  { id:'DH-2026-0533', custId:'KH04', from:'KCN Sóng Thần, BD', to:'Quy Nhơn', km:680,
+    weight:'8T', truck:'51K-77889', driver:'Nguyễn Tiến Dũng',
+    schedule:new Date(2026,4,8,5,30), value:14_600_000, paid:0, status:'done' },
+  { id:'DH-2026-0532', custId:'KH01', from:'Cảng Cát Lái, Q.2', to:'Hải Phòng', km:1750,
+    weight:'15T', truck:'51C-12345', driver:'Nguyễn Văn An',
+    schedule:new Date(2026,4,7,3,0), value:23_700_000, paid:0, status:'done' },
+  { id:'DH-2026-0531', custId:'KH02', from:'Q.5, TP.HCM', to:'Cần Thơ', km:170,
+    weight:'8T', truck:'51F-23456', driver:'Lê Văn Bình',
+    schedule:new Date(2026,4,6,6,0), value:8_800_000, paid:4_000_000, status:'done' },
+  { id:'DH-2026-0530', custId:'KH09', from:'KCN Tân Bình', to:'Nha Trang', km:430,
+    weight:'5T', truck:'51F-23456', driver:'Lê Văn Bình',
+    schedule:new Date(2026,4,5,7,0), value:11_400_000, paid:11_400_000, status:'paid' },
+  { id:'DH-2026-0529', custId:'KH07', from:'KCN Linh Trung', to:'Buôn Ma Thuột', km:380,
+    weight:'10T', truck:'51D-56789', driver:'Trần Minh Khoa',
+    schedule:new Date(2026,4,3,5,0), value:13_500_000, paid:13_500_000, status:'paid' },
+  { id:'DH-2026-0528', custId:'KH04', from:'Q.Bình Tân', to:'Long Xuyên', km:200,
+    weight:'5T', truck:null, driver:null,
+    schedule:new Date(2026,4,2,8,0), value:6_300_000, paid:0, status:'cancel' },
+  { id:'DH-2026-0527', custId:'KH12', from:'KCN Sóng Thần', to:'Pleiku', km:520,
+    weight:'12T', truck:'51E-90123', driver:'Phạm Quốc Hùng',
+    schedule:new Date(2026,4,1,4,30), value:16_800_000, paid:0, status:'done' },
+  { id:'DH-2026-0526', custId:'KH05', from:'Q.7, TP.HCM', to:'Phan Thiết', km:200,
+    weight:'7T', truck:'51G-34567', driver:'Đỗ Thanh Tùng',
+    schedule:new Date(2026,3,28,6,0), value:9_500_000, paid:9_500_000, status:'paid' },
+  { id:'DH-2026-0525', custId:'KH08', from:'KCN Mỹ Phước', to:'Đà Nẵng', km:960,
+    weight:'15T', truck:'51E-90123', driver:'Phạm Quốc Hùng',
+    schedule:new Date(2026,3,26,4,0), value:22_400_000, paid:22_400_000, status:'paid' },
+  { id:'DH-2026-0542', custId:'KH03', from:'Q.1, TP.HCM', to:'Huế', km:1080,
+    weight:'8T', truck:null, driver:null,
+    schedule:new Date(2026,4,14,5,0), value:18_200_000, paid:0, status:'confirm' }
+];
+
+/* ===== Helpers ===== */
+function debtOf(o)  { return Math.max(0, o.value - o.paid); }
+function payPct(o)  { return o.value ? Math.round(o.paid/o.value*100) : 0; }
+function isLate(o) {
+  // Đơn pending mà ngày chạy đã qua, hoặc running mà quá 2 ngày
+  if (o.status === 'pending' && o.schedule < TODAY) return true;
+  if (o.status === 'running') {
+    const days = (TODAY - o.schedule) / 86400000;
+    if (days > 2) return true;
+  }
+  return false;
+}
+function statusLabel(o) {
+  if (isLate(o)) return `<span class="b b-late">⚠ Trễ lịch</span>`;
+  switch (o.status) {
+    case 'quote':   return `<span class="b b-quote">📋 Báo giá</span>`;
+    case 'confirm': return `<span class="b b-confirm">✓ Đã xác nhận</span>`;
+    case 'pending': return `<span class="b b-pending">⏰ Chờ điều phối</span>`;
+    case 'running': return `<span class="b b-running">🚚 Đang chạy</span>`;
+    case 'done':    return `<span class="b b-done">✅ Hoàn thành</span>`;
+    case 'paid':    return `<span class="b b-paid">💰 Đã thu</span>`;
+    case 'cancel':  return `<span class="b b-cancel">✕ Đã huỷ</span>`;
+  }
+  return '';
+}
+function rowAction(o) {
+  // Hành động chính theo trạng thái + các nút phụ
+  const main =
+    o.status === 'quote'   ? `<button class="ico-btn" title="Tạo báo giá" onclick="event.stopPropagation();window.location.href='m1-bao-gia.html'">📋</button>` :
+    o.status === 'confirm' ? `<button class="ico-btn" title="Điều phối" onclick="event.stopPropagation();window.location.href='m2-dieu-phoi.html'">🎯</button>` :
+    o.status === 'pending' ? `<button class="ico-btn" title="Điều phối" onclick="event.stopPropagation();window.location.href='m2-dieu-phoi.html'">🎯</button>` :
+    o.status === 'running' ? `<button class="ico-btn" title="Theo dõi GPS" onclick="event.stopPropagation();window.location.href='m7-gps.html'">📍</button>` :
+    o.status === 'done'    ? `<button class="ico-btn" title="Thu tiền" onclick="event.stopPropagation();window.location.href='m6-cong-no.html'">💰</button>` :
+    o.status === 'paid'    ? `<button class="ico-btn" title="In phiếu thu" onclick="event.stopPropagation();alert('In phiếu thu')">🖨️</button>` :
+    `<button class="ico-btn" title="Khôi phục" onclick="event.stopPropagation();alert('Khôi phục đơn')">↺</button>`;
+  return `
+    <button class="ico-btn" title="Xem chi tiết" onclick="event.stopPropagation();alert('Mở chi tiết ${o.id}')">👁️</button>
+    ${main}
+    <button class="ico-btn" title="Sửa" onclick="event.stopPropagation();alert('Sửa ${o.id}')">✏️</button>
+  `;
+}
+
+/* ===== State ===== */
+let curStatus = '';
+let curQuick  = 'all';
+const sel = new Set();
+
+function setSeg(v) {
+  curStatus = v; curQuick = 'all';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === v));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.quick === 'all'));
+  render();
+}
+function setQuick(q) {
+  curQuick = q; curStatus = '';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === ''));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.quick === q));
+  render();
+}
+function clearFilters() {
+  document.getElementById('qSearch').value = '';
+  document.getElementById('dFrom').value = '2026-04-12';
+  document.getElementById('dTo').value   = '2026-05-12';
+  document.getElementById('fSort').value = 'recent';
+  setQuick('all');
+}
+function clearSel() { sel.clear(); render(); }
+function toggleAll(cb) {
+  const list = filterList();
+  if (cb.checked) list.forEach(o => sel.add(o.id));
+  else list.forEach(o => sel.delete(o.id));
+  render();
+}
+function toggleSel(id) {
+  if (sel.has(id)) sel.delete(id); else sel.add(id);
+  render();
+}
+
+/* ===== Filtering ===== */
+function filterList() {
+  const q = document.getElementById('qSearch').value.trim().toLowerCase();
+  const dFrom = new Date(document.getElementById('dFrom').value); dFrom.setHours(0,0,0,0);
+  const dTo   = new Date(document.getElementById('dTo').value);   dTo.setHours(23,59,59,999);
+  const sort  = document.getElementById('fSort').value;
+
+  let list = ORDERS.slice();
+  if (q) list = list.filter(o => {
+    const c = CUSTS[o.custId];
+    return (o.id+o.from+o.to+(o.truck||'')+(o.driver||'')+c.name+c.short).toLowerCase().includes(q);
+  });
+  list = list.filter(o => o.schedule >= dFrom && o.schedule <= dTo);
+  if (curStatus) list = list.filter(o => o.status === curStatus);
+  if (curQuick === 'running') list = list.filter(o => o.status === 'running');
+  if (curQuick === 'pending') list = list.filter(o => o.status === 'pending' || o.status === 'confirm');
+  if (curQuick === 'done')    list = list.filter(o => o.status === 'done');
+  if (curQuick === 'late')    list = list.filter(o => isLate(o));
+
+  list.sort((a,b) => {
+    switch (sort) {
+      case 'oldest': return a.schedule - b.schedule;
+      case 'value':  return b.value - a.value;
+      case 'cust':   return CUSTS[a.custId].name.localeCompare(CUSTS[b.custId].name, 'vi');
+      default:       return b.schedule - a.schedule;
+    }
+  });
+  return list;
+}
+
+/* ===== Render ===== */
+function render() {
+  const list = filterList();
+  const tbody = document.getElementById('tbody');
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="center" style="padding:30px;color:#94a3b8;font-style:italic;">— Không có đơn nào khớp bộ lọc —</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(o => {
+      const c = CUSTS[o.custId];
+      const debt = debtOf(o);
+      const pp = payPct(o);
+      const truck = o.truck ? `${o.weight} · <b>${o.truck}</b>` : `<span style="color:#94a3b8;font-style:italic;">${o.weight} · chưa phân</span>`;
+      const drv   = o.driver ? `<div style="font-size:10.5px;color:#64748b;">👤 ${o.driver}</div>` : `<div style="font-size:10.5px;color:#dc2626;">⚠ chưa có TX</div>`;
+      const sched = `<div style="font-size:12px;">${dShort(o.schedule)} · ${tStr(o.schedule)}</div>` +
+                    `<div style="font-size:10.5px;color:#94a3b8;">${(()=>{const d=Math.round((o.schedule-TODAY)/86400000);return d===0?'Hôm nay':d>0?`+${d}d`:`${-d}d trước`;})()}</div>`;
+      return `
+        <tr class="${sel.has(o.id)?'sel':''}" onclick="toggleSel('${o.id}')">
+          <td onclick="event.stopPropagation();"><input type="checkbox" ${sel.has(o.id)?'checked':''} onclick="toggleSel('${o.id}')"></td>
+          <td>
+            <div class="ord-id">${o.id}</div>
+            <div class="ord-id-sub">${dStr(o.schedule)}</div>
+          </td>
+          <td>
+            <a class="cust-link" href="m1-khach-hang-chi-tiet.html?id=${c.id}" onclick="event.stopPropagation();">
+              <div class="cust-cell">
+                <div class="cust-av" style="background:${c.bg};color:${c.fg};">${c.avatar}</div>
+                <div style="min-width:0;">
+                  <div class="cust-nm">${c.short}</div>
+                  <div class="cust-cd">${c.id}</div>
+                </div>
+              </div>
+            </a>
+          </td>
+          <td>
+            <div class="route">${o.from} <span class="arrow">→</span> ${o.to}</div>
+            <div class="route-sub">📏 ${o.km} km</div>
+          </td>
+          <td>
+            <div style="font-size:12px;">${truck}</div>
+            ${drv}
+          </td>
+          <td class="nowrap">${sched}</td>
+          <td class="right" title="${FMT(o.value)}">${o.value ? `<b>${FMTM(o.value)}</b>` : '<span style="color:#94a3b8;">—</span>'}</td>
+          <td class="right">
+            ${o.value ? `
+              <div style="font-size:12px;color:${pp===100?'#15803d':pp>0?'#b45309':'#64748b'};font-weight:700;" title="${FMT(o.paid)} / ${FMT(o.value)}">
+                ${pp}%${debt>0?` · còn <span style="color:#b91c1c;">${FMTM(debt)}</span>`:''}
+              </div>
+              <div class="paybar"><div class="paybar-fill" style="width:${pp}%;background:${pp===100?'#16a34a':pp>0?'#f59e0b':'#cbd5e1'};"></div></div>
+            ` : '<span style="color:#94a3b8;">—</span>'}
+          </td>
+          <td>${statusLabel(o)}</td>
+          <td class="center" onclick="event.stopPropagation();">
+            <div class="row-act">${rowAction(o)}</div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // KPI (theo bộ data đã lọc theo ngày, không lọc theo trạng thái — để KPI ổn định)
+  const dFrom = new Date(document.getElementById('dFrom').value); dFrom.setHours(0,0,0,0);
+  const dTo   = new Date(document.getElementById('dTo').value);   dTo.setHours(23,59,59,999);
+  const inRange = ORDERS.filter(o => o.schedule >= dFrom && o.schedule <= dTo);
+
+  const totVal  = inRange.reduce((s,o)=>s+o.value,0);
+  const totPaid = inRange.reduce((s,o)=>s+o.paid,0);
+  const totDebt = totVal - totPaid;
+  const runs   = inRange.filter(o=>o.status==='running');
+  const pends  = inRange.filter(o=>o.status==='pending'||o.status==='confirm');
+  const dones  = inRange.filter(o=>o.status==='done');
+  const lates  = inRange.filter(o=>isLate(o));
+  document.getElementById('kAll').textContent = inRange.length;
+  document.getElementById('kAllSub').textContent = `Doanh số ${FMTM(totVal)} · còn ${FMTM(totDebt)}`;
+  document.getElementById('kRun').textContent = runs.length;
+  document.getElementById('kRunSub').textContent = `${FMTM(runs.reduce((s,o)=>s+o.value,0))} đang vận hành`;
+  document.getElementById('kPend').textContent = pends.length;
+  document.getElementById('kPendSub').textContent = `${pends.filter(o=>!o.truck).length} đơn chưa có xe`;
+  document.getElementById('kDone').textContent = dones.length;
+  document.getElementById('kDoneSub').textContent = `Còn thu ${FMTM(dones.reduce((s,o)=>s+debtOf(o),0))}`;
+  document.getElementById('kLate').textContent = lates.length;
+  document.getElementById('kLateSub').textContent = lates.length ? 'Cần xử lý ngay' : 'Tốt ✓';
+
+  // Segment count (toàn bộ ORDERS in range)
+  const cnt = (st) => inRange.filter(o => o.status === st).length;
+  document.getElementById('ctAll').textContent  = inRange.length;
+  document.getElementById('ctQuote').textContent= cnt('quote');
+  document.getElementById('ctCfm').textContent  = cnt('confirm');
+  document.getElementById('ctPend').textContent = cnt('pending');
+  document.getElementById('ctRun').textContent  = cnt('running');
+  document.getElementById('ctDone').textContent = cnt('done');
+  document.getElementById('ctPaid').textContent = cnt('paid');
+  document.getElementById('ctCcl').textContent  = cnt('cancel');
+
+  // Footer
+  const fVal  = list.reduce((s,o)=>s+o.value,0);
+  const fPaid = list.reduce((s,o)=>s+o.paid,0);
+  document.getElementById('ftCount').textContent = list.length;
+  document.getElementById('ftTotal').textContent = ORDERS.length;
+  document.getElementById('ftVal').textContent   = FMT(fVal);
+  document.getElementById('ftPaid').textContent  = FMT(fPaid);
+  document.getElementById('ftDebt').textContent  = FMT(fVal - fPaid);
+
+  // Bulk
+  const bulk = document.getElementById('bulkBar');
+  bulk.classList.toggle('show', sel.size > 0);
+  document.getElementById('bulkCount').textContent = sel.size;
+  const chkAll = document.getElementById('chkAll');
+  chkAll.checked = list.length>0 && list.every(o => sel.has(o.id));
+}
+
+/* ===== Init ===== */
+document.querySelectorAll('#segStatus button').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.st)));
+render();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+</script>
 </body>
 </html>

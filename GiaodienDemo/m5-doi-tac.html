@@ -6,20 +6,122 @@
   <title>Tài xế & Xe đối tác – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .partner-card {
-      background: white; border-radius: 12px; border: 1px solid var(--border);
-      overflow: hidden; transition: all 0.13s;
+    .page-content { padding:10px 14px !important; }
+    .head-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:12px; }
+    .ph-title { font-size:16px; font-weight:800; color:#0f172a; line-height:1.1; }
+    .ph-sub   { font-size:11.5px; color:#64748b; margin-top:1px; }
+    .ph-actions { display:flex; gap:6px; }
+
+    /* KPI */
+    .kpi-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:8px; }
+    .kpi-mini {
+      background:#fff; border:1px solid var(--border); border-radius:8px;
+      padding:8px 10px 8px 12px; position:relative; cursor:pointer; transition:.12s;
     }
-    .partner-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-    .partner-head { padding: 14px 16px; }
-    .partner-body { padding: 10px 16px; border-top: 1px solid var(--border-light); }
-    .partner-foot { padding: 10px 16px; border-top: 1px solid var(--border-light); display:flex; gap:6px; }
-    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .status-free { background: #dcfce7; color: #15803d; }
-    .status-busy { background: #fee2e2; color: #dc2626; }
-    .status-offline { background: #f1f5f9; color: #64748b; }
-    .stars { color: #fbbf24; font-size: 12px; }
-    .commission-info { background: #f8fafc; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+    .kpi-mini:hover { border-color:var(--primary); box-shadow:0 2px 6px rgba(79,70,229,.08); }
+    .kpi-mini.active { border-color:var(--primary); background:#f5f3ff; }
+    .kpi-mini::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:8px 0 0 8px; }
+    .kpi-mini.c1::before { background:#4f46e5; }
+    .kpi-mini.c2::before { background:#16a34a; }
+    .kpi-mini.c3::before { background:#0891b2; }
+    .kpi-mini.c4::before { background:#f59e0b; }
+    .kpi-mini.c5::before { background:#dc2626; }
+    .km-lbl { font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+    .km-val { font-size:18px; font-weight:800; color:#0f172a; line-height:1.15; margin-top:2px; }
+    .km-sub { font-size:11px; color:#64748b; margin-top:1px; }
+    .km-val.in{color:#15803d;} .km-val.warn{color:#b45309;} .km-val.out{color:#b91c1c;} .km-val.blue{color:#1d4ed8;}
+
+    /* Filter */
+    .filter-bar {
+      background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 8px;
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;
+    }
+    .filter-bar input, .filter-bar select {
+      height:30px; padding:0 8px; font-size:12.5px;
+      border:1px solid var(--border); border-radius:6px; background:#fff;
+    }
+    .filter-bar input.search { flex:1; min-width:240px; }
+    .seg { display:inline-flex; background:#f1f5f9; border-radius:6px; padding:2px; gap:2px; flex-wrap:wrap; }
+    .seg button {
+      border:0; background:transparent; padding:4px 9px; border-radius:4px;
+      font-size:11.5px; font-weight:600; color:#475569; cursor:pointer; white-space:nowrap;
+    }
+    .seg button.active { background:#fff; color:var(--primary); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+    .seg button .ct { background:#e2e8f0; color:#475569; padding:0 5px; border-radius:8px; margin-left:4px; font-size:10.5px; }
+    .seg button.active .ct { background:var(--primary-light); color:var(--primary); }
+
+    /* Table */
+    .panel { background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .data-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+    .data-table thead th {
+      background:#f8fafc; font-size:10.5px; text-transform:uppercase; letter-spacing:.3px;
+      color:#64748b; font-weight:700; padding:8px 10px; text-align:left;
+      border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; z-index:1;
+    }
+    .data-table tbody td { padding:8px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+    .data-table tbody tr { cursor:pointer; }
+    .data-table tbody tr:hover { background:#f8fafc; }
+    .nowrap { white-space:nowrap; } .right { text-align:right; } .center { text-align:center; }
+    .table-wrap { max-height:calc(100vh - 280px); overflow-y:auto; }
+
+    .drv-cell { display:flex; align-items:center; gap:9px; min-width:0; }
+    .drv-av {
+      width:38px; height:38px; border-radius:50%; flex-shrink:0; overflow:hidden;
+      display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; position:relative;
+      border:1.5px solid #fff; box-shadow:0 0 0 1px var(--border);
+    }
+    .drv-av img { width:100%; height:100%; object-fit:cover; display:block; }
+    .drv-av .dot {
+      position:absolute; bottom:-1px; right:-1px; width:11px; height:11px; border-radius:50%; border:2px solid #fff;
+    }
+    .dot-on  { background:#16a34a; } .dot-busy{ background:#dc2626; } .dot-off { background:#cbd5e1; }
+    .drv-nm { font-weight:700; font-size:12.5px; color:#0f172a; line-height:1.2; }
+    .drv-meta { font-size:10.5px; color:#94a3b8; }
+
+    /* Truck badge */
+    .truck-tag {
+      display:inline-block; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:800;
+      background:#f1f5f9; color:#0f172a; letter-spacing:.3px; font-family:'Courier New',monospace;
+    }
+
+    /* Status */
+    .b { display:inline-block; padding:2px 7px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .b-free { background:#dcfce7; color:#15803d; }
+    .b-busy { background:#fee2e2; color:#b91c1c; }
+    .b-off  { background:#f1f5f9; color:#64748b; }
+    .b-warn { background:#fef3c7; color:#b45309; }
+
+    /* Rating */
+    .stars { color:#f59e0b; font-size:12px; letter-spacing:1px; }
+    .stars .empty { color:#e2e8f0; }
+
+    /* Commission chip */
+    .com-tag { display:inline-block; padding:1px 6px; border-radius:4px; font-size:10.5px; font-weight:700;
+      background:#eef2ff; color:#4338ca; }
+    .com-tag.t-pct  { background:#ccfbf1; color:#0f766e; }
+    .com-tag.t-trip { background:#fef3c7; color:#b45309; }
+    .com-tag.t-fix  { background:#dbeafe; color:#1d4ed8; }
+
+    /* Pay status */
+    .paybar { height:5px; background:#f1f5f9; border-radius:3px; overflow:hidden; min-width:60px; margin-top:3px; }
+    .paybar > i { display:block; height:100%; background:#16a34a; }
+
+    .row-act { display:inline-flex; gap:3px; opacity:0; transition:opacity .12s; }
+    tr:hover .row-act { opacity:1; }
+    .ico-btn {
+      width:24px; height:24px; border-radius:5px; border:1px solid var(--border); background:#fff;
+      display:inline-flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; color:#475569;
+    }
+    .ico-btn:hover { background:var(--primary-light); color:var(--primary); border-color:var(--primary); }
+
+    .table-foot {
+      padding:8px 12px; background:#f8fafc; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;
+      font-size:12px; color:#475569;
+    }
+    .table-foot b { color:#0f172a; }
+
+    @media (max-width:1100px) { .kpi-strip { grid-template-columns:repeat(3,1fr); } }
   </style>
 </head>
 <body>
@@ -40,6 +142,7 @@
   <nav class="sidebar-nav">
     <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
     <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
     <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
     <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
     <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
@@ -54,7 +157,7 @@
     <a href="m5-doi-tac.html" class="nav-item active"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
     <div class="nav-group">Module 6 – Tài chính</div>
     <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
-    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">??</span>C�ng n? kh�ch h�ng</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
     <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
     <div class="nav-group">Module 7 – GPS</div>
     <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
@@ -79,235 +182,491 @@
       <span class="parent">Module 5</span><span class="sep">›</span><span class="current">Tài xế & Xe đối tác</span>
     </div>
     <div class="topbar-actions">
-      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">3</span></button>
       <div class="topbar-avatar">A</div>
     </div>
   </header>
 
   <main class="page-content">
-    <div class="page-header">
+    <div class="head-row">
       <div>
-        <div class="page-title">🤝 Tài xế & Xe đối tác</div>
-        <div class="page-subtitle">Quản lý xe tự do / đối tác · Phân công chuyến · Tính hoa hồng</div>
+        <div class="ph-title">🤝 Tài xế & Xe đối tác</div>
+        <div class="ph-sub">Tài xế tự do · Xe ngoài · Hoa hồng & công nợ phải trả — click vào dòng để xem hồ sơ</div>
       </div>
-      <div class="page-actions">
-        <button class="btn btn-secondary">Cấu hình hoa hồng</button>
-        <button class="btn btn-primary">+ Thêm đối tác</button>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#e0e7ff;">🤝</div>
-        <div class="stat-card-label">Tổng đối tác</div>
-        <div class="stat-card-value">12</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#dcfce7;">🟢</div>
-        <div class="stat-card-label">Đang rảnh</div>
-        <div class="stat-card-value">4</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fee2e2;">🔴</div>
-        <div class="stat-card-label">Đang bận</div>
-        <div class="stat-card-value">3</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fef9c3;">💰</div>
-        <div class="stat-card-label">Phải trả tháng 5</div>
-        <div class="stat-card-value" style="font-size:20px;">38.5M</div>
+      <div class="ph-actions">
+        <button class="btn btn-secondary btn-sm" onclick="alert('Xuất Excel')">⬇ Xuất</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Cấu hình hoa hồng theo loại đối tác')">⚙ Cấu hình HH</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='m6-thu-chi.html'">💰 Thanh toán hàng loạt</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Mở form thêm đối tác')">+ Thêm đối tác</button>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab(this,'all')">Tất cả (12)</button>
-      <button class="tab-btn" onclick="switchTab(this,'free')">🟢 Đang rảnh (4)</button>
-      <button class="tab-btn" onclick="switchTab(this,'busy')">🔴 Đang bận (3)</button>
-      <button class="tab-btn" onclick="switchTab(this,'offline')">⚫ Offline (5)</button>
+    <!-- KPI -->
+    <div class="kpi-strip">
+      <div class="kpi-mini c1 active" data-q="all" onclick="setQuick('all')">
+        <div class="km-lbl">🤝 Tổng đối tác</div>
+        <div class="km-val" id="kAll">0</div>
+        <div class="km-sub" id="kAllSub">—</div>
+      </div>
+      <div class="kpi-mini c2" data-q="free" onclick="setQuick('free')">
+        <div class="km-lbl">🟢 Đang rảnh</div>
+        <div class="km-val in" id="kFree">0</div>
+        <div class="km-sub">Sẵn sàng nhận chuyến</div>
+      </div>
+      <div class="kpi-mini c3" data-q="busy" onclick="setQuick('busy')">
+        <div class="km-lbl">🚚 Đang chạy</div>
+        <div class="km-val blue" id="kBusy">0</div>
+        <div class="km-sub" id="kBusySub">—</div>
+      </div>
+      <div class="kpi-mini c4" data-q="pay" onclick="setQuick('pay')">
+        <div class="km-lbl">💵 Phải trả T5</div>
+        <div class="km-val warn" id="kPay">0</div>
+        <div class="km-sub" id="kPaySub">—</div>
+      </div>
+      <div class="kpi-mini c5" data-q="warn" onclick="setQuick('warn')">
+        <div class="km-lbl">⚠ Giấy tờ / Đánh giá thấp</div>
+        <div class="km-val out" id="kWarn">0</div>
+        <div class="km-sub">Cần kiểm tra</div>
+      </div>
     </div>
 
     <!-- Filter -->
     <div class="filter-bar">
-      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tên, biển số...">
-      <select class="form-control"><option>Tất cả loại xe</option><option>1 tấn</option><option>3 tấn</option><option>5 tấn</option><option>10 tấn</option></select>
+      <input class="search" type="text" id="qSearch" placeholder="🔍 Tên, SĐT, biển số, hạng bằng, nhà xe..." oninput="render()">
+      <div class="seg" id="segStatus">
+        <button class="active" data-st="">Tất cả <span class="ct" id="ctAll">0</span></button>
+        <button data-st="free">Rảnh <span class="ct" id="ctFree">0</span></button>
+        <button data-st="busy">Đang chạy <span class="ct" id="ctBusy">0</span></button>
+        <button data-st="off">Không hoạt động <span class="ct" id="ctOff">0</span></button>
+      </div>
+      <select id="fType" onchange="render()">
+        <option value="">Loại: Tất cả</option>
+        <option value="indiv">TX cá nhân</option>
+        <option value="company">Nhà xe / Cty</option>
+      </select>
+      <select id="fW" onchange="render()">
+        <option value="">Tải trọng: Tất cả</option>
+        <option value="1.5">≤ 1.5T</option>
+        <option value="3">3T</option>
+        <option value="5">5T</option>
+        <option value="8">7-8T</option>
+        <option value="15">10-15T</option>
+        <option value="20">≥ 20T</option>
+      </select>
+      <select id="fSort" onchange="render()">
+        <option value="recent">Sắp xếp: Hợp tác mới nhất</option>
+        <option value="rating">Đánh giá ↓</option>
+        <option value="trips">Chuyến T5 ↓</option>
+        <option value="debt">Phải trả ↓</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="clearFilters()" style="margin-left:auto;">↺ Xoá lọc</button>
     </div>
 
-    <div class="cards-grid">
-      <!-- Partner 1 - Free -->
-      <div class="partner-card">
-        <div class="partner-head">
-          <div style="display:flex;gap:12px;align-items:flex-start;">
-            <div style="position:relative;">
-              <div class="avatar avatar-lg" style="background:#dcfce7;color:#15803d;">M</div>
-              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;">
-                <div style="font-weight:700;font-size:14px;">Nguyễn Thành Minh</div>
-                <span class="status-pill status-free">🟢 Rảnh</span>
-              </div>
-              <div class="text-xs text-muted">📞 0911 222 333 · Đối tác tự do</div>
-              <div class="stars mt-1">★★★★★ <span style="color:var(--text-muted);font-size:11px;">4.9 (47 chuyến)</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="partner-body">
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <span class="badge badge-gray">🚚 5 tấn · Thùng kín</span>
-            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51K-11111</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">📍 Vị trí: Quận 12, TP.HCM</div>
-          <div class="commission-info">
-            <div style="display:flex;justify-content:space-between;font-weight:600;">
-              <span>Hoa hồng công ty</span><span style="color:var(--primary);">15%</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
-              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">8.500.000 ₫</span>
-            </div>
-          </div>
-        </div>
-        <div class="partner-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Giao chuyến</button>
-        </div>
+    <!-- Table -->
+    <div class="panel">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Đối tác</th>
+              <th>Liên hệ</th>
+              <th>Xe / Tải trọng</th>
+              <th>Bằng lái</th>
+              <th class="nowrap">Đánh giá</th>
+              <th class="right">Hiệu suất T5</th>
+              <th>Hoa hồng / Công ty</th>
+              <th class="right">Phải trả T5</th>
+              <th>Trạng thái</th>
+              <th class="center" style="width:120px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
-
-      <!-- Partner 2 - Busy -->
-      <div class="partner-card">
-        <div class="partner-head">
-          <div style="display:flex;gap:12px;align-items:flex-start;">
-            <div style="position:relative;">
-              <div class="avatar avatar-lg" style="background:#fee2e2;color:#dc2626;">D</div>
-              <span class="status-dot dot-red" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;">
-                <div style="font-weight:700;font-size:14px;">Trần Văn Đức</div>
-                <span class="status-pill status-busy">🔴 Đang bận</span>
-              </div>
-              <div class="text-xs text-muted">📞 0922 444 555 · Đối tác xe tải</div>
-              <div class="stars mt-1">★★★★☆ <span style="color:var(--text-muted);font-size:11px;">4.6 (32 chuyến)</span></div>
-            </div>
-          </div>
+      <div class="table-foot">
+        <div>Hiển thị <b id="ftCount">0</b> / <b id="ftTotal">0</b> đối tác</div>
+        <div>
+          Tổng chuyến T5: <b id="ftTrips">0</b>
+          · Doanh thu mang về: <b style="color:#15803d;" id="ftRev">0</b>
+          · Phải trả: <b style="color:#b45309;" id="ftPay">0</b>
         </div>
-        <div class="partner-body">
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <span class="badge badge-gray">🏗️ 10 tấn · Thùng mui bạt</span>
-            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51L-22222</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
-            📦 Đang chạy: CX-0528 · HCM → Vũng Tàu<br>
-            ⏱ Hoàn thành lúc ~14:30
-          </div>
-          <div class="commission-info">
-            <div style="display:flex;justify-content:space-between;font-weight:600;">
-              <span>Hoa hồng công ty</span><span style="color:var(--primary);">12%</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
-              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">6.200.000 ₫</span>
-            </div>
-          </div>
-        </div>
-        <div class="partner-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">GPS</button>
-        </div>
-      </div>
-
-      <!-- Partner 3 - Free -->
-      <div class="partner-card">
-        <div class="partner-head">
-          <div style="display:flex;gap:12px;align-items:flex-start;">
-            <div style="position:relative;">
-              <div class="avatar avatar-lg" style="background:#f3e8ff;color:#7e22ce;">L</div>
-              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;">
-                <div style="font-weight:700;font-size:14px;">Lê Quang Linh</div>
-                <span class="status-pill status-free">🟢 Rảnh</span>
-              </div>
-              <div class="text-xs text-muted">📞 0933 666 777 · Đối tác tự do</div>
-              <div class="stars mt-1">★★★★★ <span style="color:var(--text-muted);font-size:11px;">4.8 (28 chuyến)</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="partner-body">
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <span class="badge badge-gray">🚐 1 tấn · Xe lạnh</span>
-            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51M-33333</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">📍 Vị trí: Bình Thạnh, TP.HCM</div>
-          <div class="commission-info">
-            <div style="display:flex;justify-content:space-between;font-weight:600;">
-              <span>Hoa hồng công ty</span><span style="color:var(--primary);">15%</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
-              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">4.100.000 ₫</span>
-            </div>
-          </div>
-        </div>
-        <div class="partner-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Giao chuyến</button>
-        </div>
-      </div>
-
-      <!-- Partner 4 - Offline -->
-      <div class="partner-card" style="opacity:0.7;">
-        <div class="partner-head">
-          <div style="display:flex;gap:12px;align-items:flex-start;">
-            <div style="position:relative;">
-              <div class="avatar avatar-lg" style="background:#f1f5f9;color:#475569;">P</div>
-              <span class="status-dot dot-gray" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;">
-                <div style="font-weight:700;font-size:14px;">Phạm Hữu Phúc</div>
-                <span class="status-pill status-offline">⚫ Offline</span>
-              </div>
-              <div class="text-xs text-muted">📞 0944 888 999 · Đối tác xe tải</div>
-              <div class="stars mt-1">★★★★☆ <span style="color:var(--text-muted);font-size:11px;">4.4 (19 chuyến)</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="partner-body">
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <span class="badge badge-gray">🚛 3 tấn · Thùng kín</span>
-            <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51N-44444</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">📴 Offline từ 2 giờ trước</div>
-          <div class="commission-info">
-            <div style="display:flex;justify-content:space-between;font-weight:600;">
-              <span>Hoa hồng công ty</span><span style="color:var(--primary);">15%</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--text-muted);">
-              <span>Đã nhận tháng 5</span><span style="font-weight:600;color:#16a34a;">2.800.000 ₫</span>
-            </div>
-          </div>
-        </div>
-        <div class="partner-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;" disabled>Giao chuyến</button>
-        </div>
-      </div>
-
-      <!-- Add new -->
-      <div class="partner-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:260px;cursor:pointer;" onclick="alert('Thêm đối tác mới')">
-        <div style="font-size:32px;color:var(--text-muted);">+</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Thêm đối tác mới</div>
       </div>
     </div>
   </main>
 </div>
+
 <script src="assets/app.js"></script>
 <script>
-  function switchTab(el, type) {
-    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => { const v=Math.abs(n||0);
+  if (v>=1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'')+' tỷ';
+  if (v>=1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+  if (v>=1e3) return (n/1e3).toFixed(0)+'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const daysUntil = d => Math.round((d - TODAY)/86400000);
+
+/* ===== PARTNERS =====
+   type:    indiv (cá nhân tự do) | company (nhà xe/cty)
+   status:  free | busy | off
+   commission: { type:'pct'|'trip'|'fix', value:number }
+*/
+const PARTNERS = [
+  {
+    id:'DT01', type:'indiv', name:'Lê Hoàng Sơn', avatar:'S', bg:'#dcfce7', fg:'#15803d',
+    photo:'https://i.pravatar.cc/120?img=8',
+    company:null, phone:'0901 555 111', cccd:'079 188 234 567',
+    truck:'51C-67890', weight:8, weightLbl:'8T', truckType:'Thùng kín',
+    license:{class:'C', expire:new Date(2027,8,15)},
+    insurance:{expire:new Date(2026,9,12)},
+    joinDate:new Date(2023,5,10),
+    bank:'Vietcombank · 1234567890',
+    rating:4.8, totalTrips:128, tripsM:14, revM:62_000_000, payM:9_300_000,
+    paid:0, status:'free',
+    commission:{type:'pct', value:15},
+    note:'Quen tuyến SG–Đà Nẵng'
+  },
+  {
+    id:'DT02', type:'company', name:'Vận tải Hùng Phát', avatar:'H', bg:'#fef3c7', fg:'#b45309',
+    photo:null,
+    company:'Cty TNHH Vận tải Hùng Phát', phone:'0908 222 333', cccd:'—', taxCode:'0312345678',
+    truck:'51K-12121', weight:15, weightLbl:'15T', truckType:'Container 40ft',
+    license:{class:'FC', expire:new Date(2028,3,20)},
+    insurance:{expire:new Date(2026,11,8)},
+    joinDate:new Date(2021,1,5),
+    bank:'Techcombank · 9988776655',
+    rating:4.6, totalTrips:312, tripsM:9, revM:185_000_000, payM:27_750_000,
+    paid:15_000_000, status:'busy',
+    commission:{type:'pct', value:15},
+    note:'Đối tác chiến lược · 5 xe đầu kéo'
+  },
+  {
+    id:'DT03', type:'indiv', name:'Trần Quốc Hải', avatar:'H', bg:'#dbeafe', fg:'#1d4ed8',
+    photo:'https://i.pravatar.cc/120?img=58',
+    company:null, phone:'0912 345 678', cccd:'079 195 678 123',
+    truck:'51F-44455', weight:3, weightLbl:'3T', truckType:'Thùng bạt',
+    license:{class:'C', expire:new Date(2026,5,20)},  // sắp hết
+    insurance:{expire:new Date(2026,7,3)},
+    joinDate:new Date(2024,2,18),
+    bank:'BIDV · 5566778899',
+    rating:4.5, totalTrips:64, tripsM:18, revM:38_500_000, payM:5_775_000,
+    paid:0, status:'free',
+    commission:{type:'trip', value:350_000},
+    note:'Khu vực nội đô + lân cận'
+  },
+  {
+    id:'DT04', type:'company', name:'Cty Vận tải Sao Việt', avatar:'S', bg:'#f3e8ff', fg:'#7e22ce',
+    photo:null,
+    company:'Cty CP Vận tải Sao Việt', phone:'0902 888 999', cccd:'—', taxCode:'0309876543',
+    truck:'51G-77711', weight:20, weightLbl:'20T', truckType:'Đầu kéo + Mooc',
+    license:{class:'FC', expire:new Date(2027,11,30)},
+    insurance:{expire:new Date(2027,1,15)},
+    joinDate:new Date(2020,8,12),
+    bank:'ACB · 1212343456',
+    rating:4.9, totalTrips:480, tripsM:7, revM:215_000_000, payM:32_250_000,
+    paid:32_250_000, status:'busy',
+    commission:{type:'pct', value:15},
+    note:'Chuyên SG–Hà Nội · 8 xe'
+  },
+  {
+    id:'DT05', type:'indiv', name:'Phan Văn Đức', avatar:'D', bg:'#ffedd5', fg:'#c2410c',
+    photo:'https://i.pravatar.cc/120?img=22',
+    company:null, phone:'0934 111 222', cccd:'079 191 444 555',
+    truck:'51E-99887', weight:5, weightLbl:'5T', truckType:'Thùng kín',
+    license:{class:'C', expire:new Date(2028,1,10)},
+    insurance:{expire:new Date(2026,4,18)},  // sắp hết 6 ngày
+    joinDate:new Date(2022,10,3),
+    bank:'Sacombank · 7788991122',
+    rating:4.2, totalTrips:96, tripsM:11, revM:48_500_000, payM:7_275_000,
+    paid:0, status:'busy',
+    commission:{type:'pct', value:15},
+    note:''
+  },
+  {
+    id:'DT06', type:'indiv', name:'Nguyễn Thị Lan Anh', avatar:'L', bg:'#ccfbf1', fg:'#0f766e',
+    photo:'https://i.pravatar.cc/120?img=47',
+    company:null, phone:'0978 333 444', cccd:'079 200 333 111',
+    truck:'51H-22233', weight:1.5, weightLbl:'1.5T', truckType:'Tải nhỏ',
+    license:{class:'B2', expire:new Date(2029,3,5)},
+    insurance:{expire:new Date(2027,2,20)},
+    joinDate:new Date(2024,7,15),
+    bank:'MB Bank · 3344556677',
+    rating:5.0, totalTrips:42, tripsM:22, revM:18_000_000, payM:6_300_000,
+    paid:0, status:'free',
+    commission:{type:'trip', value:280_000},
+    note:'Giao hàng nội đô · sạch sẽ uy tín'
+  },
+  {
+    id:'DT07', type:'company', name:'HTX Vận tải Miền Tây', avatar:'M', bg:'#e0e7ff', fg:'#4338ca',
+    photo:null,
+    company:'HTX Vận tải Miền Tây', phone:'0939 666 777', cccd:'—', taxCode:'1701234567',
+    truck:'67C-55566', weight:12, weightLbl:'12T', truckType:'Thùng bạt',
+    license:{class:'E', expire:new Date(2027,6,12)},
+    insurance:{expire:new Date(2026,8,28)},
+    joinDate:new Date(2022,4,20),
+    bank:'Agribank · 8899001122',
+    rating:4.4, totalTrips:185, tripsM:6, revM:95_000_000, payM:14_250_000,
+    paid:7_000_000, status:'free',
+    commission:{type:'pct', value:15},
+    note:'Tuyến SG–Cần Thơ–Cà Mau · 4 xe'
+  },
+  {
+    id:'DT08', type:'indiv', name:'Bùi Thanh Long', avatar:'L', bg:'#fee2e2', fg:'#b91c1c',
+    photo:'https://i.pravatar.cc/120?img=70',
+    company:null, phone:'0967 222 999', cccd:'079 187 555 333',
+    truck:'51D-13579', weight:8, weightLbl:'8T', truckType:'Thùng kín',
+    license:{class:'C', expire:new Date(2027,4,10)},
+    insurance:{expire:new Date(2026,10,5)},
+    joinDate:new Date(2023,11,1),
+    bank:'TPBank · 9911223344',
+    rating:3.5, totalTrips:48, tripsM:4, revM:18_000_000, payM:2_700_000,
+    paid:0, status:'off',
+    commission:{type:'pct', value:15},
+    note:'2 lần phản hồi xấu KH · cần xem xét'
+  },
+  {
+    id:'DT09', type:'indiv', name:'Lê Văn Tài', avatar:'T', bg:'#fef9c3', fg:'#854d0e',
+    photo:'https://i.pravatar.cc/120?img=13',
+    company:null, phone:'0983 555 666', cccd:'079 186 777 888',
+    truck:'51F-66778', weight:3, weightLbl:'3T', truckType:'Thùng kín',
+    license:{class:'C', expire:new Date(2028,5,18)},
+    insurance:{expire:new Date(2027,0,10)},
+    joinDate:new Date(2024,9,8),
+    bank:'VPBank · 4455667788',
+    rating:4.7, totalTrips:35, tripsM:16, revM:34_000_000, payM:5_100_000,
+    paid:0, status:'free',
+    commission:{type:'pct', value:15},
+    note:''
+  },
+  {
+    id:'DT10', type:'company', name:'Vận tải Thành Đạt', avatar:'T', bg:'#f1f5f9', fg:'#475569',
+    photo:null,
+    company:'DNTN Vận tải Thành Đạt', phone:'0918 777 888', cccd:'—', taxCode:'0314567890',
+    truck:'51K-88990', weight:15, weightLbl:'15T', truckType:'Container 20ft',
+    license:{class:'FC', expire:new Date(2028,9,22)},
+    insurance:{expire:new Date(2027,3,11)},
+    joinDate:new Date(2021,7,25),
+    bank:'OCB · 6677889900',
+    rating:4.6, totalTrips:268, tripsM:8, revM:142_000_000, payM:21_300_000,
+    paid:21_300_000, status:'busy',
+    commission:{type:'pct', value:15},
+    note:'Tuyến cảng Cát Lái – Bình Dương'
   }
+];
+
+/* ===== Helpers ===== */
+function hasWarn(p) {
+  return daysUntil(p.license.expire) <= 30 || daysUntil(p.insurance.expire) <= 30 || p.rating < 4.0;
+}
+function statusBadge(p) {
+  if (p.status==='free') return `<span class="b b-free">🟢 Rảnh</span>`;
+  if (p.status==='busy') return `<span class="b b-busy">🚚 Đang chạy</span>`;
+  return `<span class="b b-off">⏸ Tạm ngưng</span>`;
+}
+function statusDot(p) {
+  if (p.status==='free') return 'dot-on';
+  if (p.status==='busy') return 'dot-busy';
+  return 'dot-off';
+}
+function stars(r) {
+  const full = Math.floor(r), half = (r - full) >= 0.5;
+  let s = '';
+  for (let i=0; i<5; i++) {
+    if (i < full) s += '★';
+    else if (i === full && half) s += '★';
+    else s += '<span class="empty">★</span>';
+  }
+  return `<span class="stars">${s}</span> <b style="font-size:11px;">${r.toFixed(1)}</b>`;
+}
+function commissionCell(c) {
+  const labels = {pct:'% doanh thu', trip:'Cố định/chuyến', fix:'Cố định/tháng'};
+  const v = c.type==='pct' ? `<b>${c.value}%</b> doanh thu` :
+            c.type==='trip'? `<b>${FMT(c.value)}</b>/chuyến` :
+            `<b>${FMT(c.value)}</b>/tháng`;
+  return `<div><span class="com-tag t-${c.type}">${labels[c.type]}</span></div>
+          <div style="font-size:10.5px;color:#64748b;margin-top:2px;">${v}</div>`;
+}
+
+/* ===== State ===== */
+let curStatus = '', curQuick = 'all';
+function setSeg(v) {
+  curStatus = v; curQuick = 'all';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === v));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.q === 'all'));
+  render();
+}
+function setQuick(q) {
+  curQuick = q; curStatus = '';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === ''));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.q === q));
+  render();
+}
+function clearFilters() {
+  document.getElementById('qSearch').value = '';
+  document.getElementById('fType').value = '';
+  document.getElementById('fW').value = '';
+  document.getElementById('fSort').value = 'recent';
+  setQuick('all');
+}
+function goDetail(id) {
+  window.location.href = `m5-doi-tac-chi-tiet.html?id=${id}`;
+}
+
+function filterList() {
+  const q = document.getElementById('qSearch').value.trim().toLowerCase();
+  const tp = document.getElementById('fType').value;
+  const w  = document.getElementById('fW').value;
+  const sort = document.getElementById('fSort').value;
+  let list = PARTNERS.slice();
+  if (q)  list = list.filter(p => (p.id+p.name+(p.company||'')+p.phone+p.truck+p.license.class).toLowerCase().includes(q));
+  if (tp) list = list.filter(p => p.type === tp);
+  if (w)  {
+    const W = parseFloat(w);
+    list = list.filter(p => {
+      if (W===1.5) return p.weight <= 1.5;
+      if (W===3)   return p.weight === 3;
+      if (W===5)   return p.weight === 5;
+      if (W===8)   return p.weight >= 7 && p.weight <= 8;
+      if (W===15)  return p.weight >= 10 && p.weight <= 15;
+      if (W===20)  return p.weight >= 20;
+      return true;
+    });
+  }
+  if (curStatus) list = list.filter(p => p.status === curStatus);
+  if (curQuick === 'free') list = list.filter(p => p.status === 'free');
+  if (curQuick === 'busy') list = list.filter(p => p.status === 'busy');
+  if (curQuick === 'pay')  list = list.filter(p => (p.payM - p.paid) > 0);
+  if (curQuick === 'warn') list = list.filter(p => hasWarn(p));
+  list.sort((a,b) => {
+    switch (sort) {
+      case 'rating': return b.rating - a.rating;
+      case 'trips':  return b.tripsM - a.tripsM;
+      case 'debt':   return (b.payM-b.paid) - (a.payM-a.paid);
+      default: return b.joinDate - a.joinDate;
+    }
+  });
+  return list;
+}
+
+function render() {
+  const list = filterList();
+  const tbody = document.getElementById('tbody');
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="center" style="padding:30px;color:#94a3b8;font-style:italic;">— Không có đối tác nào —</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(p => {
+      const lic = p.license, ins = p.insurance;
+      const licDays = daysUntil(lic.expire), insDays = daysUntil(ins.expire);
+      const debt = p.payM - p.paid;
+      const payPct = p.payM ? Math.round(p.paid/p.payM*100) : 0;
+      const av = p.photo
+        ? `<img src="${p.photo}" alt="${p.name}" onerror="this.parentNode.innerHTML='${p.avatar}'+this.parentNode.innerHTML.split('</span>')[0].includes('dot')?'<span class=\\'dot ${statusDot(p)}\\'></span>':'';">`
+        : (p.type==='company' ? '🏢' : p.avatar);
+      return `
+        <tr onclick="goDetail('${p.id}')">
+          <td>
+            <div class="drv-cell">
+              <div class="drv-av" style="background:${p.bg};color:${p.fg};">
+                ${av}
+                <span class="dot ${statusDot(p)}"></span>
+              </div>
+              <div style="min-width:0;">
+                <div class="drv-nm">${p.name}</div>
+                <div class="drv-meta">${p.id} · ${p.type==='company'?'🏢 Cty/Nhà xe':'👤 Cá nhân'} · từ ${dStr(p.joinDate)}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:12px;">📞 <b>${p.phone}</b></div>
+            <div style="font-size:10.5px;color:#64748b;">${p.type==='company'?'MST: '+p.taxCode:'CCCD: '+p.cccd}</div>
+          </td>
+          <td>
+            <div><span class="truck-tag">${p.truck}</span></div>
+            <div style="font-size:10.5px;color:#64748b;margin-top:2px;">${p.weightLbl} · ${p.truckType}</div>
+          </td>
+          <td>
+            <div style="font-size:12px;"><b>Hạng ${lic.class}</b></div>
+            <div style="font-size:10.5px;color:${licDays<0?'#b91c1c':licDays<=30?'#b45309':'#15803d'};font-weight:700;">
+              ${licDays<0?'⚠ Hết hạn':licDays<=30?`⏰ ${licDays}d`:`✓ ${dStr(lic.expire)}`}
+            </div>
+            <div style="font-size:10px;color:${insDays<0?'#b91c1c':insDays<=30?'#b45309':'#94a3b8'};">
+              🛡 BH: ${insDays<0?'⚠':insDays<=30?'⏰ '+insDays+'d':dStr(ins.expire)}
+            </div>
+          </td>
+          <td class="nowrap">
+            ${stars(p.rating)}
+            <div style="font-size:10.5px;color:#94a3b8;margin-top:2px;">${p.totalTrips} chuyến tổng</div>
+          </td>
+          <td class="right">
+            <div style="font-size:12px;"><b>${p.tripsM}</b> chuyến</div>
+            <div style="font-size:11px;color:#15803d;font-weight:700;">${FMTM(p.revM)} doanh thu</div>
+          </td>
+          <td>${commissionCell(p.commission)}</td>
+          <td class="right">
+            <div style="font-size:12.5px;"><b>${FMTM(p.payM)}</b></div>
+            ${p.payM ? `
+              <div style="font-size:10.5px;color:${payPct===100?'#15803d':payPct>0?'#b45309':'#b91c1c'};font-weight:700;">
+                ${payPct===100?'✓ Đã trả':payPct>0?`Còn ${FMTM(debt)}`:`Chưa trả`}
+              </div>
+              <div class="paybar"><i style="width:${payPct}%;background:${payPct===100?'#16a34a':payPct>0?'#f59e0b':'#dc2626'};"></i></div>` : ''}
+          </td>
+          <td>
+            ${statusBadge(p)}
+            ${p.note ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px;max-width:140px;">${p.note}</div>` : ''}
+          </td>
+          <td class="center" onclick="event.stopPropagation();">
+            <div class="row-act">
+              <button class="ico-btn" title="Hồ sơ" onclick="goDetail('${p.id}')">👁️</button>
+              <button class="ico-btn" title="Phân chuyến" onclick="window.location.href='m2-dieu-phoi.html'">🎯</button>
+              <button class="ico-btn" title="Thanh toán" onclick="window.location.href='m6-thu-chi.html'">💵</button>
+              <button class="ico-btn" title="Gọi" onclick="window.location.href='tel:${p.phone.replace(/\\s/g,'')}'">📞</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // KPI
+  const tot = PARTNERS.length;
+  const free = PARTNERS.filter(p => p.status==='free').length;
+  const busy = PARTNERS.filter(p => p.status==='busy').length;
+  const off  = PARTNERS.filter(p => p.status==='off').length;
+  const totPay = PARTNERS.reduce((s,p)=>s+(p.payM-p.paid),0);
+  const totPaid = PARTNERS.reduce((s,p)=>s+p.paid,0);
+  const totRev = PARTNERS.reduce((s,p)=>s+p.revM,0);
+  const warn = PARTNERS.filter(p => hasWarn(p)).length;
+  document.getElementById('kAll').textContent = tot;
+  document.getElementById('kAllSub').textContent = `Doanh thu T5: ${FMTM(totRev)}`;
+  document.getElementById('kFree').textContent = free;
+  document.getElementById('kBusy').textContent = busy;
+  document.getElementById('kBusySub').textContent = `${PARTNERS.filter(p=>p.status==='busy').reduce((s,p)=>s+p.tripsM,0)} chuyến đang chạy`;
+  document.getElementById('kPay').textContent = FMTM(totPay);
+  document.getElementById('kPaySub').textContent = `Đã trả ${FMTM(totPaid)} / ${FMTM(totPay+totPaid)}`;
+  document.getElementById('kWarn').textContent = warn;
+
+  // Segment counts
+  document.getElementById('ctAll').textContent  = tot;
+  document.getElementById('ctFree').textContent = free;
+  document.getElementById('ctBusy').textContent = busy;
+  document.getElementById('ctOff').textContent  = off;
+
+  // Footer
+  document.getElementById('ftCount').textContent = list.length;
+  document.getElementById('ftTotal').textContent = tot;
+  document.getElementById('ftTrips').textContent = list.reduce((s,p)=>s+p.tripsM,0);
+  document.getElementById('ftRev').textContent   = FMT(list.reduce((s,p)=>s+p.revM,0));
+  document.getElementById('ftPay').textContent   = FMT(list.reduce((s,p)=>s+(p.payM-p.paid),0));
+}
+
+document.querySelectorAll('#segStatus button').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.st)));
+render();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
 </script>
 </body>
 </html>

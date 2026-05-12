@@ -6,13 +6,116 @@
   <title>Khách hàng – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .customer-card {
-      background: white; border-radius: 12px; border: 1px solid var(--border);
-      padding: 16px; transition: all 0.13s; cursor: pointer;
+    .page-content { padding: 10px 14px !important; }
+
+    .head-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px; gap: 12px;
     }
-    .customer-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(29,78,216,0.08); }
-    .debt-bar { height: 4px; border-radius: 2px; background: #fee2e2; margin-top: 4px; overflow: hidden; }
-    .debt-bar-fill { height: 100%; background: #ef4444; border-radius: 2px; }
+    .ph-title { font-size: 16px; font-weight: 800; color: #0f172a; line-height: 1.1; }
+    .ph-sub { font-size: 11.5px; color: #64748b; margin-top: 1px; }
+    .ph-actions { display: flex; gap: 6px; }
+
+    .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 8px; }
+    .kpi-mini {
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px 8px 12px; position: relative; cursor: pointer;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    .kpi-mini:hover { border-color: var(--primary); box-shadow: 0 2px 6px rgba(79,70,229,0.08); }
+    .kpi-mini.active { border-color: var(--primary); background: #f5f3ff; }
+    .kpi-mini::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:8px 0 0 8px;
+    }
+    .kpi-mini.c1::before { background:#4f46e5; }
+    .kpi-mini.c2::before { background:#16a34a; }
+    .kpi-mini.c3::before { background:#f59e0b; }
+    .kpi-mini.c4::before { background:#dc2626; }
+    .kpi-mini.c5::before { background:#0891b2; }
+    .km-lbl { font-size: 10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+    .km-val { font-size: 18px; font-weight:800; color:#0f172a; line-height:1.15; margin-top: 2px; }
+    .km-sub { font-size: 11px; color:#64748b; margin-top: 1px; }
+    .km-val.in   { color: #15803d; }
+    .km-val.out  { color: #b91c1c; }
+    .km-val.warn { color: #b45309; }
+
+    .filter-bar {
+      background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 8px;
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;
+    }
+    .filter-bar input, .filter-bar select {
+      height: 30px; padding: 0 8px; font-size: 12.5px;
+      border: 1px solid var(--border); border-radius: 6px; background: #fff;
+    }
+    .filter-bar input.search { flex: 1; min-width: 220px; }
+    .seg { display: inline-flex; background:#f1f5f9; border-radius: 6px; padding: 2px; gap: 2px; }
+    .seg button {
+      border:0; background:transparent; padding: 4px 10px; border-radius: 4px;
+      font-size: 12px; font-weight:600; color:#475569; cursor:pointer;
+    }
+    .seg button.active { background:#fff; color:var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+    .seg button .ct {
+      background:#e2e8f0; color:#475569; padding:0 5px; border-radius:8px; margin-left:4px; font-size:10.5px;
+    }
+    .seg button.active .ct { background:var(--primary-light); color:var(--primary); }
+
+    .panel { background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .data-table { width:100%; border-collapse: separate; border-spacing:0; font-size: 12.5px; }
+    .data-table thead th {
+      background:#f8fafc; font-size:10.5px; text-transform:uppercase; letter-spacing:.3px;
+      color:#64748b; font-weight:700; padding: 8px 10px; text-align:left;
+      border-bottom:1px solid var(--border); white-space:nowrap;
+      position: sticky; top: 0; z-index: 1;
+    }
+    .data-table tbody td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .data-table tbody tr { cursor:pointer; }
+    .data-table tbody tr:hover { background:#f8fafc; }
+    .data-table tbody tr:last-child td { border-bottom:0; }
+    .nowrap { white-space: nowrap; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+    .table-wrap { max-height: calc(100vh - 270px); overflow-y: auto; }
+
+    .cust-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .cust-av {
+      width: 32px; height: 32px; border-radius: 8px; display:flex; align-items:center; justify-content:center;
+      font-weight: 800; font-size: 13px; flex-shrink: 0;
+    }
+    .cust-nm { font-weight: 700; font-size: 12.5px; color: #0f172a; line-height: 1.2; }
+    .cust-cd { font-size: 10.5px; color: #94a3b8; }
+
+    .dbar { height: 5px; border-radius: 3px; background: #f1f5f9; overflow: hidden; margin-top: 3px; min-width: 70px; }
+    .dbar-fill { height:100%; }
+    .dbar-fill.ok   { background: #16a34a; }
+    .dbar-fill.warn { background: #f59e0b; }
+    .dbar-fill.bad  { background: #dc2626; }
+
+    .b { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 700; white-space:nowrap; }
+    .b-green { background:#dcfce7; color:#15803d; }
+    .b-red   { background:#fee2e2; color:#b91c1c; }
+    .b-yellow{ background:#fef3c7; color:#b45309; }
+    .b-blue  { background:#dbeafe; color:#1d4ed8; }
+    .b-gray  { background:#f1f5f9; color:#475569; }
+    .b-vip   { background: linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; }
+
+    .row-act { display: inline-flex; gap: 3px; opacity: 0; transition: opacity .12s; }
+    tr:hover .row-act { opacity: 1; }
+    .ico-btn {
+      width: 24px; height: 24px; border-radius: 5px; border:1px solid var(--border); background:#fff;
+      display:inline-flex; align-items:center; justify-content:center; font-size: 12px; cursor:pointer; color:#475569;
+    }
+    .ico-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+    .table-foot {
+      padding: 8px 12px; background: #f8fafc; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items:center;
+      font-size: 12px; color: #475569; flex-wrap: wrap; gap: 6px;
+    }
+    .table-foot b { color: #0f172a; }
+
+    @media (max-width: 1100px) {
+      .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -33,6 +136,7 @@
   <nav class="sidebar-nav">
     <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
     <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
     <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
     <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
     <a href="m1-khach-hang.html" class="nav-item active"><span class="nav-icon">👥</span>Khách hàng</a>
@@ -47,7 +151,7 @@
     <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
     <div class="nav-group">Module 6 – Tài chính</div>
     <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
-    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">??</span>C�ng n? kh�ch h�ng</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
     <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
     <div class="nav-group">Module 7 – GPS</div>
     <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
@@ -78,190 +182,353 @@
   </header>
 
   <main class="page-content">
-    <div class="page-header">
+    <div class="head-row">
       <div>
-        <div class="page-title">👥 Hồ sơ khách hàng</div>
-        <div class="page-subtitle">Quản lý thông tin, lịch sử đơn hàng và công nợ từng khách hàng</div>
+        <div class="ph-title">👥 Quản lý khách hàng</div>
+        <div class="ph-sub">Theo dõi hồ sơ, đơn hàng và công nợ của từng khách</div>
       </div>
-      <div class="page-actions">
-        <button class="btn btn-secondary">⬇ Xuất Excel</button>
-        <button class="btn btn-primary" onclick="alert('Mở form thêm khách hàng')">+ Thêm khách hàng</button>
-      </div>
-    </div>
-
-    <!-- Summary stats -->
-    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#e0e7ff;">👥</div>
-        <div class="stat-card-label">Tổng khách hàng</div>
-        <div class="stat-card-value">38</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#dcfce7;">⭐</div>
-        <div class="stat-card-label">Khách thường xuyên</div>
-        <div class="stat-card-value">15</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fee2e2;">⚠️</div>
-        <div class="stat-card-label">Có công nợ quá hạn</div>
-        <div class="stat-card-value" style="color:#dc2626;">3</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fef9c3;">💰</div>
-        <div class="stat-card-label">Tổng công nợ phải thu</div>
-        <div class="stat-card-value" style="font-size:20px;">48M ₫</div>
+      <div class="ph-actions">
+        <button class="btn btn-secondary btn-sm" onclick="alert('Nhập từ Excel')">⬆ Nhập</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Xuất Excel')">⬇ Xuất</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Mở form thêm KH')">+ Thêm khách hàng</button>
       </div>
     </div>
 
-    <!-- Filter -->
+    <div class="kpi-strip">
+      <div class="kpi-mini c1 active" data-quick="all" onclick="setQuick('all')">
+        <div class="km-lbl">👥 Tổng KH</div>
+        <div class="km-val" id="kAll">0</div>
+        <div class="km-sub" id="kAllSub">—</div>
+      </div>
+      <div class="kpi-mini c2" data-quick="vip" onclick="setQuick('vip')">
+        <div class="km-lbl">⭐ Khách VIP / Tốt</div>
+        <div class="km-val in" id="kVip">0</div>
+        <div class="km-sub">DT ≥ 100M & nợ tốt</div>
+      </div>
+      <div class="kpi-mini c3" data-quick="duesoon" onclick="setQuick('duesoon')">
+        <div class="km-lbl">⏰ Sắp đến hạn (≤ 7d)</div>
+        <div class="km-val warn" id="kDue">0</div>
+        <div class="km-sub" id="kDueSub">—</div>
+      </div>
+      <div class="kpi-mini c4" data-quick="overdue" onclick="setQuick('overdue')">
+        <div class="km-lbl">⚠ Quá hạn TT</div>
+        <div class="km-val out" id="kOver">0</div>
+        <div class="km-sub" id="kOverSub">—</div>
+      </div>
+      <div class="kpi-mini c5" data-quick="debt" onclick="setQuick('debt')">
+        <div class="km-lbl">💰 Tổng phải thu</div>
+        <div class="km-val out" id="kDebt">0</div>
+        <div class="km-sub" id="kDebtSub">—</div>
+      </div>
+    </div>
+
     <div class="filter-bar">
-      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tên, điện thoại, email...">
-      <select class="form-control"><option>Tất cả loại</option><option>Doanh nghiệp</option><option>Cá nhân</option></select>
-      <select class="form-control"><option>Tất cả trạng thái</option><option>Hoạt động</option><option>Có nợ quá hạn</option></select>
-      <div style="margin-left:auto;display:flex;gap:4px;">
-        <button class="btn-icon" title="Dạng lưới" onclick="setView('grid')">⊞</button>
-        <button class="btn-icon" title="Dạng bảng" onclick="setView('table')">≡</button>
+      <input class="search" type="text" id="qSearch" placeholder="🔍 Tìm tên, mã KH, MST, điện thoại, email..." oninput="render()">
+      <div class="seg" id="segStatus">
+        <button class="active" data-st="">Tất cả <span class="ct" id="ctAll">0</span></button>
+        <button data-st="open">✓ Tốt <span class="ct" id="ctOpen">0</span></button>
+        <button data-st="duesoon">⏰ Sắp đến hạn <span class="ct" id="ctDue">0</span></button>
+        <button data-st="overdue">⚠ Quá hạn <span class="ct" id="ctOver">0</span></button>
+        <button data-st="inactive">😴 Ít hoạt động <span class="ct" id="ctIna">0</span></button>
+      </div>
+      <select id="fType" onchange="render()">
+        <option value="">Mọi loại</option>
+        <option value="Doanh nghiệp">Doanh nghiệp</option>
+        <option value="Cá nhân">Cá nhân</option>
+      </select>
+      <select id="fSort" onchange="render()">
+        <option value="debt">Sắp xếp: Nợ giảm dần</option>
+        <option value="rev">Doanh thu giảm dần</option>
+        <option value="orders">Số đơn giảm dần</option>
+        <option value="recent">Đơn gần nhất</option>
+        <option value="name">Tên A→Z</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="clearFilters()" style="margin-left:auto;">↺ Xoá lọc</button>
+    </div>
+
+    <div class="panel">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:26%;">Khách hàng</th>
+              <th>Liên hệ</th>
+              <th class="center">Loại</th>
+              <th class="right">Đơn</th>
+              <th class="right">Doanh thu</th>
+              <th class="right">Đã thu</th>
+              <th class="right">Còn nợ</th>
+              <th>% Hạn mức</th>
+              <th>Trạng thái</th>
+              <th class="nowrap">Đơn gần nhất</th>
+              <th class="center" style="width:130px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="table-foot">
+        <div>Hiển thị <b id="ftCount">0</b> / <b id="ftTotal">0</b> khách hàng</div>
+        <div>
+          Doanh thu: <b id="ftRev">0</b>
+          · Đã thu: <b style="color:#15803d;" id="ftPaid">0</b>
+          · Còn nợ: <b style="color:#b91c1c;" id="ftDebt">0</b>
+        </div>
       </div>
     </div>
 
-    <!-- Customer grid -->
-    <div id="customerGrid" class="cards-grid">
-      <!-- Card 1 -->
-      <div class="customer-card">
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
-          <div class="avatar avatar-md" style="background:#e0e7ff;color:#4338ca;font-size:16px;">P</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;">Cty TNHH Phú Hưng</div>
-            <div class="text-xs text-muted">MST: 0302 345 678 · Doanh nghiệp</div>
-            <div class="text-xs text-muted mt-1">📞 0901 234 567 · ✉ puhung@email.com</div>
-          </div>
-          <span class="badge badge-red">Nợ quá hạn</span>
-        </div>
-        <div class="divider" style="margin:8px 0;"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">24</div><div class="text-xs text-muted">Tổng đơn</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">128M</div><div class="text-xs text-muted">Doanh thu</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#dc2626;">15M</div><div class="text-xs text-muted">Còn nợ</div></div>
-        </div>
-        <div style="font-size:11px;color:#dc2626;font-weight:600;margin-bottom:8px;">⚠ Quá hạn thanh toán 14 ngày</div>
-        <div class="debt-bar"><div class="debt-bar-fill" style="width:70%;"></div></div>
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
-        </div>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="customer-card">
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
-          <div class="avatar avatar-md" style="background:#dcfce7;color:#15803d;font-size:16px;">B</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;">Siêu thị Big C</div>
-            <div class="text-xs text-muted">MST: 0301 123 456 · Doanh nghiệp</div>
-            <div class="text-xs text-muted mt-1">📞 0912 456 789 · ✉ bigc@bigc.vn</div>
-          </div>
-          <span class="badge badge-green">Tốt</span>
-        </div>
-        <div class="divider" style="margin:8px 0;"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">56</div><div class="text-xs text-muted">Tổng đơn</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">340M</div><div class="text-xs text-muted">Doanh thu</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">0</div><div class="text-xs text-muted">Còn nợ</div></div>
-        </div>
-        <div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:8px;">✅ Thanh toán đúng hạn</div>
-        <div class="debt-bar" style="background:#dcfce7;"><div class="debt-bar-fill" style="width:0%;background:#16a34a;"></div></div>
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="customer-card">
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
-          <div class="avatar avatar-md" style="background:#ffedd5;color:#c2410c;font-size:16px;">T</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;">Cty CP Thép Miền Nam</div>
-            <div class="text-xs text-muted">MST: 0300 987 654 · Doanh nghiệp</div>
-            <div class="text-xs text-muted mt-1">📞 0908 654 321 · ✉ thep@mn.vn</div>
-          </div>
-          <span class="badge badge-yellow">Có nợ</span>
-        </div>
-        <div class="divider" style="margin:8px 0;"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">18</div><div class="text-xs text-muted">Tổng đơn</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">85M</div><div class="text-xs text-muted">Doanh thu</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#c2410c;">12M</div><div class="text-xs text-muted">Còn nợ</div></div>
-        </div>
-        <div style="font-size:11px;color:#854d0e;font-weight:600;margin-bottom:8px;">⏰ Đến hạn thanh toán 16/05</div>
-        <div class="debt-bar"><div class="debt-bar-fill" style="width:45%;background:#eab308;"></div></div>
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
-        </div>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="customer-card">
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
-          <div class="avatar avatar-md" style="background:#f3e8ff;color:#7e22ce;font-size:16px;">X</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;">Cty May Mặc Xuân Hòa</div>
-            <div class="text-xs text-muted">MST: 0303 456 789 · Doanh nghiệp</div>
-            <div class="text-xs text-muted mt-1">📞 0977 333 444 · ✉ xuanhoa@mail.vn</div>
-          </div>
-          <span class="badge badge-green">Tốt</span>
-        </div>
-        <div class="divider" style="margin:8px 0;"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">31</div><div class="text-xs text-muted">Tổng đơn</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">198M</div><div class="text-xs text-muted">Doanh thu</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">0</div><div class="text-xs text-muted">Còn nợ</div></div>
-        </div>
-        <div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:8px;">⭐ Khách hàng VIP</div>
-        <div class="debt-bar" style="background:#dcfce7;"></div>
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
-        </div>
-      </div>
-
-      <!-- Card 5 -->
-      <div class="customer-card">
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
-          <div class="avatar avatar-md" style="background:#ccfbf1;color:#0f766e;font-size:16px;">A</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;">Công ty ABC Trading</div>
-            <div class="text-xs text-muted">MST: 0305 789 012 · Doanh nghiệp</div>
-            <div class="text-xs text-muted mt-1">📞 0944 555 666 · ✉ abc@trading.vn</div>
-          </div>
-          <span class="badge badge-yellow">Có nợ</span>
-        </div>
-        <div class="divider" style="margin:8px 0;"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-          <div><div style="font-size:18px;font-weight:800;color:var(--primary);">9</div><div class="text-xs text-muted">Tổng đơn</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#16a34a;">42M</div><div class="text-xs text-muted">Doanh thu</div></div>
-          <div><div style="font-size:18px;font-weight:800;color:#c2410c;">9.1M</div><div class="text-xs text-muted">Còn nợ</div></div>
-        </div>
-        <div style="font-size:11px;color:#854d0e;font-weight:600;margin-bottom:8px;">⏰ Đến hạn thanh toán 20/05</div>
-        <div class="debt-bar"><div class="debt-bar-fill" style="width:30%;background:#eab308;"></div></div>
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Xem hồ sơ</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Tạo đơn</button>
-        </div>
-      </div>
-
-      <!-- Card 6 -->
-      <div class="customer-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:200px;" onclick="alert('Thêm khách hàng mới')">
-        <div style="font-size:32px;color:var(--text-muted);">+</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Thêm khách hàng mới</div>
-      </div>
-    </div>
   </main>
 </div>
+
 <script src="assets/app.js"></script>
 <script>
-  function setView(v) { console.log('Switch to', v, 'view'); }
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => {
+  const v = Math.abs(n||0);
+  if (v >= 1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'') + ' tỷ';
+  if (v >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (v >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const daysAgo = d => Math.round((TODAY - d) / 86400000);
+
+const CUSTOMERS = [
+  { id:'KH01', code:'KH-2024-001', name:'Công ty TNHH Minh Phú', short:'Minh Phú',
+    type:'Doanh nghiệp', mst:'0301234567', phone:'0901 234 567', email:'minhphu@logistics.vn',
+    contact:'Anh Tuấn', avatar:'M', bg:'#e0e7ff', fg:'#3730a3',
+    since:new Date(2023,2,10), terms:30, limit:200_000_000,
+    orders:38, revenue:198_700_000, paid:115_500_000,
+    lastOrd:new Date(2026,4,10), nextDue:new Date(2026,3,2), overdueDays:40 },
+  { id:'KH02', code:'KH-2024-002', name:'Công ty CP An Khang', short:'An Khang',
+    type:'Doanh nghiệp', mst:'0302345678', phone:'0912 345 678', email:'ankhang@trading.vn',
+    contact:'Chị Hoa', avatar:'A', bg:'#dcfce7', fg:'#15803d',
+    since:new Date(2024,5,1), terms:45, limit:150_000_000,
+    orders:21, revenue:39_400_000, paid:34_600_000,
+    lastOrd:new Date(2026,4,6), nextDue:new Date(2026,5,20), overdueDays:0 },
+  { id:'KH03', code:'KH-2024-003', name:'Tập đoàn Hoàng Gia', short:'Hoàng Gia',
+    type:'Doanh nghiệp', mst:'0303456789', phone:'0908 765 432', email:'hg@hoanggia.com.vn',
+    contact:'Chị Lan', avatar:'H', bg:'#fef3c7', fg:'#b45309',
+    since:new Date(2023,8,15), terms:30, limit:300_000_000,
+    orders:42, revenue:141_000_000, paid:108_900_000,
+    lastOrd:new Date(2026,4,5), nextDue:new Date(2026,4,18), overdueDays:0 },
+  { id:'KH04', code:'KH-2024-004', name:'Cty TNHH Đại Phát', short:'Đại Phát',
+    type:'Doanh nghiệp', mst:'0304567890', phone:'0903 111 222', email:'daiphat@dp.vn',
+    contact:'Anh Nam', avatar:'D', bg:'#fee2e2', fg:'#b91c1c',
+    since:new Date(2024,1,12), terms:30, limit:120_000_000,
+    orders:14, revenue:78_400_000, paid:46_200_000,
+    lastOrd:new Date(2026,3,28), nextDue:new Date(2026,4,5), overdueDays:7 },
+  { id:'KH05', code:'KH-2024-005', name:'Cty TNHH Phương Nam', short:'Phương Nam',
+    type:'Doanh nghiệp', mst:'0305678901', phone:'0989 234 567', email:'pn@phuongnam.vn',
+    contact:'Chị Mai', avatar:'P', bg:'#dbeafe', fg:'#1d4ed8',
+    since:new Date(2023,11,20), terms:30, limit:180_000_000,
+    orders:29, revenue:165_300_000, paid:165_300_000,
+    lastOrd:new Date(2026,4,8), nextDue:null, overdueDays:0 },
+  { id:'KH06', code:'KH-2024-006', name:'Cty CP Sao Việt', short:'Sao Việt',
+    type:'Doanh nghiệp', mst:'0306789012', phone:'0911 888 999', email:'saoviet@sv.com.vn',
+    contact:'Anh Đức', avatar:'S', bg:'#f3e8ff', fg:'#7e22ce',
+    since:new Date(2024,8,1), terms:45, limit:100_000_000,
+    orders:9, revenue:52_800_000, paid:41_200_000,
+    lastOrd:new Date(2026,4,2), nextDue:new Date(2026,4,17), overdueDays:0 },
+  { id:'KH07', code:'KH-2024-007', name:'Siêu thị Big C', short:'Big C',
+    type:'Doanh nghiệp', mst:'0307890123', phone:'0912 456 789', email:'bigc@bigc.vn',
+    contact:'Chị Thu', avatar:'B', bg:'#ccfbf1', fg:'#0f766e',
+    since:new Date(2022,5,10), terms:60, limit:500_000_000,
+    orders:56, revenue:340_000_000, paid:340_000_000,
+    lastOrd:new Date(2026,4,11), nextDue:null, overdueDays:0 },
+  { id:'KH08', code:'KH-2024-008', name:'Cty CP Thép Miền Nam', short:'Thép MN',
+    type:'Doanh nghiệp', mst:'0308901234', phone:'0908 654 321', email:'thep@mn.vn',
+    contact:'Anh Hùng', avatar:'T', bg:'#ffedd5', fg:'#c2410c',
+    since:new Date(2023,4,3), terms:30, limit:150_000_000,
+    orders:18, revenue:85_000_000, paid:73_000_000,
+    lastOrd:new Date(2026,4,4), nextDue:new Date(2026,4,16), overdueDays:0 },
+  { id:'KH09', code:'KH-2024-009', name:'Cty May Mặc Xuân Hoà', short:'Xuân Hoà',
+    type:'Doanh nghiệp', mst:'0309012345', phone:'0977 333 444', email:'xuanhoa@mail.vn',
+    contact:'Chị Yến', avatar:'X', bg:'#f3e8ff', fg:'#7e22ce',
+    since:new Date(2023,1,18), terms:45, limit:200_000_000,
+    orders:31, revenue:198_000_000, paid:198_000_000,
+    lastOrd:new Date(2026,4,9), nextDue:null, overdueDays:0 },
+  { id:'KH10', code:'KH-2024-010', name:'Cty ABC Trading', short:'ABC',
+    type:'Doanh nghiệp', mst:'0310123456', phone:'0944 555 666', email:'abc@trading.vn',
+    contact:'Anh Bình', avatar:'A', bg:'#fef9c3', fg:'#854d0e',
+    since:new Date(2025,2,5), terms:30, limit:80_000_000,
+    orders:9, revenue:42_000_000, paid:32_900_000,
+    lastOrd:new Date(2026,3,30), nextDue:new Date(2026,4,20), overdueDays:0 },
+  { id:'KH11', code:'KH-2025-011', name:'Anh Trần Văn Lộc', short:'Anh Lộc',
+    type:'Cá nhân', mst:'—', phone:'0938 222 333', email:'loc.tran@gmail.com',
+    contact:'Anh Lộc', avatar:'L', bg:'#e0f2fe', fg:'#0369a1',
+    since:new Date(2025,7,12), terms:7, limit:30_000_000,
+    orders:5, revenue:18_500_000, paid:18_500_000,
+    lastOrd:new Date(2026,2,15), nextDue:null, overdueDays:0 },
+  { id:'KH12', code:'KH-2024-012', name:'Cty TNHH Tân Tiến', short:'Tân Tiến',
+    type:'Doanh nghiệp', mst:'0312345678', phone:'0966 777 888', email:'tantien@tt.vn',
+    contact:'Anh Quân', avatar:'T', bg:'#fee2e2', fg:'#b91c1c',
+    since:new Date(2023,7,8), terms:30, limit:100_000_000,
+    orders:11, revenue:58_200_000, paid:33_700_000,
+    lastOrd:new Date(2026,2,20), nextDue:new Date(2026,3,22), overdueDays:50 }
+];
+
+function debtOf(c)    { return Math.max(0, c.revenue - c.paid); }
+function statusOf(c) {
+  if (c.overdueDays > 0) return 'overdue';
+  if (c.nextDue) {
+    const d = Math.round((c.nextDue - TODAY)/86400000);
+    if (d >= 0 && d <= 7) return 'duesoon';
+  }
+  if (daysAgo(c.lastOrd) > 60) return 'inactive';
+  return 'open';
+}
+function isVip(c) { return c.revenue >= 100_000_000 && debtOf(c) === 0; }
+function statusBadge(c) {
+  const s = statusOf(c);
+  if (s === 'overdue')  return `<span class="b b-red">⚠ QH ${c.overdueDays}d</span>`;
+  if (s === 'duesoon')  return `<span class="b b-yellow">⏰ Đến hạn ${dStr(c.nextDue).slice(0,5)}</span>`;
+  if (s === 'inactive') return `<span class="b b-gray">😴 ${daysAgo(c.lastOrd)}d</span>`;
+  return isVip(c) ? `<span class="b b-vip">⭐ VIP</span>` : `<span class="b b-green">✓ Tốt</span>`;
+}
+
+let curStatus = '';
+let curQuick  = 'all';
+
+function setSeg(v) {
+  curStatus = v;
+  curQuick = 'all';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === v));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.quick === 'all'));
+  render();
+}
+function setQuick(q) {
+  curQuick = q;
+  curStatus = '';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === ''));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.quick === q));
+  render();
+}
+function clearFilters() {
+  document.getElementById('qSearch').value = '';
+  document.getElementById('fType').value = '';
+  document.getElementById('fSort').value = 'debt';
+  setQuick('all');
+}
+
+function render() {
+  const q = document.getElementById('qSearch').value.trim().toLowerCase();
+  const ft = document.getElementById('fType').value;
+  const sort = document.getElementById('fSort').value;
+
+  let list = CUSTOMERS.slice();
+  if (q)  list = list.filter(c => (c.name+c.short+c.code+c.mst+c.phone+c.email).toLowerCase().includes(q));
+  if (ft) list = list.filter(c => c.type === ft);
+  if (curStatus) list = list.filter(c => statusOf(c) === curStatus);
+  if (curQuick === 'vip')      list = list.filter(c => isVip(c));
+  if (curQuick === 'duesoon')  list = list.filter(c => statusOf(c) === 'duesoon');
+  if (curQuick === 'overdue')  list = list.filter(c => statusOf(c) === 'overdue');
+  if (curQuick === 'debt')     list = list.filter(c => debtOf(c) > 0);
+
+  list.sort((a,b) => {
+    switch (sort) {
+      case 'rev':    return b.revenue - a.revenue;
+      case 'orders': return b.orders - a.orders;
+      case 'recent': return b.lastOrd - a.lastOrd;
+      case 'name':   return a.name.localeCompare(b.name, 'vi');
+      default:       return debtOf(b) - debtOf(a) || (b.overdueDays - a.overdueDays);
+    }
+  });
+
+  const tbody = document.getElementById('tbody');
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11" class="center" style="padding:30px;color:#94a3b8;font-style:italic;">— Không có khách hàng nào khớp bộ lọc —</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(c => {
+      const debt = debtOf(c);
+      const usePct = c.limit ? Math.min(100, debt/c.limit*100) : 0;
+      const usCls = usePct >= 80 ? 'bad' : usePct >= 50 ? 'warn' : 'ok';
+      const usCol = usePct >= 80 ? '#b91c1c' : usePct >= 50 ? '#b45309' : '#15803d';
+      const phoneClean = c.phone.replace(/\s/g,'');
+      return `
+        <tr onclick="goDetail('${c.id}')">
+          <td>
+            <div class="cust-cell">
+              <div class="cust-av" style="background:${c.bg};color:${c.fg};">${c.avatar}</div>
+              <div style="min-width:0;">
+                <div class="cust-nm">${c.name}</div>
+                <div class="cust-cd">${c.code} · MST ${c.mst}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:12px;color:#0f172a;">${c.contact}</div>
+            <div style="font-size:11px;color:#64748b;">📞 ${c.phone}</div>
+          </td>
+          <td class="center"><span class="b ${c.type==='Cá nhân'?'b-blue':'b-gray'}">${c.type==='Cá nhân'?'CN':'DN'}</span></td>
+          <td class="right"><b>${c.orders}</b></td>
+          <td class="right" title="${FMT(c.revenue)}"><b>${FMTM(c.revenue)}</b></td>
+          <td class="right" style="color:#15803d;" title="${FMT(c.paid)}">${FMTM(c.paid)}</td>
+          <td class="right" style="color:${debt>0?'#b91c1c':'#94a3b8'};font-weight:${debt>0?700:500};" title="${FMT(debt)}">${debt>0?FMTM(debt):'—'}</td>
+          <td>
+            <div style="font-size:11px;color:${usCol};font-weight:700;">${usePct.toFixed(0)}% · HM ${FMTM(c.limit)}</div>
+            <div class="dbar"><div class="dbar-fill ${usCls}" style="width:${usePct}%;"></div></div>
+          </td>
+          <td>${statusBadge(c)}</td>
+          <td class="nowrap">
+            <div style="font-size:12px;">${dStr(c.lastOrd)}</div>
+            <div style="font-size:10.5px;color:#94a3b8;">${daysAgo(c.lastOrd)===0?'Hôm nay':daysAgo(c.lastOrd)+'d trước'}</div>
+          </td>
+          <td class="center" onclick="event.stopPropagation();">
+            <div class="row-act">
+              <button class="ico-btn" title="Xem hồ sơ" onclick="goDetail('${c.id}')">👁️</button>
+              <button class="ico-btn" title="Tạo đơn"   onclick="window.location.href='m1-bao-gia.html'">＋</button>
+              <button class="ico-btn" title="Gọi"        onclick="window.location.href='tel:${phoneClean}'">📞</button>
+              <button class="ico-btn" title="Công nợ"   onclick="window.location.href='m6-cong-no.html'">📒</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  const all = CUSTOMERS;
+  const totDebt = all.reduce((s,c)=>s+debtOf(c),0);
+  document.getElementById('kAll').textContent  = all.length;
+  document.getElementById('kAllSub').textContent = `${all.filter(c=>c.type==='Doanh nghiệp').length} DN · ${all.filter(c=>c.type==='Cá nhân').length} CN`;
+  document.getElementById('kVip').textContent  = all.filter(c=>isVip(c)).length;
+  const dueList = all.filter(c=>statusOf(c)==='duesoon');
+  document.getElementById('kDue').textContent  = dueList.length;
+  document.getElementById('kDueSub').textContent = `Tổng ${FMTM(dueList.reduce((s,c)=>s+debtOf(c),0))}`;
+  const overList = all.filter(c=>statusOf(c)==='overdue');
+  document.getElementById('kOver').textContent = overList.length;
+  document.getElementById('kOverSub').textContent = `Tổng ${FMTM(overList.reduce((s,c)=>s+debtOf(c),0))}`;
+  document.getElementById('kDebt').textContent = FMTM(totDebt);
+  document.getElementById('kDebtSub').textContent = `${all.filter(c=>debtOf(c)>0).length} KH có nợ`;
+
+  document.getElementById('ctAll').textContent  = all.length;
+  document.getElementById('ctOpen').textContent = all.filter(c=>statusOf(c)==='open').length;
+  document.getElementById('ctDue').textContent  = dueList.length;
+  document.getElementById('ctOver').textContent = overList.length;
+  document.getElementById('ctIna').textContent  = all.filter(c=>statusOf(c)==='inactive').length;
+
+  const fRev  = list.reduce((s,c)=>s+c.revenue,0);
+  const fPaid = list.reduce((s,c)=>s+c.paid,0);
+  document.getElementById('ftCount').textContent = list.length;
+  document.getElementById('ftTotal').textContent = all.length;
+  document.getElementById('ftRev').textContent   = FMT(fRev);
+  document.getElementById('ftPaid').textContent  = FMT(fPaid);
+  document.getElementById('ftDebt').textContent  = FMT(fRev - fPaid);
+}
+
+function goDetail(id) {
+  window.location.href = `m1-khach-hang-chi-tiet.html?id=${id}`;
+}
+
+document.querySelectorAll('#segStatus button').forEach(b => {
+  b.addEventListener('click', () => setSeg(b.dataset.st));
+});
+render();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
 </script>
 </body>
 </html>

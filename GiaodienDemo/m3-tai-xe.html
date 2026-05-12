@@ -6,22 +6,127 @@
   <title>Tài xế cơ hữu – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .driver-card {
-      background: white; border-radius: 12px; border: 1px solid var(--border);
-      overflow: hidden; transition: all 0.13s;
+    .page-content { padding:10px 14px !important; }
+    .head-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:12px; }
+    .ph-title { font-size:16px; font-weight:800; color:#0f172a; line-height:1.1; }
+    .ph-sub   { font-size:11.5px; color:#64748b; margin-top:1px; }
+    .ph-actions { display:flex; gap:6px; }
+
+    /* KPI */
+    .kpi-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:8px; }
+    .kpi-mini {
+      background:#fff; border:1px solid var(--border); border-radius:8px;
+      padding:8px 10px 8px 12px; position:relative; cursor:pointer; transition:.12s;
     }
-    .driver-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #cbd5e1; }
-    .driver-card-head { padding: 16px; border-bottom: 1px solid var(--border-light); }
-    .driver-card-body { padding: 12px 16px; }
-    .driver-card-foot { padding: 10px 16px; border-top: 1px solid var(--border-light); display: flex; gap: 6px; }
-    .doc-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; border-bottom: 1px solid #f4f6f8; }
-    .doc-item:last-child { border-bottom: none; }
-    .expire-warn { color: #dc2626; font-weight: 700; }
-    .expire-ok   { color: #16a34a; }
-    .expire-soon { color: #854d0e; }
-    .stat-mini { text-align: center; }
-    .stat-mini .val { font-size: 16px; font-weight: 800; color: var(--primary); }
-    .stat-mini .lbl { font-size: 10px; color: var(--text-muted); }
+    .kpi-mini:hover { border-color:var(--primary); box-shadow:0 2px 6px rgba(79,70,229,.08); }
+    .kpi-mini.active { border-color:var(--primary); background:#f5f3ff; }
+    .kpi-mini::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:8px 0 0 8px; }
+    .kpi-mini.c1::before { background:#4f46e5; }
+    .kpi-mini.c2::before { background:#0891b2; }
+    .kpi-mini.c3::before { background:#16a34a; }
+    .kpi-mini.c4::before { background:#f59e0b; }
+    .kpi-mini.c5::before { background:#dc2626; }
+    .km-lbl { font-size:10.5px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+    .km-val { font-size:18px; font-weight:800; color:#0f172a; line-height:1.15; margin-top:2px; }
+    .km-sub { font-size:11px; color:#64748b; margin-top:1px; }
+    .km-val.warn { color:#b45309; } .km-val.out { color:#b91c1c; } .km-val.in { color:#15803d; } .km-val.blue { color:#1d4ed8; }
+
+    /* Filter bar */
+    .filter-bar {
+      background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 8px;
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;
+    }
+    .filter-bar input, .filter-bar select {
+      height:30px; padding:0 8px; font-size:12.5px;
+      border:1px solid var(--border); border-radius:6px; background:#fff;
+    }
+    .filter-bar input.search { flex:1; min-width:240px; }
+    .seg { display:inline-flex; background:#f1f5f9; border-radius:6px; padding:2px; gap:2px; flex-wrap:wrap; }
+    .seg button {
+      border:0; background:transparent; padding:4px 9px; border-radius:4px;
+      font-size:11.5px; font-weight:600; color:#475569; cursor:pointer; white-space:nowrap;
+    }
+    .seg button.active { background:#fff; color:var(--primary); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+    .seg button .ct { background:#e2e8f0; color:#475569; padding:0 5px; border-radius:8px; margin-left:4px; font-size:10.5px; }
+    .seg button.active .ct { background:var(--primary-light); color:var(--primary); }
+
+    /* Table */
+    .panel { background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .data-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+    .data-table thead th {
+      background:#f8fafc; font-size:10.5px; text-transform:uppercase; letter-spacing:.3px;
+      color:#64748b; font-weight:700; padding:8px 10px; text-align:left;
+      border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; z-index:1;
+    }
+    .data-table tbody td { padding:8px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+    .data-table tbody tr { cursor:pointer; }
+    .data-table tbody tr:hover { background:#f8fafc; }
+    .data-table tbody tr:last-child td { border-bottom:0; }
+    .nowrap { white-space:nowrap; } .right { text-align:right; } .center { text-align:center; }
+    .table-wrap { max-height:calc(100vh - 280px); overflow-y:auto; }
+
+    /* Driver cell */
+    .drv-cell { display:flex; align-items:center; gap:9px; min-width:0; }
+    .drv-av {
+      width:38px; height:38px; border-radius:50%; flex-shrink:0; overflow:hidden;
+      display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; position:relative;
+      border:1.5px solid #fff; box-shadow:0 0 0 1px var(--border);
+    }
+    .drv-av img { width:100%; height:100%; object-fit:cover; display:block; }
+    .drv-av .dot {
+      position:absolute; bottom:-1px; right:-1px; width:11px; height:11px; border-radius:50%;
+      border:2px solid #fff;
+    }
+    .dot-on  { background:#16a34a; }
+    .dot-idle{ background:#94a3b8; }
+    .dot-off { background:#cbd5e1; }
+    .drv-nm { font-weight:700; font-size:12.5px; color:#0f172a; line-height:1.2; }
+    .drv-meta { font-size:10.5px; color:#94a3b8; }
+
+    /* Status badge */
+    .b { display:inline-block; padding:2px 7px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .b-run { background:#dbeafe; color:#1d4ed8; }
+    .b-idle{ background:#dcfce7; color:#15803d; }
+    .b-off { background:#f1f5f9; color:#64748b; }
+    .b-leave{background:#fef3c7; color:#b45309; }
+    .b-warn{ background:#fee2e2; color:#b91c1c; }
+
+    /* Doc warn */
+    .doc-w { color:#b91c1c; font-weight:700; }
+    .doc-s { color:#b45309; font-weight:700; }
+    .doc-o { color:#15803d; }
+
+    /* Salary chips */
+    .sal-type {
+      display:inline-block; padding:1px 6px; border-radius:4px; font-size:10.5px; font-weight:700;
+      background:#eef2ff; color:#4338ca;
+    }
+    .sal-type.t-fix  { background:#dbeafe; color:#1d4ed8; }
+    .sal-type.t-trip { background:#fef3c7; color:#b45309; }
+    .sal-type.t-pct  { background:#ccfbf1; color:#0f766e; }
+    .sal-type.t-kpi  { background:#f3e8ff; color:#7e22ce; }
+
+    /* Row actions */
+    .row-act { display:inline-flex; gap:3px; opacity:0; transition:opacity .12s; }
+    tr:hover .row-act { opacity:1; }
+    .ico-btn {
+      width:24px; height:24px; border-radius:5px; border:1px solid var(--border); background:#fff;
+      display:inline-flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; color:#475569;
+    }
+    .ico-btn:hover { background:var(--primary-light); color:var(--primary); border-color:var(--primary); }
+
+    /* Mini bar (KPI tài xế: chuyến đúng hạn) */
+    .pbar { height:5px; background:#f1f5f9; border-radius:3px; overflow:hidden; min-width:60px; margin-top:3px; }
+    .pbar > i { display:block; height:100%; background:#16a34a; }
+
+    .table-foot {
+      padding:8px 12px; background:#f8fafc; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;
+      font-size:12px; color:#475569;
+    }
+    .table-foot b { color:#0f172a; }
+
+    @media (max-width:1100px) { .kpi-strip { grid-template-columns:repeat(3,1fr); } }
   </style>
 </head>
 <body>
@@ -42,6 +147,7 @@
   <nav class="sidebar-nav">
     <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
     <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
     <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
     <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
     <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
@@ -56,7 +162,7 @@
     <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
     <div class="nav-group">Module 6 – Tài chính</div>
     <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
-    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">??</span>C�ng n? kh�ch h�ng</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
     <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
     <div class="nav-group">Module 7 – GPS</div>
     <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
@@ -81,290 +187,416 @@
       <span class="parent">Module 3</span><span class="sep">›</span><span class="current">Tài xế cơ hữu</span>
     </div>
     <div class="topbar-actions">
-      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">3</span></button>
       <div class="topbar-avatar">A</div>
     </div>
   </header>
 
   <main class="page-content">
-    <div class="page-header">
+    <div class="head-row">
       <div>
-        <div class="page-title">👤 Quản lý tài xế cơ hữu</div>
-        <div class="page-subtitle">Hồ sơ, giấy tờ và lịch sử chuyến của tài xế nội bộ</div>
+        <div class="ph-title">👤 Quản lý tài xế cơ hữu</div>
+        <div class="ph-sub">Hồ sơ · Giấy tờ · Lịch sử lái · Lương — click vào tài xế để xem chi tiết</div>
       </div>
-      <div class="page-actions">
-        <button class="btn btn-secondary">⬇ Xuất danh sách</button>
-        <button class="btn btn-primary">+ Thêm tài xế</button>
+      <div class="ph-actions">
+        <button class="btn btn-secondary btn-sm" onclick="alert('Xuất Excel')">⬇ Xuất</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Nhắc gia hạn giấy tờ qua Zalo')">🔔 Nhắc giấy tờ</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Mở form thêm tài xế')">+ Thêm tài xế</button>
       </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#e0e7ff;">👤</div>
-        <div class="stat-card-label">Tổng tài xế</div>
-        <div class="stat-card-value">8</div>
+    <!-- KPI -->
+    <div class="kpi-strip">
+      <div class="kpi-mini c1 active" data-q="all" onclick="setQuick('all')">
+        <div class="km-lbl">👤 Tổng tài xế</div>
+        <div class="km-val" id="kAll">0</div>
+        <div class="km-sub" id="kAllSub">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#dcfce7;">🟢</div>
-        <div class="stat-card-label">Đang hoạt động</div>
-        <div class="stat-card-value">5</div>
+      <div class="kpi-mini c2" data-q="run" onclick="setQuick('run')">
+        <div class="km-lbl">🚚 Đang chạy</div>
+        <div class="km-val blue" id="kRun">0</div>
+        <div class="km-sub">Trên đường giao</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fef9c3;">🗓️</div>
-        <div class="stat-card-label">Nghỉ phép tháng này</div>
-        <div class="stat-card-value">2</div>
+      <div class="kpi-mini c3" data-q="idle" onclick="setQuick('idle')">
+        <div class="km-lbl">🟢 Rảnh / sẵn sàng</div>
+        <div class="km-val in" id="kIdle">0</div>
+        <div class="km-sub">Có thể nhận chuyến</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fee2e2;">⚠️</div>
-        <div class="stat-card-label">Giấy tờ sắp hết hạn</div>
-        <div class="stat-card-value" style="color:#dc2626;">2</div>
+      <div class="kpi-mini c4" data-q="leave" onclick="setQuick('leave')">
+        <div class="km-lbl">🗓️ Nghỉ phép / nghỉ</div>
+        <div class="km-val warn" id="kLeave">0</div>
+        <div class="km-sub" id="kLeaveSub">—</div>
+      </div>
+      <div class="kpi-mini c5" data-q="warn" onclick="setQuick('warn')">
+        <div class="km-lbl">⚠ Giấy tờ sắp/đã hết</div>
+        <div class="km-val out" id="kWarn">0</div>
+        <div class="km-sub">Bằng lái · BH · Khám SK</div>
       </div>
     </div>
 
     <!-- Filter -->
     <div class="filter-bar">
-      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tên tài xế, biển số...">
-      <select class="form-control"><option>Tất cả trạng thái</option><option>Đang hoạt động</option><option>Đang nghỉ</option><option>Nghỉ việc</option></select>
-      <select class="form-control"><option>Tất cả xe</option><option>1 tấn</option><option>3 tấn</option><option>5 tấn</option><option>10 tấn</option><option>15 tấn</option></select>
+      <input class="search" type="text" id="qSearch" placeholder="🔍 Tên, CCCD, SĐT, biển số, hạng bằng..." oninput="render()">
+      <div class="seg" id="segStatus">
+        <button class="active" data-st="">Tất cả <span class="ct" id="ctAll">0</span></button>
+        <button data-st="run">Đang chạy <span class="ct" id="ctRun">0</span></button>
+        <button data-st="idle">Rảnh <span class="ct" id="ctIdle">0</span></button>
+        <button data-st="leave">Nghỉ phép <span class="ct" id="ctLeave">0</span></button>
+        <button data-st="off">Nghỉ việc <span class="ct" id="ctOff">0</span></button>
+      </div>
+      <select id="fLic" onchange="render()">
+        <option value="">Bằng lái: Tất cả</option>
+        <option value="B2">Hạng B2</option>
+        <option value="C">Hạng C</option>
+        <option value="D">Hạng D</option>
+        <option value="E">Hạng E</option>
+        <option value="FC">Hạng FC</option>
+      </select>
+      <select id="fSal" onchange="render()">
+        <option value="">Loại lương: Tất cả</option>
+        <option value="fix">Cố định</option>
+        <option value="trip">Theo chuyến</option>
+        <option value="pct">% doanh thu</option>
+        <option value="kpi">CB + KPI</option>
+      </select>
+      <select id="fSort" onchange="render()">
+        <option value="recent">Sắp xếp: Mới nhất</option>
+        <option value="trips">Chuyến T5 ↓</option>
+        <option value="rev">Doanh thu ↓</option>
+        <option value="name">Tên A→Z</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="clearFilters()" style="margin-left:auto;">↺ Xoá lọc</button>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" class="cards-grid">
-      <!-- Driver 1 -->
-      <div class="driver-card">
-        <div class="driver-card-head">
-          <div style="display:flex;align-items:flex-start;gap:12px;">
-            <div class="avatar avatar-lg" style="background:#dcfce7;color:#15803d;position:relative;">
-              A
-              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <div style="font-weight:700;font-size:14px;">Nguyễn Văn An</div>
-                  <div class="text-xs text-muted">CCCD: 079204001234 · 📞 0901 123 456</div>
-                </div>
-                <span class="badge badge-blue">Đang chạy</span>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;">
-                <span class="badge badge-gray">5 tấn</span>
-                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51C-12345</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="driver-card-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-            <div class="stat-mini"><div class="val">24</div><div class="lbl">Chuyến T5</div></div>
-            <div class="stat-mini"><div class="val">1,248</div><div class="lbl">Km T5</div></div>
-            <div class="stat-mini"><div class="val">98%</div><div class="lbl">Đúng hạn</div></div>
-          </div>
-          <div class="doc-item">
-            <span>📋 Bằng lái hạng C</span>
-            <span class="expire-ok">✓ Hết hạn 15/08/2028</span>
-          </div>
-          <div class="doc-item">
-            <span>📄 Đăng kiểm xe</span>
-            <span class="expire-ok">✓ Hết hạn 20/11/2026</span>
-          </div>
-          <div class="doc-item">
-            <span>🛡️ Bảo hiểm TNDS</span>
-            <span class="expire-ok">✓ Hết hạn 01/04/2027</span>
-          </div>
-        </div>
-        <div class="driver-card-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Điều phối</button>
-        </div>
+    <!-- Table -->
+    <div class="panel">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tài xế</th>
+              <th>Liên hệ</th>
+              <th>Bằng lái</th>
+              <th>Xe phụ trách</th>
+              <th class="nowrap">Giấy tờ gần nhất</th>
+              <th class="right">Hiệu suất T5</th>
+              <th>Lương</th>
+              <th>Trạng thái</th>
+              <th class="center" style="width:120px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
-
-      <!-- Driver 2 -->
-      <div class="driver-card">
-        <div class="driver-card-head">
-          <div style="display:flex;align-items:flex-start;gap:12px;">
-            <div class="avatar avatar-lg" style="background:#e0e7ff;color:#4338ca;position:relative;">
-              K
-              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <div style="font-weight:700;font-size:14px;">Trần Minh Khoa</div>
-                  <div class="text-xs text-muted">CCCD: 079204005678 · 📞 0912 234 567</div>
-                </div>
-                <span class="badge badge-green">Rảnh</span>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;">
-                <span class="badge badge-gray">10 tấn</span>
-                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51D-56789</span>
-              </div>
-            </div>
-          </div>
+      <div class="table-foot">
+        <div>Hiển thị <b id="ftCount">0</b> / <b id="ftTotal">0</b> tài xế</div>
+        <div>
+          Tổng chuyến T5: <b id="ftTrips">0</b>
+          · Tổng km: <b id="ftKm">0</b>
+          · Tổng lương dự kiến: <b style="color:#1d4ed8;" id="ftSal">0</b>
         </div>
-        <div class="driver-card-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-            <div class="stat-mini"><div class="val">19</div><div class="lbl">Chuyến T5</div></div>
-            <div class="stat-mini"><div class="val">1,056</div><div class="lbl">Km T5</div></div>
-            <div class="stat-mini"><div class="val">100%</div><div class="lbl">Đúng hạn</div></div>
-          </div>
-          <div class="doc-item">
-            <span>📋 Bằng lái hạng E</span>
-            <span class="expire-ok">✓ Hết hạn 10/06/2027</span>
-          </div>
-          <div class="doc-item">
-            <span>📄 Đăng kiểm xe</span>
-            <span class="expire-soon">⏰ Hết hạn 18/06/2026</span>
-          </div>
-          <div class="doc-item">
-            <span>🛡️ Bảo hiểm TNDS</span>
-            <span class="expire-ok">✓ Hết hạn 15/12/2026</span>
-          </div>
-        </div>
-        <div class="driver-card-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Điều phối</button>
-        </div>
-      </div>
-
-      <!-- Driver 3 - with expiry warning -->
-      <div class="driver-card" style="border-color:#fde68a;">
-        <div class="driver-card-head" style="background:#fffbeb;">
-          <div style="display:flex;align-items:flex-start;gap:12px;">
-            <div class="avatar avatar-lg" style="background:#fef9c3;color:#854d0e;position:relative;">
-              V
-              <span class="status-dot dot-yellow" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <div style="font-weight:700;font-size:14px;">Nguyễn Văn Khánh</div>
-                  <div class="text-xs text-muted">CCCD: 079204009012 · 📞 0923 456 789</div>
-                </div>
-                <span class="badge badge-yellow">Cảnh báo</span>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;">
-                <span class="badge badge-gray">7 tấn</span>
-                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51H-45678</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="driver-card-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-            <div class="stat-mini"><div class="val">14</div><div class="lbl">Chuyến T5</div></div>
-            <div class="stat-mini"><div class="val">842</div><div class="lbl">Km T5</div></div>
-            <div class="stat-mini"><div class="val">93%</div><div class="lbl">Đúng hạn</div></div>
-          </div>
-          <div class="doc-item">
-            <span>📋 Bằng lái hạng D</span>
-            <span class="expire-warn">⚠ Hết hạn 18/05/2026 (còn 7 ngày!)</span>
-          </div>
-          <div class="doc-item">
-            <span>📄 Đăng kiểm xe</span>
-            <span class="expire-ok">✓ Hết hạn 30/09/2026</span>
-          </div>
-          <div class="doc-item">
-            <span>🛡️ Bảo hiểm TNDS</span>
-            <span class="expire-warn">⚠ Hết hạn 20/05/2026 (còn 9 ngày!)</span>
-          </div>
-        </div>
-        <div class="driver-card-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-warning btn-sm" style="flex:1;">Gia hạn GT</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
-        </div>
-      </div>
-
-      <!-- Driver 4 -->
-      <div class="driver-card">
-        <div class="driver-card-head">
-          <div style="display:flex;align-items:flex-start;gap:12px;">
-            <div class="avatar avatar-lg" style="background:#ffedd5;color:#c2410c;position:relative;">
-              H
-              <span class="status-dot dot-yellow" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <div style="font-weight:700;font-size:14px;">Phạm Quốc Hùng</div>
-                  <div class="text-xs text-muted">CCCD: 079204003456 · 📞 0934 567 890</div>
-                </div>
-                <span class="badge badge-blue">Đang chạy</span>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;">
-                <span class="badge badge-gray">15 tấn</span>
-                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51E-90123</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="driver-card-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-            <div class="stat-mini"><div class="val">11</div><div class="lbl">Chuyến T5</div></div>
-            <div class="stat-mini"><div class="val">2,134</div><div class="lbl">Km T5</div></div>
-            <div class="stat-mini"><div class="val">95%</div><div class="lbl">Đúng hạn</div></div>
-          </div>
-          <div class="doc-item"><span>📋 Bằng lái hạng E</span><span class="expire-ok">✓ Hết hạn 22/03/2029</span></div>
-          <div class="doc-item"><span>📄 Đăng kiểm xe</span><span class="expire-ok">✓ Hết hạn 05/08/2026</span></div>
-          <div class="doc-item"><span>🛡️ Bảo hiểm TNDS</span><span class="expire-ok">✓ Hết hạn 10/01/2027</span></div>
-        </div>
-        <div class="driver-card-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">GPS</button>
-        </div>
-      </div>
-
-      <!-- Driver 5 -->
-      <div class="driver-card">
-        <div class="driver-card-head">
-          <div style="display:flex;align-items:flex-start;gap:12px;">
-            <div class="avatar avatar-lg" style="background:#f3e8ff;color:#7e22ce;position:relative;">
-              B
-              <span class="status-dot dot-green dot-pulse" style="position:absolute;bottom:1px;right:1px;border:2px solid white;"></span>
-            </div>
-            <div style="flex:1;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <div style="font-weight:700;font-size:14px;">Lê Văn Bình</div>
-                  <div class="text-xs text-muted">CCCD: 079204007890 · 📞 0945 678 901</div>
-                </div>
-                <span class="badge badge-green">Rảnh</span>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;">
-                <span class="badge badge-gray">3 tấn</span>
-                <span style="font-size:11px;background:#f1f5f9;border-radius:4px;padding:2px 6px;font-weight:600;">51F-23456</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="driver-card-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px;">
-            <div class="stat-mini"><div class="val">16</div><div class="lbl">Chuyến T5</div></div>
-            <div class="stat-mini"><div class="val">756</div><div class="lbl">Km T5</div></div>
-            <div class="stat-mini"><div class="val">97%</div><div class="lbl">Đúng hạn</div></div>
-          </div>
-          <div class="doc-item"><span>📋 Bằng lái hạng C</span><span class="expire-ok">✓ Hết hạn 30/11/2027</span></div>
-          <div class="doc-item"><span>📄 Đăng kiểm xe</span><span class="expire-ok">✓ Hết hạn 12/02/2027</span></div>
-          <div class="doc-item"><span>🛡️ Bảo hiểm TNDS</span><span class="expire-ok">✓ Hết hạn 28/06/2027</span></div>
-        </div>
-        <div class="driver-card-foot">
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Hồ sơ</button>
-          <button class="btn btn-secondary btn-sm" style="flex:1;">Lịch sử</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;">Điều phối</button>
-        </div>
-      </div>
-
-      <!-- Add new -->
-      <div class="driver-card" style="border:2px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:260px;cursor:pointer;" onclick="alert('Thêm tài xế mới')">
-        <div style="font-size:32px;color:var(--text-muted);">+</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Thêm tài xế mới</div>
       </div>
     </div>
+
   </main>
 </div>
+
 <script src="assets/app.js"></script>
+<script>
+/* ================= Quản lý tài xế ================= */
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => {
+  const v = Math.abs(n||0);
+  if (v >= 1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'') + ' tỷ';
+  if (v >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (v >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const daysUntil = d => Math.round((d - TODAY) / 86400000);
+
+/* ===== DRIVERS ===== */
+const DRIVERS = [
+  {
+    id:'TX01', name:'Nguyễn Văn An', avatar:'A', bg:'#dcfce7', fg:'#15803d', photo:'https://i.pravatar.cc/120?img=12',
+    cccd:'079 204 001 234', phone:'0901 123 456', dob:new Date(1986,5,12),
+    address:'Q.Thủ Đức, TP.HCM', joinDate:new Date(2021,2,15),
+    license:{class:'C', no:'790204001234', expire:new Date(2028,7,15)},
+    health:{expire:new Date(2026,7,20)},
+    truck:'51C-12345', weight:'15T',
+    salary:{type:'kpi', base:9_000_000, perTrip:0, pct:0, kpi:3_500_000, est:14_200_000},
+    status:'run', tripsM:24, kmM:1248, onTime:98, revM:185_000_000
+  },
+  {
+    id:'TX02', name:'Trần Minh Khoa', avatar:'K', bg:'#e0e7ff', fg:'#4338ca', photo:'https://i.pravatar.cc/120?img=33',
+    cccd:'079 204 005 678', phone:'0912 234 567', dob:new Date(1984,8,5),
+    address:'Q.Bình Tân, TP.HCM', joinDate:new Date(2020,7,1),
+    license:{class:'E', no:'790204005678', expire:new Date(2027,5,10)},
+    health:{expire:new Date(2026,5,18)},
+    truck:'51D-56789', weight:'10T',
+    salary:{type:'fix', base:14_000_000, perTrip:0, pct:0, kpi:0, est:14_000_000},
+    status:'idle', tripsM:19, kmM:1056, onTime:100, revM:142_500_000
+  },
+  {
+    id:'TX03', name:'Phạm Quốc Hùng', avatar:'H', bg:'#ffedd5', fg:'#c2410c', photo:'https://i.pravatar.cc/120?img=68',
+    cccd:'079 204 003 456', phone:'0934 567 890', dob:new Date(1981,1,28),
+    address:'Q.7, TP.HCM', joinDate:new Date(2018,11,10),
+    license:{class:'E', no:'790204003456', expire:new Date(2029,2,22)},
+    health:{expire:new Date(2026,11,5)},
+    truck:'51E-90123', weight:'15T',
+    salary:{type:'pct', base:0, perTrip:0, pct:18, kpi:0, est:18_900_000},
+    status:'run', tripsM:11, kmM:2134, onTime:95, revM:210_000_000
+  },
+  {
+    id:'TX04', name:'Lê Văn Bình', avatar:'B', bg:'#f3e8ff', fg:'#7e22ce', photo:'https://i.pravatar.cc/120?img=15',
+    cccd:'079 204 007 890', phone:'0945 678 901', dob:new Date(1990,3,18),
+    address:'Q.Gò Vấp, TP.HCM', joinDate:new Date(2022,4,20),
+    license:{class:'C', no:'790204007890', expire:new Date(2027,10,30)},
+    health:{expire:new Date(2027,2,12)},
+    truck:'51F-23456', weight:'7T',
+    salary:{type:'trip', base:0, perTrip:450_000, pct:0, kpi:0, est:7_200_000},
+    status:'idle', tripsM:16, kmM:756, onTime:97, revM:65_400_000
+  },
+  {
+    id:'TX05', name:'Nguyễn Văn Khánh', avatar:'V', bg:'#fef9c3', fg:'#854d0e', photo:'https://i.pravatar.cc/120?img=53',
+    cccd:'079 204 009 012', phone:'0923 456 789', dob:new Date(1979,9,3),
+    address:'H.Hóc Môn, TP.HCM', joinDate:new Date(2017,5,8),
+    license:{class:'D', no:'790204009012', expire:new Date(2026,4,18)},  // hết hạn 18/05/2026
+    health:{expire:new Date(2026,4,20)},
+    truck:'51H-45678', weight:'7T',
+    salary:{type:'kpi', base:8_500_000, perTrip:0, pct:0, kpi:2_000_000, est:10_500_000},
+    status:'idle', tripsM:14, kmM:842, onTime:93, revM:78_300_000
+  },
+  {
+    id:'TX06', name:'Đỗ Thanh Tùng', avatar:'T', bg:'#dbeafe', fg:'#1d4ed8', photo:'https://i.pravatar.cc/120?img=14',
+    cccd:'079 204 011 567', phone:'0956 789 012', dob:new Date(1988,6,22),
+    address:'Q.12, TP.HCM', joinDate:new Date(2021,9,5),
+    license:{class:'C', no:'790204011567', expire:new Date(2028,1,15)},
+    health:{expire:new Date(2027,0,8)},
+    truck:'51G-34567', weight:'7T',
+    salary:{type:'trip', base:0, perTrip:520_000, pct:0, kpi:0, est:9_100_000},
+    status:'run', tripsM:18, kmM:1420, onTime:96, revM:95_200_000
+  },
+  {
+    id:'TX07', name:'Vũ Hồng Phúc', avatar:'P', bg:'#ccfbf1', fg:'#0f766e', photo:'https://i.pravatar.cc/120?img=60',
+    cccd:'079 204 013 890', phone:'0967 890 123', dob:new Date(1985,2,8),
+    address:'Q.Tân Bình, TP.HCM', joinDate:new Date(2019,3,12),
+    license:{class:'FC', no:'790204013890', expire:new Date(2028,9,20)},
+    health:{expire:new Date(2026,4,28)},  // sắp hết 16 ngày
+    truck:'51H-44556', weight:'12T',
+    salary:{type:'pct', base:0, perTrip:0, pct:20, kpi:0, est:20_800_000},
+    status:'run', tripsM:13, kmM:2580, onTime:94, revM:198_000_000
+  },
+  {
+    id:'TX08', name:'Nguyễn Tiến Dũng', avatar:'D', bg:'#fee2e2', fg:'#b91c1c', photo:'https://i.pravatar.cc/120?img=11',
+    cccd:'079 204 015 234', phone:'0978 901 234', dob:new Date(1992,11,1),
+    address:'Q.Bình Thạnh, TP.HCM', joinDate:new Date(2023,1,18),
+    license:{class:'C', no:'790204015234', expire:new Date(2027,8,12)},
+    health:{expire:new Date(2026,9,15)},
+    truck:'51K-77889', weight:'8T',
+    salary:{type:'fix', base:11_500_000, perTrip:0, pct:0, kpi:0, est:11_500_000},
+    status:'leave', tripsM:6, kmM:380, onTime:100, revM:42_500_000,
+    leaveNote:'Nghỉ phép 10–14/05'
+  },
+  {
+    id:'TX09', name:'Hoàng Minh Tuấn', avatar:'T', bg:'#f1f5f9', fg:'#475569', photo:'https://i.pravatar.cc/120?img=51',
+    cccd:'079 204 017 567', phone:'0989 012 345', dob:new Date(1976,4,25),
+    address:'Q.5, TP.HCM', joinDate:new Date(2015,6,1),
+    license:{class:'E', no:'790204017567', expire:new Date(2027,3,8)},
+    health:{expire:new Date(2026,8,30)},
+    truck:null, weight:'—',
+    salary:{type:'fix', base:0, perTrip:0, pct:0, kpi:0, est:0},
+    status:'off', tripsM:0, kmM:0, onTime:0, revM:0,
+    leaveNote:'Nghỉ việc 30/04/2026'
+  }
+];
+
+/* ===== Helpers ===== */
+function docStatus(d) {
+  const days = daysUntil(d);
+  if (days < 0)  return {cls:'doc-w', txt:`⚠ Đã hết hạn ${-days}d`};
+  if (days <= 30) return {cls:'doc-s', txt:`⏰ Còn ${days}d`};
+  return {cls:'doc-o', txt:`✓ ${dStr(d)}`};
+}
+function hasWarn(drv) {
+  return daysUntil(drv.license.expire) <= 30 || daysUntil(drv.health.expire) <= 30;
+}
+function statusBadge(d) {
+  if (d.status==='run')   return `<span class="b b-run">🚚 Đang chạy</span>`;
+  if (d.status==='idle')  return `<span class="b b-idle">🟢 Rảnh</span>`;
+  if (d.status==='leave') return `<span class="b b-leave">🗓️ Nghỉ phép</span>`;
+  if (d.status==='off')   return `<span class="b b-off">⏸ Nghỉ việc</span>`;
+  return '';
+}
+function statusDot(d) {
+  if (d.status==='run')  return 'dot-on';
+  if (d.status==='idle') return 'dot-on';
+  return 'dot-off';
+}
+function salaryCell(s) {
+  const labels = {fix:'Cố định', trip:'Theo chuyến', pct:'% doanh thu', kpi:'CB + KPI'};
+  const detail =
+    s.type==='fix'  ? FMT(s.base) + '/tháng' :
+    s.type==='trip' ? FMT(s.perTrip) + '/chuyến' :
+    s.type==='pct'  ? `${s.pct}% doanh thu` :
+    s.type==='kpi'  ? FMT(s.base) + ` CB + KPI ${FMTM(s.kpi)}` : '—';
+  return `
+    <div><span class="sal-type t-${s.type}">${labels[s.type]}</span></div>
+    <div style="font-size:10.5px;color:#64748b;margin-top:2px;">${detail}</div>
+    <div style="font-size:11px;color:#1d4ed8;font-weight:700;margin-top:1px;">≈ ${FMTM(s.est)}/tháng</div>
+  `;
+}
+
+/* ===== State / Filter ===== */
+let curStatus = '', curQuick = 'all';
+function setSeg(v) {
+  curStatus = v; curQuick = 'all';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === v));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.q === 'all'));
+  render();
+}
+function setQuick(q) {
+  curQuick = q; curStatus = '';
+  document.querySelectorAll('#segStatus button').forEach(b => b.classList.toggle('active', b.dataset.st === ''));
+  document.querySelectorAll('.kpi-mini').forEach(k => k.classList.toggle('active', k.dataset.q === q));
+  render();
+}
+function clearFilters() {
+  document.getElementById('qSearch').value = '';
+  document.getElementById('fLic').value = '';
+  document.getElementById('fSal').value = '';
+  document.getElementById('fSort').value = 'recent';
+  setQuick('all');
+}
+function goDetail(id) {
+  window.location.href = `m3-tai-xe-chi-tiet.html?id=${id}`;
+}
+
+function filterList() {
+  const q = document.getElementById('qSearch').value.trim().toLowerCase();
+  const lic = document.getElementById('fLic').value;
+  const sal = document.getElementById('fSal').value;
+  const sort = document.getElementById('fSort').value;
+  let list = DRIVERS.slice();
+  if (q)   list = list.filter(d => (d.id+d.name+d.cccd+d.phone+(d.truck||'')+d.license.class).toLowerCase().includes(q));
+  if (lic) list = list.filter(d => d.license.class === lic);
+  if (sal) list = list.filter(d => d.salary.type === sal);
+  if (curStatus) list = list.filter(d => d.status === curStatus);
+  if (curQuick === 'run')   list = list.filter(d => d.status === 'run');
+  if (curQuick === 'idle')  list = list.filter(d => d.status === 'idle');
+  if (curQuick === 'leave') list = list.filter(d => d.status === 'leave' || d.status === 'off');
+  if (curQuick === 'warn')  list = list.filter(d => hasWarn(d));
+  list.sort((a,b) => {
+    switch (sort) {
+      case 'trips': return b.tripsM - a.tripsM;
+      case 'rev':   return b.revM - a.revM;
+      case 'name':  return a.name.localeCompare(b.name, 'vi');
+      default: return b.joinDate - a.joinDate;
+    }
+  });
+  return list;
+}
+
+function render() {
+  const list = filterList();
+  const tbody = document.getElementById('tbody');
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="center" style="padding:30px;color:#94a3b8;font-style:italic;">— Không có tài xế nào —</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(d => {
+      const lic = docStatus(d.license.expire);
+      const hea = docStatus(d.health.expire);
+      const truckCell = d.truck
+        ? `<div style="font-size:12px;"><b>${d.truck}</b></div><div style="font-size:10.5px;color:#64748b;">${d.weight}</div>`
+        : `<div style="font-size:11px;color:#94a3b8;font-style:italic;">Chưa gắn xe</div>`;
+      return `
+        <tr onclick="goDetail('${d.id}')">
+          <td>
+            <div class="drv-cell">
+              <div class="drv-av" style="background:${d.bg};color:${d.fg};">
+                ${d.photo?`<img src="${d.photo}" alt="${d.name}" onerror="this.replaceWith(Object.assign(document.createTextNode('${d.avatar}')))">`:d.avatar}
+                <span class="dot ${statusDot(d)}"></span>
+              </div>
+              <div style="min-width:0;">
+                <div class="drv-nm">${d.name}</div>
+                <div class="drv-meta">${d.id} · Vào ${dStr(d.joinDate)}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:12px;">📞 <b>${d.phone}</b></div>
+            <div style="font-size:10.5px;color:#64748b;">CCCD: ${d.cccd}</div>
+          </td>
+          <td>
+            <div style="font-size:12px;"><b>Hạng ${d.license.class}</b></div>
+            <div class="${lic.cls}" style="font-size:10.5px;">${lic.txt}</div>
+          </td>
+          <td>${truckCell}</td>
+          <td>
+            <div style="font-size:11px;">📋 BL: <span class="${lic.cls}">${lic.txt}</span></div>
+            <div style="font-size:11px;">🩺 Khám SK: <span class="${hea.cls}">${hea.txt}</span></div>
+          </td>
+          <td class="right">
+            <div style="font-size:12px;"><b>${d.tripsM}</b> chuyến · <b>${d.kmM.toLocaleString('vi-VN')}</b> km</div>
+            <div style="font-size:11px;color:${d.onTime>=95?'#15803d':'#b45309'};font-weight:700;">${d.onTime}% đúng hạn</div>
+            <div class="pbar"><i style="width:${d.onTime}%;background:${d.onTime>=95?'#16a34a':d.onTime>=90?'#f59e0b':'#dc2626'};"></i></div>
+          </td>
+          <td>${salaryCell(d.salary)}</td>
+          <td>
+            ${statusBadge(d)}
+            ${d.leaveNote ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px;">${d.leaveNote}</div>` : ''}
+          </td>
+          <td class="center" onclick="event.stopPropagation();">
+            <div class="row-act">
+              <button class="ico-btn" title="Hồ sơ" onclick="goDetail('${d.id}')">👁️</button>
+              <button class="ico-btn" title="Điều phối" onclick="window.location.href='m2-dieu-phoi.html'">🎯</button>
+              <button class="ico-btn" title="Lịch sử lương" onclick="window.location.href='m4-luong.html'">💵</button>
+              <button class="ico-btn" title="Gọi" onclick="window.location.href='tel:${d.phone.replace(/\\s/g,'')}'">📞</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // KPI
+  const tot = DRIVERS.length;
+  const runs = DRIVERS.filter(d => d.status==='run').length;
+  const idle = DRIVERS.filter(d => d.status==='idle').length;
+  const leav = DRIVERS.filter(d => d.status==='leave' || d.status==='off').length;
+  const warn = DRIVERS.filter(d => hasWarn(d)).length;
+  const totRev = DRIVERS.reduce((s,d)=>s+d.revM,0);
+  document.getElementById('kAll').textContent = tot;
+  document.getElementById('kAllSub').textContent = `Doanh thu T5: ${FMTM(totRev)}`;
+  document.getElementById('kRun').textContent = runs;
+  document.getElementById('kIdle').textContent = idle;
+  document.getElementById('kLeave').textContent = leav;
+  document.getElementById('kLeaveSub').textContent = `${DRIVERS.filter(d=>d.status==='leave').length} nghỉ phép · ${DRIVERS.filter(d=>d.status==='off').length} nghỉ việc`;
+  document.getElementById('kWarn').textContent = warn;
+
+  // Segment counts
+  const cnt = st => DRIVERS.filter(d => d.status === st).length;
+  document.getElementById('ctAll').textContent   = tot;
+  document.getElementById('ctRun').textContent   = cnt('run');
+  document.getElementById('ctIdle').textContent  = cnt('idle');
+  document.getElementById('ctLeave').textContent = cnt('leave');
+  document.getElementById('ctOff').textContent   = cnt('off');
+
+  // Footer
+  document.getElementById('ftCount').textContent = list.length;
+  document.getElementById('ftTotal').textContent = tot;
+  document.getElementById('ftTrips').textContent = list.reduce((s,d)=>s+d.tripsM,0);
+  document.getElementById('ftKm').textContent    = list.reduce((s,d)=>s+d.kmM,0).toLocaleString('vi-VN');
+  document.getElementById('ftSal').textContent   = FMT(list.reduce((s,d)=>s+d.salary.est,0));
+}
+
+document.querySelectorAll('#segStatus button').forEach(b => b.addEventListener('click', () => setSeg(b.dataset.st)));
+render();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+</script>
 </body>
 </html>

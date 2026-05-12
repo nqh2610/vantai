@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ tài xế – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page-content { padding:10px 14px !important; }
+
+    /* Header card */
+    .drv-hero {
+      background:#fff; border:1px solid var(--border); border-radius:10px;
+      padding:14px; display:flex; gap:14px; align-items:flex-start; margin-bottom:10px;
+    }
+    .drv-photo {
+      width:88px; height:88px; border-radius:12px; flex-shrink:0; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      font-size:32px; font-weight:800; position:relative;
+      box-shadow:0 2px 8px rgba(0,0,0,.08);
+    }
+    .drv-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .drv-photo .dot {
+      position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; border-radius:50%;
+      border:3px solid #fff; background:#16a34a;
+    }
+    .drv-name { font-size:18px; font-weight:800; color:#0f172a; }
+    .drv-id   { font-size:11.5px; color:#94a3b8; font-weight:600; }
+    .drv-tags { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+    .tag      { padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; background:#f1f5f9; color:#475569; }
+    .tag.b    { background:#dbeafe; color:#1d4ed8; }
+    .tag.g    { background:#dcfce7; color:#15803d; }
+    .tag.y    { background:#fef3c7; color:#b45309; }
+    .tag.r    { background:#fee2e2; color:#b91c1c; }
+    .hero-actions { margin-left:auto; display:flex; gap:6px; flex-shrink:0; }
+
+    /* Quick stats */
+    .qs-grid {
+      display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:10px; width:100%;
+    }
+    .qs {
+      background:#f8fafc; border-radius:6px; padding:6px 10px; border-left:3px solid var(--primary);
+    }
+    .qs-l { font-size:10px; color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:.3px; }
+    .qs-v { font-size:14px; font-weight:800; color:#0f172a; }
+    .qs.in  { border-color:#16a34a; } .qs.in  .qs-v { color:#15803d; }
+    .qs.out { border-color:#dc2626; } .qs.out .qs-v { color:#b91c1c; }
+    .qs.warn{ border-color:#f59e0b; } .qs.warn .qs-v { color:#b45309; }
+
+    /* Tabs */
+    .tabs {
+      display:flex; border-bottom:1px solid var(--border); background:#fff;
+      border-radius:10px 10px 0 0; padding:0 10px; margin-bottom:0;
+    }
+    .tabs button {
+      border:0; background:transparent; padding:10px 14px; font-size:12.5px; font-weight:700; color:#64748b;
+      cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+    }
+    .tabs button.active { color:var(--primary); border-bottom-color:var(--primary); }
+    .tab-pane { display:none; background:#fff; border:1px solid var(--border); border-top:0; border-radius:0 0 10px 10px; padding:14px; }
+    .tab-pane.active { display:block; }
+
+    /* Two column */
+    .col2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media (max-width:900px) { .col2 { grid-template-columns:1fr; } }
+
+    /* Info card */
+    .ic-h { font-size:12px; font-weight:800; color:#0f172a; text-transform:uppercase; letter-spacing:.3px;
+      margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+    .info-row { display:flex; justify-content:space-between; padding:5px 0; font-size:12.5px; border-bottom:1px solid #f1f5f9; gap:10px; }
+    .info-row:last-child { border-bottom:0; }
+    .info-row .k { color:#64748b; flex-shrink:0; }
+    .info-row .v { color:#0f172a; font-weight:600; text-align:right; }
+
+    /* Doc card with photo */
+    .doc-card {
+      border:1px solid var(--border); border-radius:8px; padding:10px; background:#fafbfc;
+    }
+    .doc-card.warn { border-color:#fbbf24; background:#fffbeb; }
+    .doc-card.exp  { border-color:#fca5a5; background:#fef2f2; }
+    .doc-img {
+      height:160px; border-radius:6px; overflow:hidden; margin-bottom:8px;
+      display:flex; align-items:stretch; justify-content:stretch;
+      background:#fff; border:1px solid var(--border);
+    }
+    .doc-img svg { width:100%; height:100%; display:block; }
+    .doc-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .doc-img.cccd, .doc-img.lic, .doc-img.health, .doc-img.contract { background:#fff; }
+
+    /* Salary panel */
+    .sal-banner {
+      background:linear-gradient(135deg,#eef2ff,#fff); border:1px solid #c7d2fe; border-radius:10px;
+      padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:14px;
+    }
+    .sal-est { font-size:24px; font-weight:800; color:var(--primary); }
+    .sal-formula { font-size:11.5px; color:#475569; }
+
+    /* History table */
+    .data-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+    .data-table thead th {
+      background:#f8fafc; font-size:10.5px; text-transform:uppercase; letter-spacing:.3px;
+      color:#64748b; font-weight:700; padding:7px 10px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap;
+    }
+    .data-table tbody td { padding:7px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+    .data-table tbody tr:hover { background:#f8fafc; }
+    .nowrap { white-space:nowrap; } .right { text-align:right; }
+    .b { display:inline-block; padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700; }
+    .b-done { background:#dcfce7; color:#15803d; }
+    .b-late { background:#fee2e2; color:#b91c1c; }
+    .b-paid { background:#cffafe; color:#0e7490; }
+
+    /* Calendar mini */
+    .cal {
+      display:grid; grid-template-columns:repeat(31,1fr); gap:2px; margin-top:8px;
+    }
+    .cal .d {
+      height:20px; border-radius:3px; background:#f1f5f9; font-size:9px;
+      display:flex; align-items:center; justify-content:center; color:#94a3b8;
+    }
+    .cal .d.work { background:#dcfce7; color:#15803d; font-weight:700; }
+    .cal .d.leave{ background:#fef3c7; color:#b45309; }
+    .cal .d.off  { background:#e2e8f0; color:#64748b; }
+    .cal .d.late { background:#fee2e2; color:#b91c1c; font-weight:700; }
+    .cal-legend { display:flex; gap:10px; margin-top:8px; font-size:11px; color:#475569; flex-wrap:wrap; }
+    .lg { display:inline-flex; align-items:center; gap:4px; }
+    .lg span { width:10px; height:10px; border-radius:2px; }
+
+    /* Sparkline KPI */
+    .kpi-mini-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+    .kmi {
+      background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px;
+    }
+    .kmi-l { font-size:10.5px; color:#64748b; text-transform:uppercase; font-weight:700; }
+    .kmi-v { font-size:18px; font-weight:800; color:#0f172a; line-height:1.15; margin-top:2px; }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item active"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
+    <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <a href="m3-tai-xe.html" class="parent" style="text-decoration:none;color:inherit;">Tài xế</a>
+      <span class="sep">›</span><span class="current" id="bcName">Hồ sơ</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content" id="page"></main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const FMT  = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const FMTM = n => { const v=Math.abs(n||0);
+  if (v>=1e9) return (n/1e9).toFixed(2).replace(/\.?0+$/,'')+' tỷ';
+  if (v>=1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+  if (v>=1e3) return (n/1e3).toFixed(0)+'K';
+  return String(n||0);
+};
+const TODAY = new Date(2026, 4, 12);
+const dStr = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+const daysUntil = d => Math.round((d - TODAY)/86400000);
+
+/* ===== DRIVERS (đồng bộ với m3-tai-xe) ===== */
+const DRIVERS = {
+  TX01:{ id:'TX01', name:'Nguyễn Văn An', avatar:'A', bg:'#dcfce7', fg:'#15803d', photo:'https://i.pravatar.cc/240?img=12',
+    cccd:'079 204 001 234', cccdIssue:new Date(2020,5,12), cccdPlace:'Cục QLHC về TTXH',
+    phone:'0901 123 456', email:'an.nguyen@vanchuyen.vn',
+    dob:new Date(1986,5,12), gender:'Nam', address:'Số 12, Đường 5, P.Linh Trung, TP.Thủ Đức, TP.HCM',
+    bank:'Vietcombank · 0123456789',
+    joinDate:new Date(2021,2,15), contract:'12 tháng (đến 14/03/2027)',
+    license:{class:'C', no:'790204001234', issue:new Date(2018,7,15), expire:new Date(2028,7,15), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2026,7,20), clinic:'BV GTVT TP.HCM'},
+    truck:'51C-12345', weight:'15T', exp:'5 năm',
+    salary:{type:'kpi', base:9_000_000, kpi:3_500_000, est:14_200_000, fuel:1_200_000, phone:200_000} },
+  TX02:{ id:'TX02', name:'Trần Minh Khoa', avatar:'K', bg:'#e0e7ff', fg:'#4338ca', photo:'https://i.pravatar.cc/240?img=33',
+    cccd:'079 204 005 678', cccdIssue:new Date(2019,3,5), cccdPlace:'Cục QLHC về TTXH',
+    phone:'0912 234 567', email:'khoa.tran@vanchuyen.vn',
+    dob:new Date(1984,8,5), gender:'Nam', address:'Số 45, Đường Tên Lửa, Q.Bình Tân, TP.HCM',
+    bank:'BIDV · 9876543210',
+    joinDate:new Date(2020,7,1), contract:'Vô thời hạn',
+    license:{class:'E', no:'790204005678', issue:new Date(2017,5,10), expire:new Date(2027,5,10), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2026,5,18), clinic:'BV GTVT TP.HCM'},
+    truck:'51D-56789', weight:'10T', exp:'8 năm',
+    salary:{type:'fix', base:14_000_000, est:14_000_000, fuel:1_500_000, phone:200_000} },
+  TX03:{ id:'TX03', name:'Phạm Quốc Hùng', avatar:'H', bg:'#ffedd5', fg:'#c2410c', photo:'https://i.pravatar.cc/240?img=68',
+    cccd:'079 204 003 456', cccdIssue:new Date(2018,11,28), cccdPlace:'CA TP.HCM',
+    phone:'0934 567 890', email:'hung.pham@vanchuyen.vn',
+    dob:new Date(1981,1,28), gender:'Nam', address:'Số 88, Lô A, KDC Phú Mỹ, Q.7, TP.HCM',
+    bank:'Techcombank · 1122334455',
+    joinDate:new Date(2018,11,10), contract:'Vô thời hạn',
+    license:{class:'E', no:'790204003456', issue:new Date(2014,2,22), expire:new Date(2029,2,22), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2026,11,5), clinic:'BV Chợ Rẫy'},
+    truck:'51E-90123', weight:'15T', exp:'10 năm',
+    salary:{type:'pct', pct:18, est:18_900_000, fuel:1_800_000, phone:300_000} },
+  TX04:{ id:'TX04', name:'Lê Văn Bình', avatar:'B', bg:'#f3e8ff', fg:'#7e22ce', photo:'https://i.pravatar.cc/240?img=15',
+    cccd:'079 204 007 890', cccdIssue:new Date(2021,1,18), cccdPlace:'Cục QLHC về TTXH',
+    phone:'0945 678 901', email:'binh.le@vanchuyen.vn',
+    dob:new Date(1990,3,18), gender:'Nam', address:'Số 23, Quang Trung, Q.Gò Vấp, TP.HCM',
+    bank:'ACB · 5544332211',
+    joinDate:new Date(2022,4,20), contract:'12 tháng (đến 19/05/2026)',
+    license:{class:'C', no:'790204007890', issue:new Date(2017,10,30), expire:new Date(2027,10,30), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2027,2,12), clinic:'BV An Sinh'},
+    truck:'51F-23456', weight:'7T', exp:'4 năm',
+    salary:{type:'trip', perTrip:450_000, est:7_200_000, fuel:1_000_000, phone:200_000} },
+  TX05:{ id:'TX05', name:'Nguyễn Văn Khánh', avatar:'V', bg:'#fef9c3', fg:'#854d0e', photo:'https://i.pravatar.cc/240?img=53',
+    cccd:'079 204 009 012', cccdIssue:new Date(2017,9,3), cccdPlace:'CA TP.HCM',
+    phone:'0923 456 789', email:'khanh.nguyen@vanchuyen.vn',
+    dob:new Date(1979,9,3), gender:'Nam', address:'Số 5, Tô Ký, H.Hóc Môn, TP.HCM',
+    bank:'Agribank · 7788990011',
+    joinDate:new Date(2017,5,8), contract:'Vô thời hạn',
+    license:{class:'D', no:'790204009012', issue:new Date(2016,4,18), expire:new Date(2026,4,18), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2026,4,20), clinic:'BV GTVT TP.HCM'},
+    truck:'51H-45678', weight:'7T', exp:'12 năm',
+    salary:{type:'kpi', base:8_500_000, kpi:2_000_000, est:10_500_000, fuel:1_100_000, phone:200_000} },
+  TX06:{ id:'TX06', name:'Đỗ Thanh Tùng', avatar:'T', bg:'#dbeafe', fg:'#1d4ed8', photo:'https://i.pravatar.cc/240?img=14',
+    cccd:'079 204 011 567', cccdIssue:new Date(2020,8,5), cccdPlace:'Cục QLHC về TTXH',
+    phone:'0956 789 012', email:'tung.do@vanchuyen.vn',
+    dob:new Date(1988,6,22), gender:'Nam', address:'Số 17, Phan Văn Hớn, Q.12, TP.HCM',
+    bank:'MB Bank · 3344556677',
+    joinDate:new Date(2021,9,5), contract:'12 tháng (đến 04/10/2026)',
+    license:{class:'C', no:'790204011567', issue:new Date(2018,1,15), expire:new Date(2028,1,15), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2027,0,8), clinic:'BV Q.12'},
+    truck:'51G-34567', weight:'7T', exp:'6 năm',
+    salary:{type:'trip', perTrip:520_000, est:9_100_000, fuel:1_100_000, phone:200_000} },
+  TX07:{ id:'TX07', name:'Vũ Hồng Phúc', avatar:'P', bg:'#ccfbf1', fg:'#0f766e', photo:'https://i.pravatar.cc/240?img=60',
+    cccd:'079 204 013 890', cccdIssue:new Date(2019,2,8), cccdPlace:'Cục QLHC về TTXH',
+    phone:'0967 890 123', email:'phuc.vu@vanchuyen.vn',
+    dob:new Date(1985,2,8), gender:'Nam', address:'Số 90, Cộng Hoà, Q.Tân Bình, TP.HCM',
+    bank:'Sacombank · 6677889900',
+    joinDate:new Date(2019,3,12), contract:'Vô thời hạn',
+    license:{class:'FC', no:'790204013890', issue:new Date(2018,9,20), expire:new Date(2028,9,20), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2026,4,28), clinic:'BV Thống Nhất'},
+    truck:'51H-44556', weight:'12T', exp:'9 năm',
+    salary:{type:'pct', pct:20, est:20_800_000, fuel:1_700_000, phone:300_000} },
+  TX08:{ id:'TX08', name:'Nguyễn Tiến Dũng', avatar:'D', bg:'#fee2e2', fg:'#b91c1c', photo:'https://i.pravatar.cc/240?img=11',
+    cccd:'079 204 015 234', cccdIssue:new Date(2022,11,1), cccdPlace:'Cục QLHC về TTXH',
+    phone:'0978 901 234', email:'dung.nguyen@vanchuyen.vn',
+    dob:new Date(1992,11,1), gender:'Nam', address:'Số 33, Ung Văn Khiêm, Q.Bình Thạnh, TP.HCM',
+    bank:'TPBank · 2233445566',
+    joinDate:new Date(2023,1,18), contract:'12 tháng (đến 17/02/2027)',
+    license:{class:'C', no:'790204015234', issue:new Date(2017,8,12), expire:new Date(2027,8,12), place:'Sở GTVT TP.HCM'},
+    health:{expire:new Date(2026,9,15), clinic:'BV Bình Thạnh'},
+    truck:'51K-77889', weight:'8T', exp:'3 năm',
+    salary:{type:'fix', base:11_500_000, est:11_500_000, fuel:1_200_000, phone:200_000} }
+};
+
+/* ===== Lịch sử chuyến mẫu (filter theo driver id) ===== */
+const TRIP_HIST = [
+  {date:new Date(2026,4,12), id:'DH-2026-0541', driver:'TX01', from:'KCN Tân Bình', to:'Hà Nội', km:1720, hours:32, status:'run'},
+  {date:new Date(2026,4,7),  id:'DH-2026-0532', driver:'TX01', from:'Cát Lái', to:'Hải Phòng', km:1750, hours:30, status:'done'},
+  {date:new Date(2026,4,3),  id:'DH-2026-0518', driver:'TX01', from:'KCN Tân Bình', to:'Đà Nẵng', km:960,  hours:18, status:'done'},
+  {date:new Date(2026,3,28), id:'DH-2026-0502', driver:'TX01', from:'Q.7',          to:'Cần Thơ',  km:170,  hours:5,  status:'done'},
+  {date:new Date(2026,3,22), id:'DH-2026-0489', driver:'TX01', from:'Cát Lái',      to:'Vũng Tàu', km:130,  hours:3,  status:'late'},
+  {date:new Date(2026,3,18), id:'DH-2026-0471', driver:'TX01', from:'Bình Dương',   to:'Long An',  km:65,   hours:2,  status:'done'},
+  {date:new Date(2026,4,12), id:'DH-2026-0540', driver:'TX02', from:'Long Bình', to:'Q.7', km:48, hours:1.5, status:'done'},
+  {date:new Date(2026,4,8),  id:'DH-2026-0533', driver:'TX02', from:'Q.5',       to:'Cần Thơ', km:170, hours:4, status:'done'},
+  {date:new Date(2026,4,5),  id:'DH-2026-0520', driver:'TX02', from:'KCN Linh Trung', to:'Buôn Ma Thuột', km:380, hours:9, status:'done'},
+];
+
+/* ===== Bảng lương 6 tháng gần nhất ===== */
+const SAL_HIST = {
+  TX01:[
+    {m:'12/2025', base:9_000_000, kpi:3_200_000, allow:1_400_000, deduct:0,        net:13_600_000, trips:22, km:1180},
+    {m:'01/2026', base:9_000_000, kpi:3_500_000, allow:1_400_000, deduct:0,        net:13_900_000, trips:25, km:1320},
+    {m:'02/2026', base:9_000_000, kpi:2_800_000, allow:1_400_000, deduct:200_000,  net:13_000_000, trips:18, km:980 },
+    {m:'03/2026', base:9_000_000, kpi:3_400_000, allow:1_400_000, deduct:0,        net:13_800_000, trips:23, km:1240},
+    {m:'04/2026', base:9_000_000, kpi:3_600_000, allow:1_400_000, deduct:0,        net:14_000_000, trips:26, km:1380},
+    {m:'05/2026', base:9_000_000, kpi:3_500_000, allow:1_400_000, deduct:0,        net:13_900_000, trips:24, km:1248, status:'pending'},
+  ]
+};
+
+/* ===== Lịch làm việc 31 ngày tháng hiện tại (ví dụ TX01) ===== */
+const WORK_CAL = {
+  TX01: 'wwlwwwwowwwwwwowwwlwwwwowwwwwww', // w=work, l=late, o=off
+  TX02: 'wwwwwwowwwwowwwwwwowwwwwowwwwww',
+  TX05: 'wwwwowwwowwowwwoolwlwoowwwlwwww',
+};
+
+/* ===== State ===== */
+const params = new URLSearchParams(location.search);
+const id = params.get('id') || 'TX01';
+const D = DRIVERS[id] || DRIVERS.TX01;
+
+/* ===== SVG Mock cards (giấy tờ) ===== */
+function svgCCCD(){
+  // CCCD mẫu (cách điệu, không phải mẫu thật)
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="cg1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#7f1d1d"/>
+      </linearGradient>
+      <pattern id="cgp" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="10" cy="10" r="0.6" fill="#fee2e2" opacity="0.4"/>
+      </pattern>
+    </defs>
+    <rect width="320" height="200" fill="url(#cg1)"/>
+    <rect width="320" height="200" fill="url(#cgp)"/>
+    <text x="160" y="22" text-anchor="middle" fill="#fef3c7" font-size="9" font-weight="700" font-family="Arial">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</text>
+    <text x="160" y="36" text-anchor="middle" fill="#fef3c7" font-size="11" font-weight="800" font-family="Arial">CĂN CƯỚC CÔNG DÂN</text>
+    <line x1="120" y1="42" x2="200" y2="42" stroke="#fef3c7" stroke-width="0.5"/>
+    <text x="160" y="54" text-anchor="middle" fill="#fef3c7" font-size="7" font-family="Arial">Citizen Identity Card</text>
+    ${D.photo?`<image href="${D.photo}" x="20" y="65" width="80" height="100" preserveAspectRatio="xMidYMid slice" clip-path="inset(0 round 4)"/>`:`<rect x="20" y="65" width="80" height="100" fill="#fee2e2" rx="4"/><text x="60" y="120" text-anchor="middle" fill="#7f1d1d" font-size="32" font-weight="800">${D.avatar}</text>`}
+    <text x="115" y="78" fill="#fef3c7" font-size="7.5" font-family="Arial">Số / No.:</text>
+    <text x="115" y="91" fill="#fff" font-size="13" font-weight="800" font-family="Arial">${D.cccd}</text>
+    <text x="115" y="106" fill="#fef3c7" font-size="7.5" font-family="Arial">Họ và tên / Full name:</text>
+    <text x="115" y="118" fill="#fff" font-size="11" font-weight="700" font-family="Arial">${D.name.toUpperCase()}</text>
+    <text x="115" y="132" fill="#fef3c7" font-size="7.5" font-family="Arial">Ngày sinh / Date of birth:</text>
+    <text x="115" y="143" fill="#fff" font-size="9" font-weight="600" font-family="Arial">${dStr(D.dob)}</text>
+    <text x="115" y="156" fill="#fef3c7" font-size="7.5" font-family="Arial">Giới tính: <tspan fill="#fff" font-weight="600">${D.gender}</tspan>   Quốc tịch: <tspan fill="#fff" font-weight="600">Việt Nam</tspan></text>
+    <text x="115" y="172" fill="#fef3c7" font-size="7" font-family="Arial">Quê quán: <tspan fill="#fff">TP. Hồ Chí Minh</tspan></text>
+    <text x="115" y="184" fill="#fef3c7" font-size="7" font-family="Arial">Có giá trị đến: <tspan fill="#fff" font-weight="700">${D.dob.getFullYear()+60}</tspan></text>
+    <rect x="240" y="155" width="60" height="35" fill="#fef3c7" opacity="0.15" rx="2"/>
+    <text x="270" y="178" text-anchor="middle" fill="#fef3c7" font-size="7" font-family="Arial">QR · MRZ</text>
+  </svg>`;
+}
+function svgLicense(){
+  const lic = D.license;
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#f59e0b"/>
+      </linearGradient>
+    </defs>
+    <rect width="320" height="200" fill="url(#lg1)"/>
+    <rect x="0" y="0" width="320" height="32" fill="#b45309"/>
+    <text x="160" y="14" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial">BỘ GIAO THÔNG VẬN TẢI</text>
+    <text x="160" y="26" text-anchor="middle" fill="#fff" font-size="11" font-weight="800" font-family="Arial">GIẤY PHÉP LÁI XE</text>
+    <text x="160" y="44" text-anchor="middle" fill="#7c2d12" font-size="7" font-family="Arial">DRIVER'S LICENSE</text>
+    ${D.photo?`<image href="${D.photo}" x="16" y="56" width="74" height="92" preserveAspectRatio="xMidYMid slice"/>`:`<rect x="16" y="56" width="74" height="92" fill="#fef3c7" rx="2"/>`}
+    <rect x="16" y="56" width="74" height="92" fill="none" stroke="#7c2d12" stroke-width="1.5"/>
+    <text x="100" y="68" fill="#7c2d12" font-size="7" font-family="Arial">No.:</text>
+    <text x="100" y="82" fill="#1c1917" font-size="13" font-weight="800" font-family="Arial">${lic.no}</text>
+    <text x="100" y="98" fill="#7c2d12" font-size="7" font-family="Arial">Họ tên / Full name:</text>
+    <text x="100" y="110" fill="#1c1917" font-size="11" font-weight="700" font-family="Arial">${D.name.toUpperCase()}</text>
+    <text x="100" y="124" fill="#7c2d12" font-size="7" font-family="Arial">NS: <tspan fill="#1c1917" font-weight="600">${dStr(D.dob)}</tspan>   QT: <tspan fill="#1c1917" font-weight="600">VN</tspan></text>
+    <text x="100" y="138" fill="#7c2d12" font-size="7" font-family="Arial">Cấp ngày / Issued: <tspan fill="#1c1917" font-weight="600">${dStr(lic.issue)}</tspan></text>
+    <text x="100" y="152" fill="#7c2d12" font-size="7" font-family="Arial">Có giá trị đến / Expiry:</text>
+    <text x="100" y="164" fill="${daysUntil(lic.expire)<0?'#b91c1c':daysUntil(lic.expire)<=30?'#b91c1c':'#15803d'}" font-size="11" font-weight="800" font-family="Arial">${dStr(lic.expire)}</text>
+    <rect x="220" y="56" width="86" height="40" fill="#7c2d12" rx="3"/>
+    <text x="263" y="78" text-anchor="middle" fill="#fde68a" font-size="9" font-family="Arial">HẠNG / CLASS</text>
+    <text x="263" y="92" text-anchor="middle" fill="#fff" font-size="20" font-weight="800" font-family="Arial">${lic.class}</text>
+    <text x="220" y="112" fill="#7c2d12" font-size="7" font-family="Arial">Nơi cấp:</text>
+    <text x="220" y="124" fill="#1c1917" font-size="8" font-weight="600" font-family="Arial">${lic.place}</text>
+    <circle cx="263" cy="160" r="22" fill="none" stroke="#b91c1c" stroke-width="1.5" opacity="0.6"/>
+    <text x="263" y="158" text-anchor="middle" fill="#b91c1c" font-size="6" font-family="Arial" opacity="0.7">SỞ GTVT</text>
+    <text x="263" y="167" text-anchor="middle" fill="#b91c1c" font-size="6" font-family="Arial" opacity="0.7">TP.HCM</text>
+  </svg>`;
+}
+function svgHealth(){
+  const h = D.health;
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="320" height="200" fill="#fff"/>
+    <rect x="0" y="0" width="320" height="40" fill="#15803d"/>
+    <text x="160" y="16" text-anchor="middle" fill="#fff" font-size="8" font-family="Arial">${h.clinic.toUpperCase()}</text>
+    <text x="160" y="32" text-anchor="middle" fill="#fff" font-size="12" font-weight="800" font-family="Arial">GIẤY KHÁM SỨC KHOẺ</text>
+    <text x="20" y="60" fill="#475569" font-size="9" font-family="Arial">Họ tên: <tspan fill="#0f172a" font-weight="700">${D.name}</tspan></text>
+    <text x="20" y="76" fill="#475569" font-size="9" font-family="Arial">Ngày sinh: <tspan fill="#0f172a" font-weight="700">${dStr(D.dob)}</tspan>   Giới tính: <tspan fill="#0f172a" font-weight="700">${D.gender}</tspan></text>
+    <text x="20" y="92" fill="#475569" font-size="9" font-family="Arial">CCCD: <tspan fill="#0f172a" font-weight="700">${D.cccd}</tspan></text>
+    <line x1="20" y1="100" x2="300" y2="100" stroke="#e2e8f0"/>
+    <text x="20" y="116" fill="#15803d" font-size="9" font-weight="700" font-family="Arial">KẾT LUẬN: ĐỦ SỨC KHOẺ LÁI XE HẠNG ${D.license.class}</text>
+    <text x="20" y="132" fill="#475569" font-size="8" font-family="Arial">• Thị lực: 10/10  • Huyết áp: 120/80  • Tim mạch: bình thường</text>
+    <text x="20" y="146" fill="#475569" font-size="8" font-family="Arial">• Thính lực: bình thường  • Không sử dụng chất kích thích</text>
+    <line x1="20" y1="155" x2="300" y2="155" stroke="#e2e8f0"/>
+    <text x="20" y="172" fill="#475569" font-size="8" font-family="Arial">Có hiệu lực đến:</text>
+    <text x="20" y="186" fill="${daysUntil(h.expire)<0?'#b91c1c':daysUntil(h.expire)<=30?'#b45309':'#15803d'}" font-size="13" font-weight="800" font-family="Arial">${dStr(h.expire)}</text>
+    <circle cx="260" cy="170" r="22" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.6"/>
+    <text x="260" y="170" text-anchor="middle" fill="#15803d" font-size="6" font-family="Arial">BÁC SĨ KÝ</text>
+  </svg>`;
+}
+function svgContract(){
+  return `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="320" height="200" fill="#fff"/>
+    <text x="160" y="22" text-anchor="middle" fill="#0f172a" font-size="9" font-family="Arial">CTY VANCHUYỂN PRO – TP.HCM</text>
+    <text x="160" y="40" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800" font-family="Arial">HỢP ĐỒNG LAO ĐỘNG</text>
+    <text x="160" y="54" text-anchor="middle" fill="#64748b" font-size="8" font-family="Arial">Số: HĐLĐ-${D.id}/${D.joinDate.getFullYear()}</text>
+    <line x1="40" y1="62" x2="280" y2="62" stroke="#e2e8f0"/>
+    <text x="20" y="78" fill="#475569" font-size="8" font-family="Arial">Bên A (NSDLĐ): Cty CP VanChuyển Pro</text>
+    <text x="20" y="92" fill="#475569" font-size="8" font-family="Arial">Bên B (NLĐ): <tspan fill="#0f172a" font-weight="700">${D.name}</tspan></text>
+    <text x="20" y="106" fill="#475569" font-size="8" font-family="Arial">Vị trí: Tài xế hạng ${D.license.class}</text>
+    <text x="20" y="120" fill="#475569" font-size="8" font-family="Arial">Loại HĐ: ${D.contract}</text>
+    <text x="20" y="134" fill="#475569" font-size="8" font-family="Arial">Ngày bắt đầu: ${dStr(D.joinDate)}</text>
+    <line x1="40" y1="142" x2="280" y2="142" stroke="#e2e8f0"/>
+    <text x="80"  y="180" text-anchor="middle" fill="#64748b" font-size="7" font-family="Arial">ĐẠI DIỆN BÊN A</text>
+    <text x="240" y="180" text-anchor="middle" fill="#64748b" font-size="7" font-family="Arial">NGƯỜI LAO ĐỘNG</text>
+    <text x="240" y="166" text-anchor="middle" fill="#94a3b8" font-size="9" font-style="italic" font-family="cursive">${D.name.split(' ').slice(-1)[0]}</text>
+  </svg>`;
+}
+
+/* ===== Render ===== */
+function docCls(d){ const x=daysUntil(d); return x<0?'exp':(x<=30?'warn':''); }
+function docTxt(d){ const x=daysUntil(d); return x<0?`⚠ Đã hết hạn ${-x} ngày`:(x<=30?`⏰ Còn ${x} ngày · ${dStr(d)}`:`✓ ${dStr(d)}`); }
+function statusTrip(s){
+  if (s==='run')  return '<span class="b b-paid">🚚 Đang chạy</span>';
+  if (s==='done') return '<span class="b b-done">✅ Hoàn thành</span>';
+  if (s==='late') return '<span class="b b-late">⚠ Trễ</span>';
+  return '';
+}
+
+function renderHero(){
+  const lic = D.license, hea = D.health;
+  const warn = daysUntil(lic.expire)<=30 || daysUntil(hea.expire)<=30;
+  document.getElementById('bcName').textContent = D.name;
+  return `
+    <div class="drv-hero">
+      <div class="drv-photo" style="background:${D.bg};color:${D.fg};">
+        ${D.photo?`<img src="${D.photo}" alt="${D.name}" onerror="this.parentNode.innerHTML='${D.avatar}'">`:D.avatar}
+        <span class="dot"></span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="drv-name">${D.name}</div>
+        <div class="drv-id">${D.id} · 📞 ${D.phone} · ✉ ${D.email}</div>
+        <div class="drv-tags">
+          <span class="tag b">Bằng ${lic.class}</span>
+          <span class="tag g">Xe ${D.truck||'—'} · ${D.weight}</span>
+          <span class="tag">${D.exp} kinh nghiệm</span>
+          ${warn?'<span class="tag r">⚠ Giấy tờ cần gia hạn</span>':'<span class="tag g">✓ Giấy tờ hợp lệ</span>'}
+        </div>
+        <div class="qs-grid">
+          <div class="qs"><div class="qs-l">Chuyến T5</div><div class="qs-v">24</div></div>
+          <div class="qs in"><div class="qs-l">Km T5</div><div class="qs-v">1,248</div></div>
+          <div class="qs in"><div class="qs-l">Đúng hạn</div><div class="qs-v">98%</div></div>
+          <div class="qs warn"><div class="qs-l">Doanh thu T5</div><div class="qs-v">${FMTM(185_000_000)}</div></div>
+          <div class="qs"><div class="qs-l">Lương dự kiến</div><div class="qs-v" style="color:#1d4ed8;">${FMTM(D.salary.est)}</div></div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='tel:${D.phone.replace(/\\s/g,'')}'">📞 Gọi</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Mở Zalo')">💬 Zalo</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('Sửa hồ sơ')">✏️ Sửa</button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='m2-dieu-phoi.html'">🎯 Điều phối</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderTabs(){
+  return `
+    <div class="tabs">
+      <button class="active" data-tab="info">📋 Hồ sơ</button>
+      <button data-tab="docs">📄 Giấy tờ</button>
+      <button data-tab="salary">💵 Lương & Hợp đồng</button>
+      <button data-tab="history">📜 Lịch sử lái</button>
+      <button data-tab="calendar">🗓️ Chấm công T5</button>
+    </div>
+  `;
+}
+
+function renderInfo(){
+  return `
+    <div class="tab-pane active" id="tab-info">
+      <div class="col2">
+        <div>
+          <div class="ic-h">Thông tin cá nhân</div>
+          <div class="info-row"><span class="k">Họ và tên</span><span class="v">${D.name}</span></div>
+          <div class="info-row"><span class="k">Mã nhân viên</span><span class="v">${D.id}</span></div>
+          <div class="info-row"><span class="k">Ngày sinh</span><span class="v">${dStr(D.dob)} (${TODAY.getFullYear()-D.dob.getFullYear()} tuổi)</span></div>
+          <div class="info-row"><span class="k">Giới tính</span><span class="v">${D.gender}</span></div>
+          <div class="info-row"><span class="k">CCCD</span><span class="v">${D.cccd}</span></div>
+          <div class="info-row"><span class="k">Ngày cấp CCCD</span><span class="v">${dStr(D.cccdIssue)}</span></div>
+          <div class="info-row"><span class="k">Nơi cấp</span><span class="v">${D.cccdPlace}</span></div>
+          <div class="info-row"><span class="k">Địa chỉ</span><span class="v" style="text-align:right;max-width:60%;">${D.address}</span></div>
+        </div>
+        <div>
+          <div class="ic-h">Liên hệ & Công việc</div>
+          <div class="info-row"><span class="k">📞 Điện thoại</span><span class="v">${D.phone}</span></div>
+          <div class="info-row"><span class="k">✉ Email</span><span class="v">${D.email}</span></div>
+          <div class="info-row"><span class="k">🏦 TK ngân hàng</span><span class="v">${D.bank}</span></div>
+          <div class="info-row"><span class="k">📅 Ngày vào làm</span><span class="v">${dStr(D.joinDate)} (${TODAY.getFullYear()-D.joinDate.getFullYear()} năm)</span></div>
+          <div class="info-row"><span class="k">📝 Hợp đồng</span><span class="v">${D.contract}</span></div>
+          <div class="info-row"><span class="k">🚚 Xe phụ trách</span><span class="v"><b>${D.truck||'—'}</b> · ${D.weight}</span></div>
+          <div class="info-row"><span class="k">🎓 Bằng lái</span><span class="v">Hạng <b>${D.license.class}</b></span></div>
+          <div class="info-row"><span class="k">⏳ Kinh nghiệm</span><span class="v">${D.exp}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDocs(){
+  const lic = D.license, hea = D.health;
+  return `
+    <div class="tab-pane" id="tab-docs">
+      <div class="col2">
+        <div class="doc-card">
+          <div class="doc-img cccd">${svgCCCD()}</div>
+          <div class="ic-h" style="margin-top:0;">Căn cước công dân</div>
+          <div class="info-row"><span class="k">Số CCCD</span><span class="v">${D.cccd}</span></div>
+          <div class="info-row"><span class="k">Ngày cấp</span><span class="v">${dStr(D.cccdIssue)}</span></div>
+          <div class="info-row"><span class="k">Nơi cấp</span><span class="v">${D.cccdPlace}</span></div>
+          <div class="info-row"><span class="k">Trạng thái</span><span class="v doc-o" style="color:#15803d;">✓ Còn hiệu lực</span></div>
+          <div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-secondary btn-sm">⬇ Tải</button><button class="btn btn-secondary btn-sm">✏️ Cập nhật</button></div>
+        </div>
+
+        <div class="doc-card ${docCls(lic.expire)}">
+          <div class="doc-img lic">${svgLicense()}</div>
+          <div class="ic-h" style="margin-top:0;">Giấy phép lái xe</div>
+          <div class="info-row"><span class="k">Số GPLX</span><span class="v">${lic.no}</span></div>
+          <div class="info-row"><span class="k">Hạng</span><span class="v"><b style="color:#1d4ed8;">${lic.class}</b></span></div>
+          <div class="info-row"><span class="k">Ngày cấp</span><span class="v">${dStr(lic.issue)}</span></div>
+          <div class="info-row"><span class="k">Hết hạn</span><span class="v ${docCls(lic.expire)==='exp'?'':''}" style="color:${daysUntil(lic.expire)<0?'#b91c1c':daysUntil(lic.expire)<=30?'#b45309':'#15803d'};font-weight:700;">${docTxt(lic.expire)}</span></div>
+          <div class="info-row"><span class="k">Nơi cấp</span><span class="v">${lic.place}</span></div>
+          <div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-secondary btn-sm">⬇ Tải</button>${daysUntil(lic.expire)<=30?'<button class="btn btn-warning btn-sm">⚠ Gia hạn ngay</button>':'<button class="btn btn-secondary btn-sm">✏️ Cập nhật</button>'}</div>
+        </div>
+
+        <div class="doc-card ${docCls(hea.expire)}">
+          <div class="doc-img health">${svgHealth()}</div>
+          <div class="ic-h" style="margin-top:0;">Giấy khám sức khoẻ</div>
+          <div class="info-row"><span class="k">Cơ sở khám</span><span class="v">${hea.clinic}</span></div>
+          <div class="info-row"><span class="k">Hết hạn</span><span class="v" style="color:${daysUntil(hea.expire)<0?'#b91c1c':daysUntil(hea.expire)<=30?'#b45309':'#15803d'};font-weight:700;">${docTxt(hea.expire)}</span></div>
+          <div class="info-row"><span class="k">Trạng thái</span><span class="v" style="color:${daysUntil(hea.expire)<0?'#b91c1c':daysUntil(hea.expire)<=30?'#b45309':'#15803d'};font-weight:700;">${daysUntil(hea.expire)<0?'⚠ Đã hết':'Còn hiệu lực'}</span></div>
+          <div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-secondary btn-sm">⬇ Tải</button>${daysUntil(hea.expire)<=30?'<button class="btn btn-warning btn-sm">⚠ Gia hạn</button>':'<button class="btn btn-secondary btn-sm">✏️ Cập nhật</button>'}</div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-img contract">${svgContract()}</div>
+          <div class="ic-h" style="margin-top:0;">Hợp đồng & Tài liệu khác</div>
+          <div class="info-row"><span class="k">Hợp đồng LĐ</span><span class="v">${D.contract}</span></div>
+          <div class="info-row"><span class="k">BHXH/BHYT</span><span class="v doc-o" style="color:#15803d;">✓ Đang đóng</span></div>
+          <div class="info-row"><span class="k">Sơ yếu lý lịch</span><span class="v doc-o" style="color:#15803d;">✓ Đầy đủ</span></div>
+          <div class="info-row"><span class="k">Cam kết an toàn</span><span class="v doc-o" style="color:#15803d;">✓ Đã ký 12/03/2025</span></div>
+          <div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-secondary btn-sm">⬇ Tải HĐ</button><button class="btn btn-secondary btn-sm">+ Thêm tài liệu</button></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSalary(){
+  const s = D.salary;
+  const types = {fix:'Lương cố định', trip:'Lương theo chuyến', pct:'% Doanh thu', kpi:'Lương cơ bản + KPI'};
+  let formula =
+    s.type==='fix'  ? `<b>${FMT(s.base)}</b> / tháng (cố định)` :
+    s.type==='trip' ? `<b>${FMT(s.perTrip)}</b> × số chuyến` :
+    s.type==='pct'  ? `<b>${s.pct}%</b> × doanh thu chuyến giao` :
+    s.type==='kpi'  ? `<b>${FMT(s.base)}</b> CB + KPI tối đa <b>${FMT(s.kpi)}</b> theo % đúng hạn & doanh thu` : '';
+  const hist = SAL_HIST[D.id] || SAL_HIST.TX01;
+  return `
+    <div class="tab-pane" id="tab-salary">
+      <div class="sal-banner">
+        <div style="font-size:36px;">💵</div>
+        <div style="flex:1;">
+          <div style="font-size:11.5px;color:#64748b;font-weight:700;text-transform:uppercase;">${types[s.type]}</div>
+          <div class="sal-est">≈ ${FMT(s.est)} <span style="font-size:13px;color:#475569;font-weight:600;">/ tháng</span></div>
+          <div class="sal-formula">Công thức: ${formula}</div>
+        </div>
+        <div>
+          <button class="btn btn-secondary btn-sm">✏️ Đổi cơ chế</button>
+          <button class="btn btn-primary btn-sm" onclick="window.location.href='m4-luong.html'">📊 Bảng lương</button>
+        </div>
+      </div>
+
+      <div class="col2">
+        <div>
+          <div class="ic-h">Cấu trúc thu nhập</div>
+          ${s.base?`<div class="info-row"><span class="k">Lương cơ bản</span><span class="v">${FMT(s.base)}</span></div>`:''}
+          ${s.perTrip?`<div class="info-row"><span class="k">Đơn giá / chuyến</span><span class="v">${FMT(s.perTrip)}</span></div>`:''}
+          ${s.pct?`<div class="info-row"><span class="k">% doanh thu</span><span class="v">${s.pct}%</span></div>`:''}
+          ${s.kpi?`<div class="info-row"><span class="k">KPI tối đa</span><span class="v">${FMT(s.kpi)}</span></div>`:''}
+          <div class="info-row"><span class="k">Phụ cấp xăng/ăn/ĐT</span><span class="v">${FMT((s.fuel||0)+(s.phone||0))}</span></div>
+          <div class="info-row"><span class="k">Hình thức trả</span><span class="v">Chuyển khoản · ngày 5 hàng tháng</span></div>
+          <div class="info-row"><span class="k">Tài khoản</span><span class="v">${D.bank}</span></div>
+        </div>
+        <div>
+          <div class="ic-h">Quy định khấu trừ / thưởng</div>
+          <div class="info-row"><span class="k">Trễ chuyến</span><span class="v" style="color:#b91c1c;">−200,000 ₫ / lần</span></div>
+          <div class="info-row"><span class="k">Hỏng/mất hàng</span><span class="v" style="color:#b91c1c;">Theo biên bản</span></div>
+          <div class="info-row"><span class="k">Vi phạm GTVT</span><span class="v" style="color:#b91c1c;">Tự chịu phạt</span></div>
+          <div class="info-row"><span class="k">Đúng hạn 100% / tháng</span><span class="v" style="color:#15803d;">+500,000 ₫ thưởng</span></div>
+          <div class="info-row"><span class="k">Không nghỉ/sự cố</span><span class="v" style="color:#15803d;">+300,000 ₫ chuyên cần</span></div>
+          <div class="info-row"><span class="k">Lễ Tết</span><span class="v" style="color:#15803d;">×2 lương ngày làm</span></div>
+        </div>
+      </div>
+
+      <div class="ic-h" style="margin-top:14px;">Lịch sử lương 6 tháng gần nhất</div>
+      <table class="data-table">
+        <thead><tr>
+          <th>Tháng</th><th class="right">Cơ bản</th><th class="right">KPI/Thưởng</th>
+          <th class="right">Phụ cấp</th><th class="right">Khấu trừ</th>
+          <th class="right">Thực nhận</th><th class="right">Chuyến</th><th class="right">Km</th><th>Trạng thái</th>
+        </tr></thead>
+        <tbody>${hist.map(r=>`
+          <tr>
+            <td><b>${r.m}</b></td>
+            <td class="right">${FMT(r.base)}</td>
+            <td class="right" style="color:#15803d;">${FMT(r.kpi)}</td>
+            <td class="right">${FMT(r.allow)}</td>
+            <td class="right" style="color:${r.deduct?'#b91c1c':'#94a3b8'};">${r.deduct?'-'+FMT(r.deduct):'—'}</td>
+            <td class="right"><b style="color:#1d4ed8;">${FMT(r.net)}</b></td>
+            <td class="right">${r.trips}</td>
+            <td class="right">${r.km.toLocaleString('vi-VN')}</td>
+            <td>${r.status==='pending'?'<span class="b" style="background:#fef3c7;color:#b45309;">⏰ Chờ chốt</span>':'<span class="b b-paid">💰 Đã chi</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderHistory(){
+  const trips = TRIP_HIST.filter(t => t.driver === D.id);
+  return `
+    <div class="tab-pane" id="tab-history">
+      <div class="kpi-mini-row">
+        <div class="kmi"><div class="kmi-l">Tổng chuyến (90 ngày)</div><div class="kmi-v">${trips.length||38}</div></div>
+        <div class="kmi"><div class="kmi-l">Tổng km</div><div class="kmi-v">${(trips.reduce((s,t)=>s+t.km,0)||4892).toLocaleString('vi-VN')}</div></div>
+        <div class="kmi"><div class="kmi-l">Đúng hạn TB</div><div class="kmi-v" style="color:#15803d;">96%</div></div>
+        <div class="kmi"><div class="kmi-l">Doanh thu mang về</div><div class="kmi-v" style="color:#1d4ed8;">${FMTM(485_000_000)}</div></div>
+      </div>
+      <div class="ic-h">Chuyến gần đây</div>
+      <table class="data-table">
+        <thead><tr>
+          <th class="nowrap">Ngày</th><th>Mã chuyến</th><th>Tuyến</th>
+          <th class="right">Km</th><th class="right">Giờ chạy</th><th>Trạng thái</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${(trips.length?trips:[
+            {date:new Date(2026,4,12),id:'DH-2026-0541',from:'KCN Tân Bình',to:'Hà Nội',km:1720,hours:32,status:'run'},
+            {date:new Date(2026,4,7), id:'DH-2026-0532',from:'Cát Lái',to:'Hải Phòng',km:1750,hours:30,status:'done'},
+          ]).map(t=>`
+            <tr>
+              <td class="nowrap">${dStr(t.date)}</td>
+              <td><b style="color:#4f46e5;">${t.id}</b></td>
+              <td><span style="color:#0f172a;">${t.from}</span> → <span style="color:#0f172a;">${t.to}</span></td>
+              <td class="right">${t.km.toLocaleString('vi-VN')}</td>
+              <td class="right">${t.hours}h</td>
+              <td>${statusTrip(t.status)}</td>
+              <td><button class="btn btn-secondary btn-sm">👁️</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:10px;text-align:center;">
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='m1-don-hang.html'">Xem tất cả chuyến của tài xế →</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCalendar(){
+  const cal = WORK_CAL[D.id] || WORK_CAL.TX01;
+  const cells = Array.from({length:31}, (_, i) => {
+    const c = cal[i] || 'o';
+    const day = i+1;
+    const cls = c==='w'?'work':c==='l'?'late':c==='leave'?'leave':'off';
+    return `<div class="d ${cls}" title="Ngày ${day}: ${c==='w'?'Đi làm':c==='l'?'Trễ':c==='leave'?'Nghỉ phép':'Nghỉ'}">${day}</div>`;
+  }).join('');
+  return `
+    <div class="tab-pane" id="tab-calendar">
+      <div class="kpi-mini-row">
+        <div class="kmi"><div class="kmi-l">Ngày làm việc T5</div><div class="kmi-v" style="color:#15803d;">${(cal.match(/w/g)||[]).length}</div></div>
+        <div class="kmi"><div class="kmi-l">Nghỉ phép</div><div class="kmi-v" style="color:#b45309;">${(cal.match(/l/g)||[]).length}</div></div>
+        <div class="kmi"><div class="kmi-l">Nghỉ không lương</div><div class="kmi-v">${(cal.match(/o/g)||[]).length}</div></div>
+        <div class="kmi"><div class="kmi-l">% công làm</div><div class="kmi-v">${Math.round((cal.match(/w/g)||[]).length/31*100)}%</div></div>
+      </div>
+      <div class="ic-h">Lịch chấm công – Tháng 05/2026</div>
+      <div class="cal">${cells}</div>
+      <div class="cal-legend">
+        <div class="lg"><span style="background:#dcfce7;"></span> Đi làm</div>
+        <div class="lg"><span style="background:#fee2e2;"></span> Trễ chuyến</div>
+        <div class="lg"><span style="background:#fef3c7;"></span> Nghỉ phép</div>
+        <div class="lg"><span style="background:#e2e8f0;"></span> Nghỉ</div>
+      </div>
+      <div style="margin-top:14px;padding:10px;background:#fff7ed;border-radius:8px;border-left:3px solid #f59e0b;font-size:12px;color:#7c2d12;">
+        💡 Sự cố trong tháng: <b>1 chuyến trễ ngày 22/04</b> (trừ 200,000 ₫) – do kẹt xe cao tốc CT.HCM–LT.
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  document.getElementById('page').innerHTML = renderHero() + renderTabs()
+    + renderInfo() + renderDocs() + renderSalary() + renderHistory() + renderCalendar();
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+  }));
+}
+render();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+</script>
+</body>
+</html>

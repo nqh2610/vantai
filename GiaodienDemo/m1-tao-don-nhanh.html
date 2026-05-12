@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo đơn nhanh – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page-content { padding:14px 18px !important; }
+
+    .head-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px; flex-wrap:wrap; }
+    .ph-title { font-size:18px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px; }
+    .ph-sub   { font-size:12px; color:#64748b; margin-top:2px; }
+
+    .form-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+      background:#fff; border:1px solid var(--border); border-radius:10px;
+      padding:16px 18px;
+    }
+    .field { margin:0; position:relative; }
+    .field.span-2 { grid-column:1 / -1; }
+    .ipt {
+      width:100%; height:40px; border:1.5px solid var(--border); border-radius:7px;
+      padding:0 12px; font-size:14px; background:#fff; box-sizing:border-box; transition:.12s;
+    }
+    .ipt:focus { outline:0; border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.12); }
+    .ipt::placeholder { color:#94a3b8; }
+
+    .suggest {
+      position:absolute; left:0; right:0; top:calc(100% + 2px); background:#fff;
+      border:1px solid var(--border); border-radius:7px; box-shadow:0 6px 18px rgba(15,23,42,.1);
+      max-height:180px; overflow-y:auto; z-index:10; display:none;
+    }
+    .suggest.show { display:block; }
+    .suggest .item {
+      padding:7px 11px; cursor:pointer; font-size:13px; border-bottom:1px solid #f1f5f9;
+      display:flex; justify-content:space-between; gap:8px;
+    }
+    .suggest .item:hover { background:#f5f3ff; }
+    .suggest .item:last-child { border-bottom:0; }
+    .suggest .item b { color:#0f172a; }
+    .suggest .item span { color:#64748b; font-size:11.5px; }
+
+    .route { display:grid; grid-template-columns:1fr 24px 1fr; gap:8px; align-items:center; }
+    .route .arr { text-align:center; color:#94a3b8; font-size:18px; font-weight:700; }
+    .route .from-wrap, .route .to-wrap { position:relative; }
+    .route .pin {
+      position:absolute; left:10px; top:50%; transform:translateY(-50%);
+      width:18px; height:18px; border-radius:50%; color:#fff;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:10px; font-weight:800; pointer-events:none;
+    }
+    .route .pin.from { background:#16a34a; } .route .pin.to { background:#dc2626; }
+    .route .ipt { padding-left:36px; }
+
+    .price-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+    .price-input {
+      width:100%; height:52px; border:2px solid var(--primary); border-radius:8px;
+      padding:0 14px; font-size:24px; font-weight:800; color:#0f172a; background:#fff;
+      text-align:right; font-family:'Courier New',monospace; box-sizing:border-box;
+    }
+    .price-input:focus { outline:0; box-shadow:0 0 0 4px rgba(79,70,229,.15); }
+    .price-quick { display:flex; gap:4px; flex-wrap:wrap; }
+    .price-quick button {
+      border:1px solid var(--border); background:#fff; padding:6px 11px;
+      border-radius:14px; font-size:12px; font-weight:700; cursor:pointer; color:#475569; height:32px;
+    }
+    .price-quick button:hover { border-color:var(--primary); color:var(--primary); }
+
+    .totals {
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:10px 14px; background:#f5f3ff; border:1px solid #e0e7ff; border-radius:8px;
+      margin-top:8px;
+    }
+    .vat-toggle { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#0f172a; cursor:pointer; user-select:none; }
+    .switch { position:relative; width:38px; height:22px; flex-shrink:0; display:inline-block; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; inset:0; background:#cbd5e1; border-radius:22px; transition:.2s; }
+    .slider::before { content:''; position:absolute; height:16px; width:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .switch input:checked + .slider { background:#16a34a; }
+    .switch input:checked + .slider::before { transform:translateX(16px); }
+    .total-val { font-size:20px; font-weight:800; color:var(--primary); font-family:'Courier New',monospace; }
+    .total-val small { font-size:12px; color:#64748b; font-weight:600; margin-right:6px; }
+
+    .action-bar {
+      margin-top:12px; padding:10px 14px;
+      background:#fff; border:1px solid var(--border); border-radius:10px;
+      display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;
+      position:sticky; bottom:10px;
+      box-shadow:0 -4px 12px rgba(15,23,42,.04);
+    }
+    .btn-lg { height:42px; padding:0 22px; font-size:14px; font-weight:700; }
+
+    @media (max-width:760px) {
+      .form-grid { grid-template-columns:1fr; }
+      .route { grid-template-columns:1fr; }
+      .route .arr { display:none; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item active"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
+    <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 1</span><span class="sep">›</span><span class="current">⚡ Tạo đơn nhanh</span>
+    </div>
+    <div class="topbar-actions"><div class="topbar-avatar">A</div></div>
+  </header>
+
+  <main class="page-content">
+    <div class="head-row">
+      <div>
+        <div class="ph-title">⚡ Tạo đơn nhanh</div>
+        <div class="ph-sub">Nhập tối thiểu khi đang gọi điện — chi tiết bổ sung sau</div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <input id="cusName" class="ipt" type="text" placeholder="👤 Tên khách hàng *" autocomplete="off" oninput="suggestCus()">
+        <div class="suggest" id="cusSuggest"></div>
+      </div>
+      <div class="field">
+        <input id="cusPhone" class="ipt" type="tel" placeholder="📱 Số điện thoại *" inputmode="numeric">
+      </div>
+
+      <div class="field span-2">
+        <div class="route">
+          <div class="from-wrap">
+            <span class="pin from">A</span>
+            <input id="from" class="ipt" type="text" placeholder="Điểm đi *" list="placesFrom">
+          </div>
+          <div class="arr">➜</div>
+          <div class="to-wrap">
+            <span class="pin to">B</span>
+            <input id="to" class="ipt" type="text" placeholder="Điểm đến *" list="placesTo">
+          </div>
+          <datalist id="placesFrom">
+            <option>Quận 1, TP.HCM</option><option>Quận 7, TP.HCM</option>
+            <option>KCN Tân Bình, TP.HCM</option><option>Cảng Cát Lái, TP. Thủ Đức</option>
+            <option>KCN VSIP, Bình Dương</option><option>Long An</option>
+          </datalist>
+          <datalist id="placesTo">
+            <option>Đà Nẵng</option><option>Hà Nội</option><option>Nha Trang</option>
+            <option>Cần Thơ</option><option>Vũng Tàu</option><option>Bình Dương</option>
+            <option>Đồng Nai</option><option>Đà Lạt</option>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="field">
+        <input id="depart" class="ipt" type="datetime-local" title="Ngày giờ xuất phát">
+      </div>
+      <div class="field">
+        <input id="note" class="ipt" type="text" placeholder="📝 Ghi chú (tuỳ chọn)">
+      </div>
+
+      <div class="field span-2">
+        <div class="price-row">
+          <input id="price" class="price-input" type="text" placeholder="0 ₫" inputmode="numeric" oninput="onPriceInput()">
+          <div class="price-quick">
+            <button type="button" onclick="addPrice(500000)">+500K</button>
+            <button type="button" onclick="addPrice(1000000)">+1M</button>
+            <button type="button" onclick="addPrice(5000000)">+5M</button>
+            <button type="button" onclick="addPrice(10000000)">+10M</button>
+            <button type="button" onclick="setPrice(0)" style="color:#b91c1c;">↺</button>
+          </div>
+        </div>
+        <div class="totals">
+          <label class="vat-toggle">
+            <span class="switch">
+              <input id="vat" type="checkbox" onchange="calcPrice()">
+              <span class="slider"></span>
+            </span>
+            VAT 15%
+          </label>
+          <div class="total-val"><small>Tổng:</small><span id="bdTotal">0 ₫</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-secondary btn-lg" onclick="resetForm()">↺ Làm mới</button>
+      <button class="btn btn-secondary btn-lg" onclick="saveDraft()">💾 Lưu nháp</button>
+      <button class="btn btn-primary btn-lg" onclick="saveOrder()">✓ Tạo đơn</button>
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const FMT = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const VAT_RATE = 0.15;
+
+const CUSTOMERS = [
+  { name:'Anh Tùng – Cty ABC',     phone:'0909 123 456' },
+  { name:'Chị Mai – Cửa hàng XYZ', phone:'0908 234 567' },
+  { name:'Anh Hùng – Hùng Phát',   phone:'0908 222 333' },
+  { name:'Chị Lan – Shop Lan Anh', phone:'0978 333 444' },
+  { name:'Anh Sơn – Logistics S',  phone:'0901 555 111' },
+  { name:'Cty Sao Việt',           phone:'0902 888 999' },
+  { name:'HTX Miền Tây',           phone:'0939 666 777' },
+  { name:'Anh Long – Vũng Tàu',    phone:'0967 222 999' },
+];
+
+function suggestCus() {
+  const v = document.getElementById('cusName').value.trim().toLowerCase();
+  const box = document.getElementById('cusSuggest');
+  if (!v) { box.classList.remove('show'); return; }
+  const matches = CUSTOMERS.filter(c => c.name.toLowerCase().includes(v) || c.phone.includes(v)).slice(0,5);
+  if (!matches.length) { box.classList.remove('show'); return; }
+  box.innerHTML = matches.map(c => `
+    <div class="item" onclick="pickCus('${c.name.replace(/'/g,"\\'")}','${c.phone}')">
+      <b>${c.name}</b><span>${c.phone}</span>
+    </div>`).join('');
+  box.classList.add('show');
+}
+function pickCus(name, phone) {
+  document.getElementById('cusName').value = name;
+  document.getElementById('cusPhone').value = phone;
+  document.getElementById('cusSuggest').classList.remove('show');
+  document.getElementById('from').focus();
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#cusName') && !e.target.closest('#cusSuggest'))
+    document.getElementById('cusSuggest').classList.remove('show');
+});
+
+function rawPrice() { return parseInt((document.getElementById('price').value.replace(/\D/g,''))||'0', 10); }
+function setPrice(n) { document.getElementById('price').value = n? n.toLocaleString('vi-VN') + ' ₫' : ''; calcPrice(); }
+function addPrice(d) { setPrice(rawPrice() + d); }
+function onPriceInput() { setPrice(rawPrice()); }
+
+function calcPrice() {
+  const base = rawPrice();
+  const vat = document.getElementById('vat').checked ? Math.round(base * VAT_RATE) : 0;
+  document.getElementById('bdTotal').textContent = FMT(base + vat);
+}
+
+function gather() {
+  return {
+    cusName:  document.getElementById('cusName').value.trim(),
+    cusPhone: document.getElementById('cusPhone').value.trim(),
+    from:     document.getElementById('from').value.trim(),
+    to:       document.getElementById('to').value.trim(),
+    depart:   document.getElementById('depart').value,
+    vat:      document.getElementById('vat').checked,
+    price:    rawPrice(),
+    note:     document.getElementById('note').value.trim()
+  };
+}
+function validate(d) {
+  if (!d.cusName)  return 'Vui lòng nhập tên khách hàng';
+  if (!d.cusPhone) return 'Vui lòng nhập số điện thoại';
+  if (!d.from)     return 'Vui lòng nhập điểm đi';
+  if (!d.to)       return 'Vui lòng nhập điểm đến';
+  if (!d.depart)   return 'Vui lòng chọn ngày giờ xuất phát';
+  if (!d.price)    return 'Vui lòng nhập giá';
+  return null;
+}
+function saveOrder() {
+  const d = gather();
+  const err = validate(d);
+  if (err) { alert('⚠ ' + err); return; }
+  const code = 'DH-' + String(Math.floor(Math.random()*9000)+1000);
+  const total = d.price + (d.vat?Math.round(d.price*VAT_RATE):0);
+  if (confirm(`✓ Tạo đơn ${code}?\n\nKH: ${d.cusName}\nTổng: ${FMT(total)}`))
+    window.location.href = 'm1-don-hang.html';
+}
+function saveDraft() {
+  const d = gather();
+  if (!d.cusName && !d.cusPhone && !d.price) { alert('⚠ Hãy nhập ít nhất tên KH hoặc SĐT để lưu nháp'); return; }
+  const code = 'NHAP-' + String(Math.floor(Math.random()*900)+100);
+  alert(`💾 Đã lưu nháp ${code}`);
+}
+function resetForm() {
+  if (!confirm('Xoá toàn bộ thông tin đang nhập?')) return;
+  ['cusName','cusPhone','from','to','price','note'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('vat').checked = false;
+  initDepart(); calcPrice();
+}
+function initDepart() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset() + 60);
+  document.getElementById('depart').value = now.toISOString().slice(0,16);
+}
+
+(function init(){ initDepart(); calcPrice(); document.getElementById('cusName').focus(); })();
+
+const sbt = document.getElementById('sidebarToggle');
+const sbo = document.getElementById('sidebarOverlay');
+if (sbt) sbt.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sbo) sbo.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+</script>
+</body>
+</html>

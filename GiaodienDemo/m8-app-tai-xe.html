@@ -870,6 +870,103 @@
       padding: 6px 10px; border-radius: 8px;
       display: inline-block;
     }
+
+    /* ===== Ứng tiền ===== */
+    .advance-summary {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 10px;
+    }
+    .advance-stat {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px; padding: 8px 10px;
+    }
+    .advance-stat .l { font-size: 10.5px; color: rgba(255,255,255,0.75); }
+    .advance-stat .v { font-size: 14px; font-weight: 800; color: white; margin-top: 2px; letter-spacing: -0.01em; }
+    .advance-stat .v.warn { color: #fde68a; }
+
+    .btn-advance-money {
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px;
+      background: white;
+      color: #047857;
+      border: none; border-radius: 12px;
+      font-size: 13.5px; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      box-shadow: 0 4px 10px -2px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-advance-money:hover { background: #ecfdf5; }
+    .btn-advance-money:active { transform: scale(0.98); }
+
+    .adv-list { display: flex; flex-direction: column; gap: 8px; }
+    .adv-row {
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .adv-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: #fef3c7; color: #b45309;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .adv-info { flex: 1; min-width: 0; }
+    .adv-note { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+    .adv-meta { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+    .adv-amount { font-size: 13px; font-weight: 800; color: #b45309; flex-shrink: 0; text-align: right; }
+    .adv-status {
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 10px;
+      margin-top: 3px; display: inline-block;
+    }
+    .adv-status.approved { background: #dcfce7; color: #047857; }
+    .adv-status.pending  { background: #fef3c7; color: #92400e; }
+
+    .adv-form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .adv-form-row label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); }
+    .adv-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: inherit;
+      background: #f8fafc;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .adv-input:focus { outline: none; border-color: #059669; background: white; box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
+    .adv-amount-input {
+      font-size: 22px !important; font-weight: 800;
+      text-align: center; letter-spacing: -0.01em;
+      color: #047857;
+    }
+    .adv-quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .adv-quick {
+      background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857;
+      font-size: 11.5px; font-weight: 700;
+      padding: 5px 10px; border-radius: 16px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .adv-quick:hover { background: #d1fae5; }
+    .adv-warn {
+      background: #fef3c7; border: 1px solid #fcd34d;
+      color: #92400e; font-size: 11.5px;
+      padding: 8px 10px; border-radius: 10px;
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .btn-submit-adv {
+      width: 100%;
+      padding: 12px;
+      background: #059669; color: white;
+      border: none; border-radius: 12px;
+      font-size: 13.5px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px -2px rgba(5,150,105,0.4);
+      transition: background 0.15s;
+    }
+    .btn-submit-adv:hover { background: #047857; }
+    .btn-submit-adv:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
   </style>
 </head>
 <body>
@@ -1466,6 +1563,23 @@
               <span class="dot">•</span>
               <span>Trả ngày 05/06/2026</span>
             </div>
+
+            <!-- Tóm tắt ứng tiền -->
+            <div class="advance-summary">
+              <div class="advance-stat">
+                <div class="l">Đã ứng</div>
+                <div class="v warn" id="advUsed">0 ₫</div>
+              </div>
+              <div class="advance-stat">
+                <div class="l">Còn nhận cuối tháng</div>
+                <div class="v" id="advRemain">0 ₫</div>
+              </div>
+            </div>
+
+            <button class="btn-advance-money" onclick="openAdvanceModal()">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/><circle cx="12" cy="12" r="9"/></svg>
+              Yêu cầu ứng tiền
+            </button>
           </div>
         </div>
 
@@ -1481,6 +1595,17 @@
           <div class="exp-section-title" style="margin-bottom:8px;">Cách tính</div>
           <div class="breakdown-card" id="breakdownCard">
             <!-- nạp bằng JS -->
+          </div>
+        </div>
+
+        <!-- Lịch sử ứng tiền -->
+        <div class="sal-section" style="padding-top:0;">
+          <div class="section-title">
+            Ứng tiền tháng này
+            <span class="count-badge" style="background:#fef3c7;color:#92400e;"><span id="advCountBadge">0</span> lần</span>
+          </div>
+          <div class="adv-list" id="advList">
+            <!-- rows by JS -->
           </div>
         </div>
 
@@ -1511,6 +1636,67 @@
             </div>
             <div class="sheet-body" id="sheetBody">
               <!-- nội dung detail -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Advance request bottom sheet -->
+        <div class="trip-detail-overlay" id="advOverlay" onclick="if(event.target===this)closeAdvanceModal()">
+          <div class="trip-detail-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+              <div>
+                <div class="sheet-title">Yêu cầu ứng tiền</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Trừ vào lương cuối tháng</div>
+              </div>
+              <button class="sheet-close" onclick="closeAdvanceModal()" aria-label="Đóng">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="sheet-body">
+              <!-- Tóm tắt khả dụng -->
+              <div class="breakdown-card">
+                <div class="bd-row"><span class="bd-label">Lương dự kiến</span><span class="bd-value" id="advAvailSal">0 ₫</span></div>
+                <div class="bd-row"><span class="bd-label">Đã ứng trước đó</span><span class="bd-value minus" id="advAvailUsed">− 0 ₫</span></div>
+                <div class="bd-row total"><span class="bd-label">Tối đa có thể ứng (70%)</span><span class="bd-value" id="advAvailMax">0 ₫</span></div>
+              </div>
+
+              <!-- Số tiền -->
+              <div class="adv-form-row">
+                <label>Số tiền muốn ứng (K)</label>
+                <input type="text" id="advAmountInput" class="adv-input adv-amount-input" inputmode="numeric" placeholder="0" oninput="formatAmount(this); validateAdv()">
+                <div class="adv-quick-chips">
+                  <button type="button" class="adv-quick" onclick="setAdvAmount(500)">500K</button>
+                  <button type="button" class="adv-quick" onclick="setAdvAmount(1000)">1.000K</button>
+                  <button type="button" class="adv-quick" onclick="setAdvAmount(2000)">2.000K</button>
+                  <button type="button" class="adv-quick" onclick="setAdvAmount(3000)">3.000K</button>
+                  <button type="button" class="adv-quick" onclick="setAdvAmountMax()">Tối đa</button>
+                </div>
+              </div>
+
+              <!-- Lý do -->
+              <div class="adv-form-row">
+                <label>Lý do (ngắn gọn)</label>
+                <input type="text" id="advReason" class="adv-input" placeholder="VD: Sửa xe, học phí con, gia đình…">
+              </div>
+
+              <!-- Phương thức -->
+              <div class="adv-form-row">
+                <label>Nhận qua</label>
+                <select id="advMethod" class="adv-input">
+                  <option value="bank">Chuyển khoản ngân hàng</option>
+                  <option value="cash">Tiền mặt tại văn phòng</option>
+                </select>
+              </div>
+
+              <div class="adv-warn" id="advWarn" style="display:none;">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
+                <span id="advWarnText">Số tiền vượt quá hạn mức</span>
+              </div>
+
+              <button class="btn-submit-adv" id="btnSubmitAdv" onclick="submitAdvance()">
+                ✓ Gửi yêu cầu
+              </button>
             </div>
           </div>
         </div>
@@ -1763,6 +1949,14 @@
   let salType = 'percent';
   const fmtVND = n => (n || 0).toLocaleString('vi-VN') + ' ₫';
 
+  // ===== Ứng tiền =====
+  // Mỗi advance: { amount (đồng), reason, method, status: 'approved'|'pending', day, month }
+  let ADVANCES = [
+    { amount: 1500000, reason: 'Sửa lốp xe',     method: 'bank', status: 'approved', day: 4,  month: 5 },
+    { amount: 800000,  reason: 'Tạm ứng xăng',   method: 'cash', status: 'approved', day: 8,  month: 5 },
+  ];
+  const ADV_MAX_RATE = 0.7; // tối đa 70% lương dự kiến
+
   function tripRevenue(t) { return t.price - t.fees.reduce((s, f) => s + f.amount, 0); }
   function tripPay(t) {
     const cfg = SAL_CONFIG[salType];
@@ -1796,6 +1990,13 @@
     document.getElementById('salTotalValue').textContent = fmtVND(total);
     document.getElementById('salTripCount').textContent = SAL_TRIPS.length;
     document.getElementById('tripCountBadge').textContent = SAL_TRIPS.length;
+
+    // Ứng tiền summary
+    const usedTotal = ADVANCES.reduce((s, a) => s + a.amount, 0);
+    document.getElementById('advUsed').textContent = fmtVND(usedTotal);
+    document.getElementById('advRemain').textContent = fmtVND(Math.max(0, total - usedTotal));
+    document.getElementById('advCountBadge').textContent = ADVANCES.length;
+    renderAdvList();
 
     // Breakdown card
     const bd = document.getElementById('breakdownCard');
@@ -1920,6 +2121,102 @@
   }
   function closeTripDetail() {
     document.getElementById('tripDetailOverlay').classList.remove('show');
+  }
+
+  // ===== Ứng tiền: render & modal =====
+  function renderAdvList() {
+    const list = document.getElementById('advList');
+    if (ADVANCES.length === 0) {
+      list.innerHTML = `<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:14px;background:white;border:1px dashed var(--border);border-radius:12px;">Chưa có yêu cầu ứng nào trong tháng</div>`;
+      return;
+    }
+    list.innerHTML = ADVANCES.map(a => `
+      <div class="adv-row">
+        <div class="adv-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1"/></svg>
+        </div>
+        <div class="adv-info">
+          <div class="adv-note">${a.reason || 'Ứng lương'}</div>
+          <div class="adv-meta">${String(a.day).padStart(2,'0')}/${String(a.month).padStart(2,'0')} · ${a.method === 'cash' ? 'Tiền mặt' : 'Chuyển khoản'}</div>
+        </div>
+        <div>
+          <div class="adv-amount">− ${fmtVND(a.amount)}</div>
+          <span class="adv-status ${a.status}">${a.status === 'approved' ? '✓ Đã duyệt' : '⏳ Chờ duyệt'}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openAdvanceModal() {
+    const total = totalSalary();
+    const used = ADVANCES.reduce((s, a) => s + a.amount, 0);
+    const max = Math.max(0, Math.floor(total * ADV_MAX_RATE) - used);
+    document.getElementById('advAvailSal').textContent = fmtVND(total);
+    document.getElementById('advAvailUsed').textContent = '− ' + fmtVND(used);
+    document.getElementById('advAvailMax').textContent = fmtVND(max);
+    document.getElementById('advAmountInput').value = '';
+    document.getElementById('advReason').value = '';
+    document.getElementById('advMethod').value = 'bank';
+    document.getElementById('advWarn').style.display = 'none';
+    document.getElementById('btnSubmitAdv').disabled = false;
+    document.getElementById('advOverlay').classList.add('show');
+  }
+  function closeAdvanceModal() {
+    document.getElementById('advOverlay').classList.remove('show');
+  }
+  function setAdvAmount(k) {
+    const input = document.getElementById('advAmountInput');
+    input.value = k.toLocaleString('vi-VN');
+    validateAdv();
+  }
+  function setAdvAmountMax() {
+    const total = totalSalary();
+    const used = ADVANCES.reduce((s, a) => s + a.amount, 0);
+    const maxK = Math.floor((total * ADV_MAX_RATE - used) / 1000);
+    setAdvAmount(Math.max(0, maxK));
+  }
+  function validateAdv() {
+    const k = parseAmount(document.getElementById('advAmountInput').value);
+    const total = totalSalary();
+    const used = ADVANCES.reduce((s, a) => s + a.amount, 0);
+    const max = Math.max(0, Math.floor(total * ADV_MAX_RATE) - used);
+    const amount = k * 1000;
+    const warn = document.getElementById('advWarn');
+    const btn = document.getElementById('btnSubmitAdv');
+    if (k === 0) {
+      warn.style.display = 'none';
+      btn.disabled = true;
+      return;
+    }
+    if (amount > max) {
+      warn.style.display = 'flex';
+      document.getElementById('advWarnText').textContent =
+        `Vượt hạn mức. Tối đa còn lại: ${fmtVND(max)}`;
+      btn.disabled = true;
+    } else {
+      warn.style.display = 'none';
+      btn.disabled = false;
+    }
+  }
+  function submitAdvance() {
+    const k = parseAmount(document.getElementById('advAmountInput').value);
+    if (k === 0) return;
+    const reason = document.getElementById('advReason').value.trim() || 'Ứng lương';
+    const method = document.getElementById('advMethod').value;
+    const now = new Date();
+    ADVANCES.unshift({
+      amount: k * 1000,
+      reason,
+      method,
+      status: 'pending',
+      day: now.getDate(),
+      month: now.getMonth() + 1,
+    });
+    closeAdvanceModal();
+    renderSalary();
+    setTimeout(() => {
+      alert(`✓ Đã gửi yêu cầu ứng ${(k*1000).toLocaleString('vi-VN')} ₫\nKế toán sẽ duyệt trong 24h.`);
+    }, 280);
   }
 </script>
 </body>

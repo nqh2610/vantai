@@ -6,16 +6,191 @@
   <title>Bảng lương – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .salary-mode { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-    .mode-fixed  { background: #e0e7ff; color: #4338ca; }
-    .mode-share  { background: #dcfce7; color: #15803d; }
-    .mode-combo  { background: #f3e8ff; color: #7e22ce; }
+    /* ===== Stat bar (compact, 1 row) ===== */
+    .stat-bar {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 14px;
+    }
+    .stat-pill { display:flex; align-items:center; gap:9px; padding: 4px 8px; border-radius: 8px; }
+    .stat-pill .ico { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .stat-pill .meta { min-width:0; }
+    .stat-pill .lbl { font-size:11px; color: var(--text-muted); font-weight:600; line-height:1.1; }
+    .stat-pill .val { font-size:14px; font-weight:800; color: var(--text); margin-top:2px; letter-spacing:-0.01em; }
+    .stat-pill .sub { font-size:10.5px; color: var(--text-secondary); margin-top:1px; }
+
+    /* ===== Mode pills ===== */
+    .salary-mode { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; white-space:nowrap; }
+    .mode-percent  { background: #dcfce7; color: #15803d; }
+    .mode-base     { background: #f3e8ff; color: #7e22ce; }
+    .mode-fixed    { background: #e0e7ff; color: #4338ca; }
+
+    /* ===== Toolbar ===== */
+    .toolbar {
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      background:white; border:1px solid var(--border); border-radius:10px;
+      padding:10px 12px; margin-bottom:14px;
+    }
+    .toolbar .grow { flex:1; min-width:200px; }
+    .toolbar input.search, .toolbar select {
+      width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+      font-family:inherit; font-size:13px; background:white;
+    }
+    .month-pick { display:flex; align-items:center; gap:4px; }
+    .month-pick button { width:30px; height:32px; border:1px solid var(--border); background:white; border-radius:6px; cursor:pointer; font-size:12px; color:var(--text-secondary); }
+    .month-pick button:hover { background:#f1f5f9; }
+    .month-pick .lbl { padding:0 10px; font-weight:700; font-size:13px; min-width:120px; text-align:center; }
+
+    .view-tabs { display:inline-flex; background:#f1f5f9; padding:3px; border-radius:8px; gap:2px; }
+    .view-tabs button {
+      border:none; background:transparent; padding:6px 12px; font-size:12.5px; font-weight:600;
+      color:var(--text-secondary); border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:5px;
+    }
+    .view-tabs button.active { background:white; color:var(--primary); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+    .view-tabs .pill { background:#fee2e2; color:#dc2626; padding:1px 6px; border-radius:8px; font-size:10px; font-weight:800; }
+
+    /* ===== Salary table ===== */
+    .data-table tr.row-driver { cursor:pointer; transition:background .12s; }
+    .data-table tr.row-driver:hover { background:#f8fafc; }
+    .data-table tr.row-driver.is-open { background:#eef2ff !important; }
     .salary-row-name { font-weight: 700; font-size: 13px; }
-    .salary-row-vehicle { font-size: 11px; color: var(--text-muted); }
-    .month-selector { display: flex; align-items: center; gap: 8px; }
-    .progress-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; width: 80px; }
-    .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; }
-    .advance-badge { font-size: 11px; color: #dc2626; font-weight: 600; }
+    .salary-row-vehicle { font-size: 11px; color: var(--text-muted); margin-top:1px; }
+
+    .net-pay { font-weight:800; color:var(--primary); font-size:14px; }
+    .advance-badge { font-size: 11px; color: #dc2626; font-weight: 700; }
+    .row-actions { display:flex; gap:4px; flex-wrap:nowrap; justify-content:flex-end; }
+
+    /* ===== Driver detail drawer (slide-in right) ===== */
+    .drawer-overlay {
+      position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:90;
+      opacity:0; visibility:hidden; transition:opacity .2s, visibility .2s;
+    }
+    .drawer-overlay.show { opacity:1; visibility:visible; }
+    .drawer {
+      position:fixed; top:0; right:0; bottom:0; width:480px; max-width:100%;
+      background:#f8fafc; z-index:91; box-shadow:-8px 0 30px rgba(15,23,42,0.18);
+      transform:translateX(100%); transition:transform .25s ease-out;
+      display:flex; flex-direction:column;
+    }
+    .drawer.show { transform:translateX(0); }
+    .drawer-head {
+      padding:14px 18px; background:white; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:12px;
+    }
+    .drawer-head .av { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; flex-shrink:0; }
+    .drawer-head .nm { font-weight:800; font-size:15px; }
+    .drawer-head .meta { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+    .drawer-close { margin-left:auto; width:30px; height:30px; border:none; border-radius:8px; background:#f1f5f9; cursor:pointer; color:var(--text-secondary); font-size:16px; }
+    .drawer-close:hover { background:#fee2e2; color:#dc2626; }
+
+    .drawer-body { flex:1; overflow-y:auto; padding:14px 16px; }
+    .dr-section { background:white; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:12px; }
+    .dr-section-title { font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
+
+    /* Big total card mirroring Phone 4 */
+    .dr-total {
+      background: linear-gradient(135deg, #4338ca, #4f46e5);
+      color:white; border:none; padding:16px;
+    }
+    .dr-total .lbl { font-size:11px; color:rgba(255,255,255,0.8); font-weight:600; }
+    .dr-total .val { font-size:26px; font-weight:800; margin-top:4px; letter-spacing:-0.02em; }
+    .dr-total .meta { font-size:11px; color:rgba(255,255,255,0.85); margin-top:4px; }
+    .dr-adv-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .dr-adv-stat { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.18); border-radius:8px; padding:8px 10px; }
+    .dr-adv-stat .l { font-size:10.5px; color:rgba(255,255,255,0.75); }
+    .dr-adv-stat .v { font-size:14px; font-weight:800; margin-top:2px; }
+    .dr-adv-stat .v.warn { color:#fde68a; }
+
+    .bd-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; font-size:12.5px; border-bottom:1px dashed var(--border); }
+    .bd-row:last-child { border-bottom:none; }
+    .bd-row.total { font-weight:800; font-size:13.5px; padding-top:10px; border-top:2px solid var(--border); border-bottom:none; margin-top:4px; color:var(--primary); }
+    .bd-label { color:var(--text-secondary); }
+    .bd-value { font-weight:700; color:var(--text); }
+    .bd-value.minus { color:#dc2626; }
+    .bd-value.plus  { color:#16a34a; }
+
+    .trip-row, .adv-row {
+      display:flex; align-items:center; gap:10px; padding:9px 10px;
+      border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:#f8fafc; font-size:12.5px;
+    }
+    .trip-row .code, .adv-row .day { font-size:10.5px; color:var(--text-muted); font-weight:700; margin-top:2px; }
+    .trip-row .route, .adv-row .reason { font-weight:700; color:var(--text); }
+    .trip-row .amt, .adv-row .amt { margin-left:auto; font-weight:800; white-space:nowrap; }
+    .trip-row .amt { color:#16a34a; }
+    .adv-row .amt { color:#dc2626; }
+    .adv-row.pending { background:#fef9c3; border-color:#fde68a; }
+    .badge-mini { font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-left:4px; }
+    .badge-mini.approved { background:#dcfce7; color:#15803d; }
+    .badge-mini.pending  { background:#fef3c7; color:#92400e; }
+    .badge-mini.rejected { background:#fee2e2; color:#dc2626; }
+    .adv-actions-mini { display:flex; gap:4px; margin-left:6px; }
+    .adv-actions-mini .btn { padding:3px 8px; font-size:11px; }
+
+    .drawer-foot {
+      padding:12px 16px; background:white; border-top:1px solid var(--border);
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .drawer-foot .btn { flex:1; }
+
+    /* ===== Advance request panel ===== */
+    .adv-panel { background:white; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .adv-panel .panel-head { padding:12px 16px; border-bottom:1px solid var(--border); }
+    .adv-panel .panel-head .ttl { font-weight:800; font-size:14px; }
+    .adv-panel .panel-head .ct { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+    .adv-card {
+      display:grid; grid-template-columns: 40px 1fr auto auto; gap:12px;
+      align-items:center; padding:12px 16px; border-bottom:1px solid var(--border);
+    }
+    .adv-card:last-child { border-bottom:none; }
+    .adv-card .av { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
+    .adv-card .who { font-weight:700; font-size:13px; }
+    .adv-card .why { font-size:11.5px; color:var(--text-secondary); margin-top:2px; }
+    .adv-card .why .pill {
+      display:inline-block; background:#f1f5f9; color:var(--text-secondary);
+      font-size:10px; font-weight:700; padding:1px 6px; border-radius:4px; margin-right:4px;
+    }
+    .adv-card .amt-col { text-align:right; }
+    .adv-card .amt-col .a { font-weight:800; font-size:15px; color:#dc2626; }
+    .adv-card .amt-col .l { font-size:10.5px; color:var(--text-muted); margin-top:2px; }
+    .adv-card .actions { display:flex; gap:5px; }
+
+    /* ===== Print salary slip (only visible during print) ===== */
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { position:absolute; top:0; left:0; right:0; padding:24px; }
+    }
+    #printArea { display:none; }
+    #printArea.printing { display:block; }
+    .slip { font-family: 'Arial', sans-serif; color:#0f172a; max-width:780px; margin:0 auto; }
+    .slip-head { display:flex; justify-content:space-between; border-bottom:2px solid #0f172a; padding-bottom:8px; margin-bottom:14px; }
+    .slip-head .co { font-weight:800; font-size:16px; }
+    .slip-head .co-sub { font-size:11px; color:#475569; margin-top:2px; }
+    .slip-title { text-align:center; font-size:18px; font-weight:800; margin:18px 0 4px; text-transform:uppercase; }
+    .slip-sub { text-align:center; font-size:12px; color:#475569; margin-bottom:18px; }
+    .slip-info { display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; margin-bottom:14px; font-size:13px; }
+    .slip table { width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:12px; }
+    .slip table th, .slip table td { border:1px solid #cbd5e1; padding:6px 8px; }
+    .slip table th { background:#f1f5f9; font-weight:800; text-align:left; }
+    .slip-net {
+      background:#dcfce7; border:2px solid #16a34a; padding:12px 16px; border-radius:8px;
+      display:flex; justify-content:space-between; align-items:center; margin:12px 0 18px;
+    }
+    .slip-net .lbl { font-weight:800; font-size:14px; color:#14532d; }
+    .slip-net .val { font-weight:800; font-size:22px; color:#15803d; }
+    .slip-amt-text { font-size:11.5px; font-style:italic; color:#475569; margin-top:4px; }
+    .slip-sign { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:30px; text-align:center; font-size:12px; }
+    .slip-sign .lbl { font-weight:800; }
+    .slip-sign .nm { margin-top:60px; font-style:italic; color:#475569; }
+
+    .empty-state { text-align:center; padding:50px 20px; color:var(--text-muted); }
+    .empty-state .ico { font-size:42px; margin-bottom:8px; opacity:0.5; }
+
+    @media (max-width: 1024px) {
+      .stat-bar { grid-template-columns: repeat(2, 1fr); }
+      .drawer { width:100%; }
+    }
   </style>
 </head>
 <body>
@@ -83,185 +258,644 @@
     <div class="page-header">
       <div>
         <div class="page-title">💵 Bảng lương tài xế</div>
-        <div class="page-subtitle">Tính lương tự động · 3 chế độ: Cố định / Ăn chia / Hoa hồng</div>
+        <div class="page-subtitle">Đồng bộ dữ liệu từ app tài xế · Duyệt → Chi lương → In phiếu</div>
       </div>
       <div class="page-actions">
-        <div class="month-selector">
-          <button class="btn btn-secondary btn-sm">◀</button>
-          <select class="form-control" style="width:130px;">
-            <option>Tháng 5 / 2026</option>
-            <option>Tháng 4 / 2026</option>
-            <option>Tháng 3 / 2026</option>
-          </select>
-          <button class="btn btn-secondary btn-sm">▶</button>
-        </div>
-        <button class="btn btn-secondary">⬇ Xuất Excel</button>
-        <button class="btn btn-primary">✅ Duyệt & Chốt lương</button>
+        <button class="btn btn-secondary" onclick="exportExcel()">⬇ Xuất Excel</button>
+        <button class="btn btn-primary" onclick="closeMonth()">🔒 Chốt lương cả tháng</button>
       </div>
     </div>
 
-    <!-- Summary stats -->
-    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#e0e7ff;">💵</div>
-        <div class="stat-card-label">Tổng quỹ lương T5</div>
-        <div class="stat-card-value" style="font-size:20px;">62.4M</div>
-        <div class="stat-card-change" style="color:var(--text-secondary);">8 tài xế</div>
+    <div class="stat-bar" id="statBar"></div>
+
+    <div class="toolbar">
+      <div class="view-tabs" id="viewTabs">
+        <button class="active" data-view="payroll" onclick="setView('payroll')">📋 Bảng lương</button>
+        <button data-view="advance" onclick="setView('advance')">💸 Yêu cầu ứng <span class="pill" id="advPendingPill">0</span></button>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#dcfce7;">✅</div>
-        <div class="stat-card-label">Đã thanh toán</div>
-        <div class="stat-card-value" style="font-size:20px;">0M</div>
-        <div class="stat-card-change" style="color:var(--text-muted);">Chưa chốt lương</div>
+      <div class="month-pick">
+        <button onclick="changeMonth(-1)">◀</button>
+        <div class="lbl" id="monthLabel">Tháng 5 / 2026</div>
+        <button onclick="changeMonth(1)">▶</button>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fef9c3;">💸</div>
-        <div class="stat-card-label">Tổng tạm ứng</div>
-        <div class="stat-card-value" style="font-size:20px;">8.5M</div>
-        <div class="stat-card-change" style="color:#dc2626;">Sẽ trừ vào lương</div>
+      <div class="grow">
+        <input type="text" class="search" id="searchBox" placeholder="🔍 Tìm tài xế / biển số…" oninput="render()">
       </div>
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#fee2e2;">⏳</div>
-        <div class="stat-card-label">Chi phí chờ duyệt</div>
-        <div class="stat-card-value" style="font-size:20px;">2.1M</div>
-        <div class="stat-card-change" style="color:#c2410c;">Cần xét duyệt</div>
+      <div style="min-width:160px;">
+        <select id="statusFilter" onchange="render()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="pending">⏳ Chờ duyệt</option>
+          <option value="approved">✅ Đã duyệt</option>
+          <option value="paid">💵 Đã chi lương</option>
+        </select>
       </div>
     </div>
 
-    <!-- Salary table -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Chi tiết bảng lương – Tháng 05/2026</span>
-        <div style="display:flex;gap:6px;">
-          <span class="salary-mode mode-fixed">Cố định</span>
-          <span class="salary-mode mode-share">Ăn chia</span>
-          <span class="salary-mode mode-combo">Cơ bản + HH</span>
+    <div id="payrollView">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Chi tiết bảng lương – Tháng 05/2026</span>
+          <div style="display:flex;gap:6px;">
+            <span class="salary-mode mode-percent">Ăn chia %</span>
+            <span class="salary-mode mode-base">Cơ bản + %</span>
+            <span class="salary-mode mode-fixed">Cố định</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tài xế / Xe</th>
+                <th>Chế độ</th>
+                <th style="text-align:center;">Chuyến</th>
+                <th style="text-align:right;">Doanh thu</th>
+                <th style="text-align:right;">Lương tính</th>
+                <th style="text-align:right;">Tạm ứng</th>
+                <th style="text-align:right;">Thực nhận</th>
+                <th>Trạng thái</th>
+                <th style="text-align:right;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="payrollBody"></tbody>
+            <tfoot id="payrollFoot"></tfoot>
+          </table>
         </div>
       </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Tài xế / Xe</th>
-              <th>Chế độ lương</th>
-              <th style="text-align:center;">Số chuyến</th>
-              <th style="text-align:center;">Km</th>
-              <th style="text-align:right;">Doanh thu</th>
-              <th style="text-align:right;">Lương tính</th>
-              <th style="text-align:right;">Phụ cấp</th>
-              <th style="text-align:right;">Tạm ứng</th>
-              <th style="text-align:right;color:var(--primary);">Thực nhận</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">A</div>
-                  <div><div class="salary-row-name">Nguyễn Văn An</div><div class="salary-row-vehicle">51C-12345 · 5 tấn</div></div>
-                </div>
-              </td>
-              <td><span class="salary-mode mode-fixed">Cố định</span></td>
-              <td style="text-align:center;font-weight:700;">24</td>
-              <td style="text-align:center;">1,248</td>
-              <td style="text-align:right;">76.800.000</td>
-              <td style="text-align:right;font-weight:700;">15.000.000</td>
-              <td style="text-align:right;color:#16a34a;">+2.400.000</td>
-              <td style="text-align:right;"><span class="advance-badge">- 2.000.000</span></td>
-              <td style="text-align:right;font-weight:800;color:var(--primary);">15.400.000</td>
-              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
-              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div class="avatar avatar-sm" style="background:#e0e7ff;color:#4338ca;">K</div>
-                  <div><div class="salary-row-name">Trần Minh Khoa</div><div class="salary-row-vehicle">51D-56789 · 10 tấn</div></div>
-                </div>
-              </td>
-              <td><span class="salary-mode mode-share">Ăn chia 40%</span></td>
-              <td style="text-align:center;font-weight:700;">19</td>
-              <td style="text-align:center;">1,056</td>
-              <td style="text-align:right;">95.000.000</td>
-              <td style="text-align:right;font-weight:700;">18.240.000</td>
-              <td style="text-align:right;color:#16a34a;">+1.200.000</td>
-              <td style="text-align:right;"><span class="advance-badge">- 3.000.000</span></td>
-              <td style="text-align:right;font-weight:800;color:var(--primary);">16.440.000</td>
-              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
-              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div class="avatar avatar-sm" style="background:#fef9c3;color:#854d0e;">V</div>
-                  <div><div class="salary-row-name">Nguyễn Văn Khánh</div><div class="salary-row-vehicle">51H-45678 · 7 tấn</div></div>
-                </div>
-              </td>
-              <td><span class="salary-mode mode-combo">Cơ bản + HH 5%</span></td>
-              <td style="text-align:center;font-weight:700;">14</td>
-              <td style="text-align:center;">842</td>
-              <td style="text-align:right;">58.400.000</td>
-              <td style="text-align:right;font-weight:700;">10.920.000</td>
-              <td style="text-align:right;color:#16a34a;">+800.000</td>
-              <td style="text-align:right;">-</td>
-              <td style="text-align:right;font-weight:800;color:var(--primary);">11.720.000</td>
-              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
-              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">H</div>
-                  <div><div class="salary-row-name">Phạm Quốc Hùng</div><div class="salary-row-vehicle">51E-90123 · 15 tấn</div></div>
-                </div>
-              </td>
-              <td><span class="salary-mode mode-share">Ăn chia 35%</span></td>
-              <td style="text-align:center;font-weight:700;">11</td>
-              <td style="text-align:center;">2,134</td>
-              <td style="text-align:right;">110.000.000</td>
-              <td style="text-align:right;font-weight:700;">21.000.000</td>
-              <td style="text-align:right;color:#16a34a;">+1.500.000</td>
-              <td style="text-align:right;"><span class="advance-badge">- 2.000.000</span></td>
-              <td style="text-align:right;font-weight:800;color:var(--primary);">20.500.000</td>
-              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
-              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div class="avatar avatar-sm" style="background:#f3e8ff;color:#7e22ce;">B</div>
-                  <div><div class="salary-row-name">Lê Văn Bình</div><div class="salary-row-vehicle">51F-23456 · 3 tấn</div></div>
-                </div>
-              </td>
-              <td><span class="salary-mode mode-fixed">Cố định</span></td>
-              <td style="text-align:center;font-weight:700;">16</td>
-              <td style="text-align:center;">756</td>
-              <td style="text-align:right;">44.800.000</td>
-              <td style="text-align:right;font-weight:700;">12.000.000</td>
-              <td style="text-align:right;color:#16a34a;">+600.000</td>
-              <td style="text-align:right;"><span class="advance-badge">- 1.500.000</span></td>
-              <td style="text-align:right;font-weight:800;color:var(--primary);">11.100.000</td>
-              <td><span class="badge badge-yellow">Chờ duyệt</span></td>
-              <td><div style="display:flex;gap:3px;"><button class="btn btn-primary btn-sm">Duyệt</button><button class="btn btn-secondary btn-sm">PDF</button></div></td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr style="background:#f8fafc;font-weight:700;">
-              <td colspan="5" style="padding:10px 12px;font-size:13px;">Tổng cộng</td>
-              <td style="text-align:right;padding:10px 12px;color:var(--primary);font-size:14px;">77.160.000</td>
-              <td style="text-align:right;padding:10px 12px;color:#16a34a;">+6.500.000</td>
-              <td style="text-align:right;padding:10px 12px;color:#dc2626;">- 8.500.000</td>
-              <td style="text-align:right;padding:10px 12px;color:var(--primary);font-size:15px;">75.160.000</td>
-              <td colspan="2"></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+    </div>
+
+    <div id="advanceView" style="display:none;">
+      <div class="adv-panel" id="advPanel"></div>
     </div>
   </main>
 </div>
+
+<!-- Driver detail drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="av" id="dr_avatar">A</div>
+    <div style="min-width:0; flex:1;">
+      <div class="nm" id="dr_name">—</div>
+      <div class="meta" id="dr_meta">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</div>
+
+<!-- Print area -->
+<div id="printArea"></div>
+
 <script src="assets/app.js"></script>
+<script>
+  // ========== Master data (đồng bộ với m8 app tài xế) ==========
+  const FMT  = n => (n || 0).toLocaleString('vi-VN') + ' ₫';
+  const FMTM = n => (n / 1000000).toFixed(1).replace('.0','') + 'M';
+
+  const MODE_LABEL = {
+    percent: { label: 'Ăn chia %',  cls: 'mode-percent' },
+    base:    { label: 'Cơ bản + %', cls: 'mode-base' },
+    fixed:   { label: 'Cố định',    cls: 'mode-fixed' },
+  };
+
+  const DRIVERS = [
+    { id:'TX01', name:'Nguyễn Văn An',    plate:'51C-12345', tonnage:'5 tấn',  avatar:'A', avatarBg:'#dcfce7', avatarFg:'#15803d', bank:'Vietcombank · 0123 456 789', mode:'fixed',   cfg:{ fixed:12000000 },        bonus:800000  },
+    { id:'TX02', name:'Trần Minh Khoa',   plate:'51D-56789', tonnage:'10 tấn', avatar:'K', avatarBg:'#e0e7ff', avatarFg:'#4338ca', bank:'BIDV · 9988 7766',           mode:'percent', cfg:{ rate:35 },                bonus:1200000 },
+    { id:'TX03', name:'Phạm Quốc Hùng',   plate:'51E-90123', tonnage:'15 tấn', avatar:'H', avatarBg:'#ffedd5', avatarFg:'#c2410c', bank:'Techcombank · 1199 2200',    mode:'percent', cfg:{ rate:35 },                bonus:1500000 },
+    { id:'TX04', name:'Lê Văn Bình',      plate:'51F-23456', tonnage:'3 tấn',  avatar:'B', avatarBg:'#f3e8ff', avatarFg:'#7e22ce', bank:'ACB · 7700 1144',            mode:'fixed',   cfg:{ fixed:10000000 },        bonus:600000  },
+    { id:'TX05', name:'Nguyễn Văn Khánh', plate:'51H-45678', tonnage:'7 tấn',  avatar:'V', avatarBg:'#fef9c3', avatarFg:'#854d0e', bank:'MB Bank · 3344 5500',        mode:'base',    cfg:{ base:6000000, rate:5 }, bonus:400000  },
+  ];
+
+  const TRIPS = {
+    TX01: [
+      { code:'DH-2026-0512', day:12, route:'TP.HCM → Cần Thơ',     price:4200000, fees:1350000 },
+      { code:'DH-2026-0509', day:9,  route:'TP.HCM → Vũng Tàu',    price:2800000, fees:760000 },
+      { code:'DH-2026-0506', day:6,  route:'TP.HCM → Long An',     price:1800000, fees:440000 },
+      { code:'DH-2026-0503', day:3,  route:'TP.HCM → Bình Dương',  price:1500000, fees:360000 },
+    ],
+    TX02: [
+      { code:'DH-2026-0511', day:11, route:'TP.HCM → Đà Nẵng',     price:9500000, fees:2100000 },
+      { code:'DH-2026-0508', day:8,  route:'TP.HCM → Quy Nhơn',    price:8200000, fees:1850000 },
+      { code:'DH-2026-0505', day:5,  route:'TP.HCM → Nha Trang',   price:6800000, fees:1620000 },
+      { code:'DH-2026-0502', day:2,  route:'TP.HCM → Phan Thiết',  price:4500000, fees:980000 },
+    ],
+    TX03: [
+      { code:'DH-2026-0510', day:10, route:'TP.HCM → Hà Nội',      price:18500000, fees:4200000 },
+      { code:'DH-2026-0504', day:4,  route:'TP.HCM → Vinh',         price:14200000, fees:3600000 },
+    ],
+    TX04: [
+      { code:'DH-2026-0511', day:11, route:'Q.7 → Q.12',            price:850000, fees:120000 },
+      { code:'DH-2026-0509', day:9,  route:'Q.1 → Thủ Đức',         price:650000, fees:90000 },
+      { code:'DH-2026-0507', day:7,  route:'Q.7 → Bình Tân',        price:720000, fees:100000 },
+      { code:'DH-2026-0504', day:4,  route:'Q.5 → Q.9',             price:580000, fees:80000 },
+      { code:'DH-2026-0501', day:1,  route:'Q.1 → Hóc Môn',         price:920000, fees:140000 },
+    ],
+    TX05: [
+      { code:'DH-2026-0510', day:10, route:'TP.HCM → Đà Lạt',       price:5500000, fees:1380000 },
+      { code:'DH-2026-0506', day:6,  route:'TP.HCM → Buôn Ma Thuột', price:6200000, fees:1450000 },
+      { code:'DH-2026-0503', day:3,  route:'TP.HCM → Phan Rang',    price:4800000, fees:1120000 },
+    ],
+  };
+
+  const ADVANCES = {
+    TX01: [
+      { id:1, day:4,  amount:1500000, reason:'Sửa lốp xe',     method:'bank', status:'approved' },
+      { id:2, day:8,  amount:500000,  reason:'Tạm ứng xăng',   method:'cash', status:'approved' },
+    ],
+    TX02: [
+      { id:3, day:6,  amount:3000000, reason:'Việc gia đình',  method:'bank', status:'approved' },
+      { id:4, day:11, amount:2000000, reason:'Sửa điện thoại', method:'cash', status:'pending'  },
+    ],
+    TX03: [
+      { id:5, day:5,  amount:2000000, reason:'Thay nhớt + lọc gió',     method:'bank', status:'approved' },
+      { id:6, day:10, amount:1500000, reason:'Chi phí dọc đường HN',    method:'cash', status:'pending'  },
+    ],
+    TX04: [
+      { id:7, day:7,  amount:1500000, reason:'Mua sách cho con',        method:'bank', status:'approved' },
+    ],
+    TX05: [
+      { id:8, day:9,  amount:800000,  reason:'Khám sức khỏe',           method:'cash', status:'pending'  },
+    ],
+  };
+
+  const PAYROLL_STATUS = { TX01:'pending', TX02:'pending', TX03:'pending', TX04:'pending', TX05:'pending' };
+
+  // ========== Calculations ==========
+  const tripRevenue = t => t.price - t.fees;
+  const driverGross = d => (TRIPS[d.id]||[]).reduce((s,t)=>s+t.price,0);
+  const driverFees  = d => (TRIPS[d.id]||[]).reduce((s,t)=>s+t.fees,0);
+  const driverRev   = d => driverGross(d) - driverFees(d);
+  function driverPay(d) {
+    const r = driverRev(d);
+    if (d.mode === 'fixed')   return d.cfg.fixed;
+    if (d.mode === 'percent') return Math.round(r * d.cfg.rate / 100);
+    if (d.mode === 'base')    return d.cfg.base + Math.round(r * d.cfg.rate / 100);
+    return 0;
+  }
+  const driverAdvUsed    = d => (ADVANCES[d.id]||[]).filter(a=>a.status==='approved'||a.status==='paid').reduce((s,a)=>s+a.amount,0);
+  const driverAdvPending = d => (ADVANCES[d.id]||[]).filter(a=>a.status==='pending').length;
+  const driverNet        = d => driverPay(d) + (d.bonus||0) - driverAdvUsed(d);
+
+  // ========== State ==========
+  let view = 'payroll';
+  let openDriverId = null;
+
+  function setView(v) {
+    view = v;
+    document.querySelectorAll('#viewTabs button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+    document.getElementById('payrollView').style.display = v === 'payroll' ? '' : 'none';
+    document.getElementById('advanceView').style.display = v === 'advance' ? '' : 'none';
+    render();
+  }
+
+  function getFilteredDrivers() {
+    const q  = document.getElementById('searchBox').value.trim().toLowerCase();
+    const st = document.getElementById('statusFilter').value;
+    return DRIVERS.filter(d => {
+      if (q && !(d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q))) return false;
+      if (st && PAYROLL_STATUS[d.id] !== st) return false;
+      return true;
+    });
+  }
+
+  function renderStats() {
+    const fund      = DRIVERS.reduce((s,d)=>s+driverPay(d)+(d.bonus||0),0);
+    const paid      = DRIVERS.filter(d=>PAYROLL_STATUS[d.id]==='paid').reduce((s,d)=>s+driverNet(d),0);
+    const pendingPR = DRIVERS.filter(d=>PAYROLL_STATUS[d.id]==='pending').length;
+    const advUsed   = DRIVERS.reduce((s,d)=>s+driverAdvUsed(d),0);
+    const advPend   = DRIVERS.reduce((s,d)=>s+driverAdvPending(d),0);
+
+    document.getElementById('statBar').innerHTML = `
+      <div class="stat-pill"><div class="ico" style="background:#e0e7ff;color:#4338ca;">💵</div>
+        <div class="meta"><div class="lbl">Tổng quỹ lương</div><div class="val">${FMTM(fund)}</div><div class="sub">${DRIVERS.length} tài xế</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#dcfce7;color:#15803d;">✅</div>
+        <div class="meta"><div class="lbl">Đã chi lương</div><div class="val">${FMTM(paid)}</div><div class="sub">${DRIVERS.filter(d=>PAYROLL_STATUS[d.id]==='paid').length} người đã trả</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#fef9c3;color:#854d0e;">⏳</div>
+        <div class="meta"><div class="lbl">Chờ chốt lương</div><div class="val">${pendingPR}</div><div class="sub">cần duyệt</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#fee2e2;color:#dc2626;">💸</div>
+        <div class="meta"><div class="lbl">Đã ứng (đã duyệt)</div><div class="val">${FMTM(advUsed)}</div><div class="sub">trừ vào lương</div></div></div>
+      <div class="stat-pill"><div class="ico" style="background:#fef3c7;color:#92400e;">📥</div>
+        <div class="meta"><div class="lbl">Yêu cầu ứng mới</div><div class="val">${advPend}</div><div class="sub">chờ duyệt</div></div></div>
+    `;
+    document.getElementById('advPendingPill').textContent = advPend;
+  }
+
+  function statusBadge(st) {
+    if (st === 'paid')     return '<span class="badge badge-green">💵 Đã chi</span>';
+    if (st === 'approved') return '<span class="badge badge-blue">✅ Đã duyệt</span>';
+    return '<span class="badge badge-yellow">⏳ Chờ duyệt</span>';
+  }
+
+  function quickActionsFor(d, st) {
+    if (st === 'pending')  return `<button class="btn btn-primary btn-sm" onclick="approvePayroll('${d.id}')">Duyệt</button>
+                                   <button class="btn btn-secondary btn-sm" onclick="printSlip('${d.id}')">In</button>`;
+    if (st === 'approved') return `<button class="btn btn-primary btn-sm" onclick="payPayroll('${d.id}')">Chi lương</button>
+                                   <button class="btn btn-secondary btn-sm" onclick="printSlip('${d.id}')">In</button>`;
+    return `<button class="btn btn-secondary btn-sm" onclick="printSlip('${d.id}')">In phiếu</button>`;
+  }
+
+  function renderPayroll() {
+    const list = getFilteredDrivers();
+    const tbody = document.getElementById('payrollBody');
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="ico">🔍</div>Không có tài xế phù hợp bộ lọc</div></td></tr>`;
+      document.getElementById('payrollFoot').innerHTML = '';
+      return;
+    }
+    tbody.innerHTML = list.map(d => {
+      const trips = (TRIPS[d.id]||[]).length;
+      const rev   = driverRev(d);
+      const pay   = driverPay(d);
+      const adv   = driverAdvUsed(d);
+      const net   = driverNet(d);
+      const st    = PAYROLL_STATUS[d.id];
+      const modeText = d.mode === 'percent' ? `Ăn chia ${d.cfg.rate}%`
+                    : d.mode === 'base'    ? `Cơ bản + ${d.cfg.rate}%`
+                    : 'Cố định';
+      return `
+        <tr class="row-driver ${openDriverId===d.id?'is-open':''}" onclick="openDrawer('${d.id}')">
+          <td>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div class="avatar avatar-sm" style="background:${d.avatarBg};color:${d.avatarFg};">${d.avatar}</div>
+              <div>
+                <div class="salary-row-name">${d.name}</div>
+                <div class="salary-row-vehicle">${d.plate} · ${d.tonnage}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="salary-mode ${MODE_LABEL[d.mode].cls}">${modeText}</span></td>
+          <td style="text-align:center;font-weight:700;">${trips}</td>
+          <td style="text-align:right;">${FMT(rev)}</td>
+          <td style="text-align:right;font-weight:700;">${FMT(pay)}</td>
+          <td style="text-align:right;">${adv > 0 ? `<span class="advance-badge">− ${FMT(adv)}</span>` : '<span style="color:var(--text-muted);">—</span>'}</td>
+          <td style="text-align:right;"><span class="net-pay">${FMT(net)}</span></td>
+          <td>${statusBadge(st)}</td>
+          <td style="text-align:right;" onclick="event.stopPropagation()">
+            <div class="row-actions">${quickActionsFor(d, st)}</div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    const tot = {
+      rev: list.reduce((s,d)=>s+driverRev(d),0),
+      pay: list.reduce((s,d)=>s+driverPay(d),0),
+      adv: list.reduce((s,d)=>s+driverAdvUsed(d),0),
+      net: list.reduce((s,d)=>s+driverNet(d),0),
+    };
+    document.getElementById('payrollFoot').innerHTML = `
+      <tr style="background:#f8fafc;font-weight:700;">
+        <td colspan="3" style="padding:10px 12px;font-size:13px;">Tổng cộng (${list.length} tài xế)</td>
+        <td style="text-align:right;padding:10px 12px;">${FMT(tot.rev)}</td>
+        <td style="text-align:right;padding:10px 12px;color:var(--primary);">${FMT(tot.pay)}</td>
+        <td style="text-align:right;padding:10px 12px;color:#dc2626;">− ${FMT(tot.adv)}</td>
+        <td style="text-align:right;padding:10px 12px;color:var(--primary);font-size:14px;">${FMT(tot.net)}</td>
+        <td colspan="2"></td>
+      </tr>
+    `;
+  }
+
+  // ========== Advance view ==========
+  function renderAdvanceView() {
+    const items = [];
+    DRIVERS.forEach(d => (ADVANCES[d.id]||[]).forEach(a => items.push({d,a})));
+    const pending = items.filter(x => x.a.status === 'pending');
+    const decided = items.filter(x => x.a.status !== 'pending').sort((a,b) => b.a.day - a.a.day);
+
+    let html = `
+      <div class="panel-head">
+        <div class="ttl">📥 Yêu cầu ứng lương chờ duyệt</div>
+        <div class="ct">${pending.length} yêu cầu · Tổng đề xuất ${FMT(pending.reduce((s,x)=>s+x.a.amount,0))}</div>
+      </div>
+    `;
+    html += pending.length === 0
+      ? `<div class="empty-state"><div class="ico">✨</div>Không có yêu cầu chờ duyệt</div>`
+      : pending.map(({d,a}) => advanceCardHtml(d,a)).join('');
+
+    html += `
+      <div class="panel-head" style="margin-top:6px;">
+        <div class="ttl">📜 Lịch sử ứng đã xử lý</div>
+        <div class="ct">${decided.length} mục</div>
+      </div>
+    `;
+    html += decided.length === 0
+      ? `<div class="empty-state"><div class="ico">📭</div>Chưa có lịch sử</div>`
+      : decided.map(({d,a}) => advanceCardHtml(d,a)).join('');
+
+    document.getElementById('advPanel').innerHTML = html;
+  }
+
+  function advanceCardHtml(d, a) {
+    const stB = a.status === 'approved' ? '<span class="badge-mini approved">✓ Duyệt</span>'
+              : a.status === 'rejected' ? '<span class="badge-mini rejected">✕ Từ chối</span>'
+              : '<span class="badge-mini pending">⏳ Chờ</span>';
+    const actions = a.status === 'pending' ? `
+        <button class="btn btn-primary btn-sm" onclick="approveAdvance('${d.id}', ${a.id})">✓ Duyệt</button>
+        <button class="btn btn-secondary btn-sm" onclick="rejectAdvance('${d.id}', ${a.id})">✕ Từ chối</button>
+      ` : `
+        <button class="btn btn-secondary btn-sm" onclick="undoAdvance('${d.id}', ${a.id})">↶ Hoàn tác</button>
+      `;
+    return `
+      <div class="adv-card">
+        <div class="av" style="background:${d.avatarBg};color:${d.avatarFg};">${d.avatar}</div>
+        <div>
+          <div class="who">${d.name} <span style="font-weight:500;color:var(--text-muted);font-size:11.5px;">· ${d.plate}</span></div>
+          <div class="why">
+            <span class="pill">Ngày ${String(a.day).padStart(2,'0')}/05</span>
+            <span class="pill">${a.method==='bank'?'Chuyển khoản':'Tiền mặt'}</span>
+            ${stB}
+            <span style="margin-left:6px;">${a.reason}</span>
+          </div>
+        </div>
+        <div class="amt-col">
+          <div class="a">${FMT(a.amount)}</div>
+          <div class="l">đề xuất ứng</div>
+        </div>
+        <div class="actions">${actions}</div>
+      </div>
+    `;
+  }
+
+  // ========== Actions ==========
+  function approvePayroll(id)   { PAYROLL_STATUS[id] = 'approved'; render(); refreshDrawer(); }
+  function payPayroll(id) {
+    const d = DRIVERS.find(x=>x.id===id);
+    if (!confirm(`Xác nhận chi lương ${FMT(driverNet(d))} cho ${d.name}?`)) return;
+    PAYROLL_STATUS[id] = 'paid'; render(); refreshDrawer();
+  }
+  function unpayPayroll(id)     { PAYROLL_STATUS[id] = 'approved'; render(); refreshDrawer(); }
+  function unapprovePayroll(id) { PAYROLL_STATUS[id] = 'pending';  render(); refreshDrawer(); }
+
+  function approveAdvance(did, aid) { const a = (ADVANCES[did]||[]).find(x=>x.id===aid); if (a) a.status='approved'; render(); refreshDrawer(); }
+  function rejectAdvance(did, aid)  { const a = (ADVANCES[did]||[]).find(x=>x.id===aid); if (a) a.status='rejected'; render(); refreshDrawer(); }
+  function undoAdvance(did, aid)    { const a = (ADVANCES[did]||[]).find(x=>x.id===aid); if (a) a.status='pending';  render(); refreshDrawer(); }
+
+  function exportExcel() { alert('Đã xuất Excel bảng lương tháng (demo).'); }
+  function closeMonth() {
+    const pending = DRIVERS.filter(d=>PAYROLL_STATUS[d.id]==='pending').length;
+    if (pending > 0) {
+      if (!confirm(`Còn ${pending} tài xế chưa duyệt. Tự động duyệt tất cả và chốt tháng?`)) return;
+      DRIVERS.forEach(d => { if (PAYROLL_STATUS[d.id]==='pending') PAYROLL_STATUS[d.id]='approved'; });
+    }
+    alert('🔒 Đã chốt lương Tháng 05/2026. Có thể bắt đầu chi lương từng tài xế.');
+    render();
+  }
+  function changeMonth(dir) { alert(dir < 0 ? 'Xem tháng trước (demo)' : 'Xem tháng sau (demo)'); }
+
+  // ========== Driver detail drawer ==========
+  function openDrawer(id) {
+    openDriverId = id;
+    refreshDrawer();
+    document.getElementById('drawer').classList.add('show');
+    document.getElementById('drawerOverlay').classList.add('show');
+    render();
+  }
+  function closeDrawer() {
+    openDriverId = null;
+    document.getElementById('drawer').classList.remove('show');
+    document.getElementById('drawerOverlay').classList.remove('show');
+    render();
+  }
+  function refreshDrawer() {
+    if (!openDriverId) return;
+    const d = DRIVERS.find(x=>x.id===openDriverId);
+    if (!d) return;
+    const av = document.getElementById('dr_avatar');
+    av.textContent = d.avatar; av.style.background = d.avatarBg; av.style.color = d.avatarFg;
+    document.getElementById('dr_name').textContent = d.name;
+    document.getElementById('dr_meta').textContent = `${d.plate} · ${d.tonnage} · ${d.bank}`;
+
+    const trips = TRIPS[d.id]||[], advs = ADVANCES[d.id]||[];
+    const rev = driverRev(d), fees = driverFees(d), gross = driverGross(d);
+    const pay = driverPay(d), advUsed = driverAdvUsed(d), net = driverNet(d);
+    const st  = PAYROLL_STATUS[d.id];
+
+    let breakdown = '';
+    if (d.mode === 'percent') {
+      breakdown = `
+        <div class="bd-row"><span class="bd-label">Doanh thu chuyến (giá vận chuyển)</span><span class="bd-value">${FMT(gross)}</span></div>
+        <div class="bd-row"><span class="bd-label">Trừ chi phí dọc đường (cầu/dầu/phà…)</span><span class="bd-value minus">− ${FMT(fees)}</span></div>
+        <div class="bd-row"><span class="bd-label">Doanh thu ròng</span><span class="bd-value">${FMT(rev)}</span></div>
+        <div class="bd-row"><span class="bd-label">Tỉ lệ ăn chia ${d.cfg.rate}%</span><span class="bd-value">× ${d.cfg.rate}%</span></div>
+        <div class="bd-row total"><span class="bd-label">Lương chia</span><span class="bd-value">${FMT(pay)}</span></div>`;
+    } else if (d.mode === 'base') {
+      breakdown = `
+        <div class="bd-row"><span class="bd-label">Lương cơ bản</span><span class="bd-value">${FMT(d.cfg.base)}</span></div>
+        <div class="bd-row"><span class="bd-label">Doanh thu ròng (${trips.length} chuyến)</span><span class="bd-value">${FMT(rev)}</span></div>
+        <div class="bd-row"><span class="bd-label">Hoa hồng ${d.cfg.rate}%</span><span class="bd-value plus">+ ${FMT(Math.round(rev * d.cfg.rate / 100))}</span></div>
+        <div class="bd-row total"><span class="bd-label">Lương tính</span><span class="bd-value">${FMT(pay)}</span></div>`;
+    } else {
+      breakdown = `
+        <div class="bd-row"><span class="bd-label">Lương cố định tháng</span><span class="bd-value">${FMT(d.cfg.fixed)}</span></div>
+        <div class="bd-row"><span class="bd-label">Số chuyến hoàn thành</span><span class="bd-value">${trips.length} chuyến</span></div>
+        <div class="bd-row total"><span class="bd-label">Lương tính</span><span class="bd-value">${FMT(pay)}</span></div>`;
+    }
+
+    const tripsHtml = trips.length === 0
+      ? `<div class="empty-state" style="padding:18px;"><div class="ico">📭</div>Chưa có chuyến nào</div>`
+      : trips.map(t => `
+          <div class="trip-row">
+            <div>
+              <div class="route">${t.route}</div>
+              <div class="code">${t.code} · ${String(t.day).padStart(2,'0')}/05 · phí ${FMT(t.fees)}</div>
+            </div>
+            <div class="amt">${FMT(tripRevenue(t))}</div>
+          </div>`).join('');
+
+    const advsHtml = advs.length === 0
+      ? `<div class="empty-state" style="padding:18px;"><div class="ico">✨</div>Chưa có ứng nào</div>`
+      : advs.map(a => {
+          const stB = a.status === 'approved' ? '<span class="badge-mini approved">✓ Duyệt</span>'
+                    : a.status === 'rejected' ? '<span class="badge-mini rejected">✕ Từ chối</span>'
+                    : '<span class="badge-mini pending">⏳ Chờ</span>';
+          const act = a.status === 'pending' ? `
+              <div class="adv-actions-mini">
+                <button class="btn btn-primary btn-sm" onclick="approveAdvance('${d.id}', ${a.id})">Duyệt</button>
+                <button class="btn btn-secondary btn-sm" onclick="rejectAdvance('${d.id}', ${a.id})">Từ chối</button>
+              </div>` : '';
+          return `
+            <div class="adv-row ${a.status==='pending'?'pending':''}">
+              <div>
+                <div class="reason">${a.reason} ${stB}</div>
+                <div class="day">Ngày ${String(a.day).padStart(2,'0')}/05 · ${a.method==='bank'?'Chuyển khoản':'Tiền mặt'}</div>
+              </div>
+              <div class="amt">− ${FMT(a.amount)}</div>
+              ${act}
+            </div>`;
+        }).join('');
+
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="dr-section dr-total">
+        <div class="lbl">Lương dự kiến tháng 05/2026</div>
+        <div class="val">${FMT(net)}</div>
+        <div class="meta">${trips.length} chuyến · ${MODE_LABEL[d.mode].label} · ${st === 'paid' ? 'Đã chi' : st === 'approved' ? 'Đã duyệt — chờ chi' : 'Chờ duyệt'}</div>
+        <div class="dr-adv-grid">
+          <div class="dr-adv-stat"><div class="l">Đã ứng</div><div class="v warn">${FMT(advUsed)}</div></div>
+          <div class="dr-adv-stat"><div class="l">Còn nhận</div><div class="v">${FMT(net)}</div></div>
+        </div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">📐 Cách tính lương (đồng bộ với app tài xế)</div>
+        ${breakdown}
+        ${d.bonus ? `<div class="bd-row"><span class="bd-label">Phụ cấp / thưởng</span><span class="bd-value plus">+ ${FMT(d.bonus)}</span></div>` : ''}
+        <div class="bd-row"><span class="bd-label">Trừ tạm ứng đã duyệt</span><span class="bd-value minus">− ${FMT(advUsed)}</span></div>
+        <div class="bd-row total"><span class="bd-label">Thực nhận</span><span class="bd-value">${FMT(net)}</span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">💸 Tạm ứng tháng này (${advs.length})</div>
+        ${advsHtml}
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">🚚 Các chuyến đã hoàn thành (${trips.length})</div>
+        ${tripsHtml}
+      </div>
+    `;
+
+    let foot = '';
+    if (st === 'pending') {
+      foot = `<button class="btn btn-secondary" onclick="closeDrawer()">Đóng</button>
+              <button class="btn btn-secondary" onclick="printSlip('${d.id}')">🖨️ In phiếu</button>
+              <button class="btn btn-primary" onclick="approvePayroll('${d.id}')">✅ Duyệt lương</button>`;
+    } else if (st === 'approved') {
+      foot = `<button class="btn btn-secondary" onclick="unapprovePayroll('${d.id}')">↶ Bỏ duyệt</button>
+              <button class="btn btn-secondary" onclick="printSlip('${d.id}')">🖨️ In phiếu</button>
+              <button class="btn btn-primary" onclick="payPayroll('${d.id}')">💵 Chi lương</button>`;
+    } else {
+      foot = `<button class="btn btn-secondary" onclick="unpayPayroll('${d.id}')">↶ Thu hồi chi lương</button>
+              <button class="btn btn-primary" onclick="printSlip('${d.id}')">🖨️ In phiếu lương</button>`;
+    }
+    document.getElementById('drawerFoot').innerHTML = foot;
+  }
+
+  // ========== Print salary slip ==========
+  function printSlip(id) {
+    const d = DRIVERS.find(x=>x.id===id);
+    if (!d) return;
+    const trips = TRIPS[d.id]||[];
+    const advs  = (ADVANCES[d.id]||[]).filter(a=>a.status==='approved'||a.status==='paid');
+    const rev = driverRev(d), fees = driverFees(d), gross = driverGross(d);
+    const pay = driverPay(d), advU = driverAdvUsed(d), net = driverNet(d);
+    const today = new Date();
+    const dStr = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+
+    const tripsRows = trips.length === 0
+      ? `<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Không có chuyến</td></tr>`
+      : trips.map((t,i) => `
+          <tr>
+            <td style="text-align:center;">${i+1}</td>
+            <td>${t.code}</td>
+            <td>${String(t.day).padStart(2,'0')}/05/2026 · ${t.route}</td>
+            <td style="text-align:right;">${FMT(t.price)}</td>
+            <td style="text-align:right;">− ${FMT(t.fees)}</td>
+          </tr>`).join('');
+
+    const advsRows = advs.length === 0
+      ? `<tr><td colspan="3" style="text-align:center;color:#94a3b8;">Không có ứng</td></tr>`
+      : advs.map(a => `
+          <tr>
+            <td>${String(a.day).padStart(2,'0')}/05/2026</td>
+            <td>${a.reason} (${a.method==='bank'?'CK':'TM'})</td>
+            <td style="text-align:right;">${FMT(a.amount)}</td>
+          </tr>`).join('');
+
+    const modeText = d.mode === 'percent' ? `Ăn chia ${d.cfg.rate}% doanh thu ròng`
+                  : d.mode === 'base'    ? `Cơ bản ${FMT(d.cfg.base)} + ${d.cfg.rate}% doanh thu`
+                  : `Cố định ${FMT(d.cfg.fixed)}/tháng`;
+
+    document.getElementById('printArea').innerHTML = `
+      <div class="slip">
+        <div class="slip-head">
+          <div>
+            <div class="co">CÔNG TY VẬN TẢI VANCHUYỂN PRO</div>
+            <div class="co-sub">123 Nguyễn Văn Linh, P. Tân Phong, Q.7, TP.HCM · MST: 0312345678</div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:#475569;">Số: PL-${d.id}-202605<br>Ngày in: ${dStr}</div>
+        </div>
+        <div class="slip-title">Phiếu lương tài xế</div>
+        <div class="slip-sub">Kỳ lương: Tháng 05 / 2026</div>
+        <div class="slip-info">
+          <div><b>Họ tên:</b> ${d.name}</div>
+          <div><b>Mã NV:</b> ${d.id}</div>
+          <div><b>Phương tiện:</b> ${d.plate} (${d.tonnage})</div>
+          <div><b>Chế độ lương:</b> ${modeText}</div>
+          <div style="grid-column:1/-1;"><b>Tài khoản nhận:</b> ${d.bank}</div>
+        </div>
+
+        <div style="font-weight:800;font-size:13px;margin:8px 0 4px;">1. Chi tiết các chuyến đã hoàn thành</div>
+        <table>
+          <thead><tr>
+            <th style="width:30px;">#</th><th style="width:120px;">Mã đơn</th><th>Ngày · Tuyến</th>
+            <th style="width:120px;text-align:right;">Giá vận chuyển</th><th style="width:110px;text-align:right;">Phí dọc đường</th>
+          </tr></thead>
+          <tbody>
+            ${tripsRows}
+            <tr style="background:#f1f5f9;font-weight:800;">
+              <td colspan="3" style="text-align:right;">Tổng cộng (${trips.length} chuyến):</td>
+              <td style="text-align:right;">${FMT(gross)}</td>
+              <td style="text-align:right;">− ${FMT(fees)}</td>
+            </tr>
+            <tr style="font-weight:800;"><td colspan="4" style="text-align:right;">Doanh thu ròng:</td><td style="text-align:right;">${FMT(rev)}</td></tr>
+          </tbody>
+        </table>
+
+        <div style="font-weight:800;font-size:13px;margin:8px 0 4px;">2. Tạm ứng đã nhận</div>
+        <table>
+          <thead><tr><th style="width:120px;">Ngày</th><th>Lý do · Hình thức</th><th style="width:140px;text-align:right;">Số tiền</th></tr></thead>
+          <tbody>
+            ${advsRows}
+            <tr style="background:#f1f5f9;font-weight:800;">
+              <td colspan="2" style="text-align:right;">Tổng tạm ứng đã nhận:</td>
+              <td style="text-align:right;color:#dc2626;">${FMT(advU)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-weight:800;font-size:13px;margin:8px 0 4px;">3. Tổng kết lương</div>
+        <table>
+          <tbody>
+            <tr><td>Lương tính theo chế độ</td><td style="text-align:right;width:160px;">${FMT(pay)}</td></tr>
+            ${d.bonus ? `<tr><td>Phụ cấp / thưởng</td><td style="text-align:right;color:#15803d;">+ ${FMT(d.bonus)}</td></tr>` : ''}
+            <tr><td>Trừ tạm ứng đã nhận</td><td style="text-align:right;color:#dc2626;">− ${FMT(advU)}</td></tr>
+          </tbody>
+        </table>
+
+        <div class="slip-net">
+          <div>
+            <div class="lbl">THỰC NHẬN</div>
+            <div class="slip-amt-text">Bằng chữ: ${FMT(net).replace(' ₫','')} đồng</div>
+          </div>
+          <div class="val">${FMT(net)}</div>
+        </div>
+
+        <div class="slip-sign">
+          <div>
+            <div class="lbl">NGƯỜI NHẬN</div>
+            <div style="font-size:10.5px;color:#475569;">(Ký, ghi rõ họ tên)</div>
+            <div class="nm">${d.name}</div>
+          </div>
+          <div>
+            <div class="lbl">KẾ TOÁN / GIÁM ĐỐC</div>
+            <div style="font-size:10.5px;color:#475569;">(Ký, đóng dấu)</div>
+            <div class="nm">________________</div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('printArea').classList.add('printing');
+    setTimeout(() => {
+      window.print();
+      document.getElementById('printArea').classList.remove('printing');
+    }, 100);
+  }
+
+  // ========== Render root ==========
+  function render() {
+    renderStats();
+    if (view === 'payroll') renderPayroll();
+    else                    renderAdvanceView();
+  }
+  render();
+</script>
 </body>
 </html>

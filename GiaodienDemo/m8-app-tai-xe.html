@@ -7,12 +7,52 @@
   <link rel="stylesheet" href="assets/style.css">
   <style>
     .app-preview-area {
-      display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap;
+      display: flex; gap: 32px; align-items: flex-start;
       justify-content: center;
     }
     @media (max-width: 900px) {
       .phone-frame { width: 100%; max-width: 375px; margin: 0 auto; }
     }
+
+    /* Screen tabs */
+    .screen-tabs {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px;
+      margin: 0 auto 24px;
+      max-width: 720px;
+      box-shadow: var(--shadow-sm);
+    }
+    .screen-tab {
+      flex: 1 1 140px;
+      background: transparent; border: none;
+      padding: 10px 14px; border-radius: 10px;
+      font-size: 12.5px; font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .screen-tab:hover { background: var(--hover-bg); color: var(--text-primary); }
+    .screen-tab.active {
+      background: var(--primary); color: white;
+      box-shadow: 0 4px 10px -2px rgba(79,70,229,0.35);
+    }
+    .screen-tab .dot {
+      width: 18px; height: 18px; border-radius: 6px;
+      background: rgba(255,255,255,0.25);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    .screen-tab:not(.active) .dot { background: var(--primary-xlight); color: var(--primary); }
+
+    /* Phone visibility */
+    .phone-frame[data-screen] { display: none; }
+    .phone-frame[data-screen].active { display: flex; }
 
     /* ===== Phone frame (theo mẫu demo-giaodien.html) ===== */
     .phone-frame {
@@ -904,9 +944,25 @@
       </div>
     </div>
 
+    <!-- Tabs chuyển màn hình -->
+    <div class="screen-tabs" role="tablist">
+      <button class="screen-tab active" data-target="home" onclick="showScreen('home')">
+        <span class="dot">1</span> Rảnh / Bận
+      </button>
+      <button class="screen-tab" data-target="trip" onclick="showScreen('trip')">
+        <span class="dot">2</span> Chuyến đang giao
+      </button>
+      <button class="screen-tab" data-target="expense" onclick="showScreen('expense')">
+        <span class="dot">3</span> Nhập chi phí
+      </button>
+      <button class="screen-tab" data-target="salary" onclick="showScreen('salary')">
+        <span class="dot">4</span> Xem lương
+      </button>
+    </div>
+
     <div class="app-preview-area">
       <!-- ===== Phone mockup (theo mẫu Screen 6 demo-giaodien.html) ===== -->
-      <div class="phone-frame">
+      <div class="phone-frame active" data-screen="home">
         <div class="phone-notch"></div>
         <div class="phone-scroll">
 
@@ -1012,7 +1068,7 @@
       <!-- ===================================================================
            PHONE 2 — Màn hình CHUYẾN ĐANG GIAO (workflow + thanh toán QR)
       =================================================================== -->
-      <div class="phone-frame">
+      <div class="phone-frame" data-screen="trip">
         <div class="phone-notch"></div>
         <div class="phone-scroll">
 
@@ -1220,7 +1276,7 @@
       <!-- ===================================================================
            PHONE 3 — Nhập chi phí chuyến (cầu đường, xăng, bến bãi, phà…)
       =================================================================== -->
-      <div class="phone-frame">
+      <div class="phone-frame" data-screen="expense">
         <div class="phone-notch"></div>
         <div class="phone-scroll">
 
@@ -1374,7 +1430,7 @@
       <!-- ===================================================================
            PHONE 4 — Xem lương tháng (3 loại: % theo chuyến / cơ bản+% / cố định)
       =================================================================== -->
-      <div class="phone-frame" style="position:relative;">
+      <div class="phone-frame" data-screen="salary" style="position:relative;">
         <div class="phone-notch"></div>
         <div class="phone-scroll">
 
@@ -1484,6 +1540,16 @@
 </div>
 <script src="assets/app.js"></script>
 <script>
+  // ===== Tabs chuyển màn hình demo =====
+  function showScreen(name) {
+    document.querySelectorAll('.screen-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.target === name);
+    });
+    document.querySelectorAll('.phone-frame[data-screen]').forEach(p => {
+      p.classList.toggle('active', p.dataset.screen === name);
+    });
+  }
+
   // ===== Toggle trạng thái tài xế (theo mẫu demo-giaodien.html) =====
   let isBusy = false;
   function toggleDriverStatus() {

@@ -54,12 +54,18 @@
     .route .ipt { padding-left:36px; }
 
     .price-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+    .price-wrap { position:relative; }
     .price-input {
       width:100%; height:52px; border:2px solid var(--primary); border-radius:8px;
-      padding:0 14px; font-size:24px; font-weight:800; color:#0f172a; background:#fff;
+      padding:0 46px 0 14px; font-size:24px; font-weight:800; color:#0f172a; background:#fff;
       text-align:right; font-family:'Courier New',monospace; box-sizing:border-box;
     }
     .price-input:focus { outline:0; box-shadow:0 0 0 4px rgba(79,70,229,.15); }
+    .price-unit {
+      position:absolute; right:14px; top:50%; transform:translateY(-50%);
+      font-size:18px; font-weight:800; color:var(--primary);
+      font-family:'Courier New',monospace; pointer-events:none;
+    }
     .price-quick { display:flex; gap:4px; flex-wrap:wrap; }
     .price-quick button {
       border:1px solid var(--border); background:#fff; padding:6px 11px;
@@ -208,12 +214,15 @@
 
       <div class="field span-2">
         <div class="price-row">
-          <input id="price" class="price-input" type="text" placeholder="0 ₫" inputmode="numeric" oninput="onPriceInput()">
+          <div class="price-wrap">
+            <input id="price" class="price-input" type="text" placeholder="0" inputmode="numeric" oninput="onPriceInput()">
+            <span class="price-unit">K</span>
+          </div>
           <div class="price-quick">
-            <button type="button" onclick="addPrice(500000)">+500K</button>
-            <button type="button" onclick="addPrice(1000000)">+1M</button>
-            <button type="button" onclick="addPrice(5000000)">+5M</button>
-            <button type="button" onclick="addPrice(10000000)">+10M</button>
+            <button type="button" onclick="addPrice(500)">+500</button>
+            <button type="button" onclick="addPrice(1000)">+1.000</button>
+            <button type="button" onclick="addPrice(5000)">+5.000</button>
+            <button type="button" onclick="addPrice(10000)">+10.000</button>
             <button type="button" onclick="setPrice(0)" style="color:#b91c1c;">↺</button>
           </div>
         </div>
@@ -277,10 +286,12 @@ document.addEventListener('click', e => {
     document.getElementById('cusSuggest').classList.remove('show');
 });
 
-function rawPrice() { return parseInt((document.getElementById('price').value.replace(/\D/g,''))||'0', 10); }
-function setPrice(n) { document.getElementById('price').value = n? n.toLocaleString('vi-VN') + ' ₫' : ''; calcPrice(); }
-function addPrice(d) { setPrice(rawPrice() + d); }
-function onPriceInput() { setPrice(rawPrice()); }
+// Giá nhập theo nghìn (K). VD: gõ 500 = 500.000 ₫, gõ 5000 = 5.000.000 ₫
+function rawPriceK() { return parseInt((document.getElementById('price').value.replace(/\D/g,''))||'0', 10); }
+function rawPrice()  { return rawPriceK() * 1000; }
+function setPrice(k) { document.getElementById('price').value = k? k.toLocaleString('vi-VN') : ''; calcPrice(); }
+function addPrice(dK) { setPrice(rawPriceK() + dK); }
+function onPriceInput() { setPrice(rawPriceK()); }
 
 function calcPrice() {
   const base = rawPrice();

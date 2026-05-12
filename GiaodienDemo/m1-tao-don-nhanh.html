@@ -20,8 +20,8 @@
     .field { margin:0; position:relative; }
     .field.span-2 { grid-column:1 / -1; }
     .ipt {
-      width:100%; height:40px; border:1.5px solid var(--border); border-radius:7px;
-      padding:0 12px; font-size:14px; background:#fff; box-sizing:border-box; transition:.12s;
+      width:100%; height:36px; border:1px solid var(--border); border-radius:7px;
+      padding:0 12px; font-size:13.5px; background:#fff; box-sizing:border-box; transition:.12s;
     }
     .ipt:focus { outline:0; border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,.12); }
     .ipt::placeholder { color:#94a3b8; }
@@ -45,48 +45,48 @@
     .route .arr { text-align:center; color:#94a3b8; font-size:18px; font-weight:700; }
     .route .from-wrap, .route .to-wrap { position:relative; }
     .route .pin {
-      position:absolute; left:10px; top:50%; transform:translateY(-50%);
-      width:18px; height:18px; border-radius:50%; color:#fff;
+      position:absolute; left:9px; top:50%; transform:translateY(-50%);
+      width:16px; height:16px; border-radius:50%; color:#fff;
       display:inline-flex; align-items:center; justify-content:center;
-      font-size:10px; font-weight:800; pointer-events:none;
+      font-size:9px; font-weight:800; pointer-events:none;
     }
     .route .pin.from { background:#16a34a; } .route .pin.to { background:#dc2626; }
-    .route .ipt { padding-left:36px; }
+    .route .ipt { padding-left:32px; }
 
     .price-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
     .price-wrap { position:relative; }
     .price-input {
-      width:100%; height:52px; border:2px solid var(--primary); border-radius:8px;
-      padding:0 46px 0 14px; font-size:24px; font-weight:800; color:#0f172a; background:#fff;
+      width:100%; height:42px; border:2px solid var(--primary); border-radius:7px;
+      padding:0 38px 0 12px; font-size:18px; font-weight:800; color:#0f172a; background:#fff;
       text-align:right; font-family:'Courier New',monospace; box-sizing:border-box;
     }
-    .price-input:focus { outline:0; box-shadow:0 0 0 4px rgba(79,70,229,.15); }
+    .price-input:focus { outline:0; box-shadow:0 0 0 3px rgba(79,70,229,.15); }
     .price-unit {
-      position:absolute; right:14px; top:50%; transform:translateY(-50%);
-      font-size:18px; font-weight:800; color:var(--primary);
+      position:absolute; right:12px; top:50%; transform:translateY(-50%);
+      font-size:14px; font-weight:800; color:var(--primary);
       font-family:'Courier New',monospace; pointer-events:none;
     }
     .price-quick { display:flex; gap:4px; flex-wrap:wrap; }
     .price-quick button {
-      border:1px solid var(--border); background:#fff; padding:6px 11px;
-      border-radius:14px; font-size:12px; font-weight:700; cursor:pointer; color:#475569; height:32px;
+      border:1px solid var(--border); background:#fff; padding:0 11px;
+      border-radius:14px; font-size:12px; font-weight:700; cursor:pointer; color:#475569; height:28px;
     }
     .price-quick button:hover { border-color:var(--primary); color:var(--primary); }
 
     .totals {
       display:flex; justify-content:space-between; align-items:center; gap:10px;
-      padding:10px 14px; background:#f5f3ff; border:1px solid #e0e7ff; border-radius:8px;
+      padding:8px 12px; background:#f5f3ff; border:1px solid #e0e7ff; border-radius:7px;
       margin-top:8px;
     }
-    .vat-toggle { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#0f172a; cursor:pointer; user-select:none; }
-    .switch { position:relative; width:38px; height:22px; flex-shrink:0; display:inline-block; }
+    .vat-toggle { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:#0f172a; cursor:pointer; user-select:none; }
+    .switch { position:relative; width:34px; height:20px; flex-shrink:0; display:inline-block; }
     .switch input { opacity:0; width:0; height:0; }
-    .slider { position:absolute; cursor:pointer; inset:0; background:#cbd5e1; border-radius:22px; transition:.2s; }
-    .slider::before { content:''; position:absolute; height:16px; width:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .slider { position:absolute; cursor:pointer; inset:0; background:#cbd5e1; border-radius:20px; transition:.2s; }
+    .slider::before { content:''; position:absolute; height:14px; width:14px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
     .switch input:checked + .slider { background:#16a34a; }
-    .switch input:checked + .slider::before { transform:translateX(16px); }
-    .total-val { font-size:20px; font-weight:800; color:var(--primary); font-family:'Courier New',monospace; }
-    .total-val small { font-size:12px; color:#64748b; font-weight:600; margin-right:6px; }
+    .switch input:checked + .slider::before { transform:translateX(14px); }
+    .total-val { font-size:16px; font-weight:800; color:var(--primary); font-family:'Courier New',monospace; }
+    .total-val small { font-size:11.5px; color:#64748b; font-weight:600; margin-right:5px; }
 
     .action-bar {
       margin-top:12px; padding:10px 14px;
@@ -95,7 +95,7 @@
       position:sticky; bottom:10px;
       box-shadow:0 -4px 12px rgba(15,23,42,.04);
     }
-    .btn-lg { height:42px; padding:0 22px; font-size:14px; font-weight:700; }
+    .btn-lg { height:36px; padding:0 18px; font-size:13px; font-weight:700; }
 
     @media (max-width:760px) {
       .form-grid { grid-template-columns:1fr; }
@@ -213,18 +213,9 @@
       </div>
 
       <div class="field span-2">
-        <div class="price-row">
-          <div class="price-wrap">
-            <input id="price" class="price-input" type="text" placeholder="0" inputmode="numeric" oninput="onPriceInput()">
-            <span class="price-unit">K</span>
-          </div>
-          <div class="price-quick">
-            <button type="button" onclick="addPrice(500)">+500</button>
-            <button type="button" onclick="addPrice(1000)">+1.000</button>
-            <button type="button" onclick="addPrice(5000)">+5.000</button>
-            <button type="button" onclick="addPrice(10000)">+10.000</button>
-            <button type="button" onclick="setPrice(0)" style="color:#b91c1c;">↺</button>
-          </div>
+        <div class="price-wrap">
+          <input id="price" class="price-input" type="text" placeholder="0" inputmode="numeric" oninput="onPriceInput()">
+          <span class="price-unit">K</span>
         </div>
         <div class="totals">
           <label class="vat-toggle">

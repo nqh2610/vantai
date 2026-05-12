@@ -1107,9 +1107,6 @@
       ? `<tr><td colspan="6" style="text-align:center;color:#94a3b8;">— Không có chuyến nào trong tháng —</td></tr>`
       : invs.map((i, idx) => {
           const r  = remaining(i);
-          const od = overdueDays(i);
-          const stTxt = r === 0 ? 'Đã thu đủ' : (od > 0 ? `Quá hạn ${od}d` : 'Trong hạn');
-          const stColor = r === 0 ? '#15803d' : (od > 0 ? '#dc2626' : '#475569');
           return `
             <tr>
               <td style="text-align:center;">${idx+1}</td>
@@ -1119,7 +1116,6 @@
               <td style="text-align:right;">${FMT(i.amount)}</td>
               <td style="text-align:right;color:${r>0?'#dc2626':'#15803d'};font-weight:700;">
                 ${r>0?FMT(r):'—'}
-                <div style="font-size:10px;font-weight:600;color:${stColor};">${stTxt}</div>
               </td>
             </tr>`;
         }).join('');

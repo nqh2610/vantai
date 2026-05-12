@@ -704,12 +704,17 @@
 
   function rowActionsHtml(c) {
     const debt = custDebt(c);
+    const paid = custPaid(c);
+    const printBtn = paid > 0
+      ? `<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();printReceipt('${c.id}')" title="In phiếu thu tiền">🖨️ Phiếu thu</button>`
+      : '';
     if (debt === 0) {
-      return `<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();printReceipt('${c.id}')">In phiếu</button>`;
+      return printBtn || `<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openDrawer('${c.id}')">Xem</button>`;
     }
     return `
       <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openPayModal('${c.id}')">💵 Thu</button>
       <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openQrModal('${c.id}')">📲 QR</button>
+      ${printBtn}
       <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();sendReminder('${c.id}')">📧 Nhắc</button>
     `;
   }
@@ -884,17 +889,20 @@
       </div>
     `;
 
+    const printRow = paid > 0
+      ? `<button class="btn btn-secondary" onclick="printReceipt('${c.id}')">🖨️ In phiếu thu tổng</button>` : '';
     let foot = '';
     if (debt > 0) {
       foot = `
-        <button class="btn btn-secondary" onclick="sendReminder('${c.id}')">📧 Gửi nhắc nợ</button>
-        <button class="btn btn-secondary" onclick="openQrModal('${c.id}')">📲 QR thanh toán</button>
+        <button class="btn btn-secondary" onclick="sendReminder('${c.id}')">📧 Nhắc nợ</button>
+        <button class="btn btn-secondary" onclick="openQrModal('${c.id}')">📲 QR</button>
+        ${printRow}
         <button class="btn btn-primary" onclick="openPayModal('${c.id}')">💵 Ghi nhận thu</button>
       `;
     } else {
       foot = `
         <button class="btn btn-secondary" onclick="closeDrawer()">Đóng</button>
-        <button class="btn btn-primary" onclick="printReceipt('${c.id}')">🖨️ In tổng hợp</button>
+        ${printRow || `<button class="btn btn-secondary" disabled>Chưa có khoản thu</button>`}
       `;
     }
     document.getElementById('drawerFoot').innerHTML = foot;
@@ -1154,14 +1162,72 @@
     document.getElementById('printArea').classList.add('printing');
     setTimeout(() => { window.print(); document.getElementById('printArea').classList.remove('printing'); }, 100);
   }
-  // Print summary (all payments of a customer) when no specific pay
+  // Number → Vietnamese reading (rút gọn cho hiển thị phiếu thu)
+  function numToVnd(n) {
+    if (!n) return 'Không đồng';
+    const d = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+    function readBlock(b, full) {
+      const tr = Math.floor(b/100), ch = Math.floor((b%100)/10), dv = b%10;
+      let s = '';
+      if (full || tr > 0) { s += d[tr] + ' trăm '; if (ch===0 && dv>0) s += 'lẻ '; }
+      if (ch > 1) { s += d[ch] + ' mươi '; if (dv===1) s = s.replace('mươi ','mươi mốt '); else if (dv===5) s = s.replace('','') + ''; }
+      else if (ch === 1) s += 'mười ';
+      else if (ch === 0 && dv > 0 && (full || tr > 0)) {/* lẻ */}
+      if (ch > 1 && dv > 0 && dv !== 1) s += d[dv] + ' ';
+      else if (ch === 1 && dv > 0) s += (dv===5?'lăm':d[dv]) + ' ';
+      else if (ch === 0 && dv > 0 && (full||tr>0)) s += d[dv] + ' ';
+      else if (ch === 0 && dv > 0) s += d[dv] + ' ';
+      return s.trim();
+    }
+    const units = ['', 'nghìn', 'triệu', 'tỷ'];
+    let str = '', i = 0; let num = n;
+    const blocks = [];
+    while (num > 0) { blocks.push(num % 1000); num = Math.floor(num/1000); }
+    for (let j = blocks.length - 1; j >= 0; j--) {
+      const b = blocks[j];
+      if (b > 0) str += readBlock(b, j !== blocks.length-1) + (units[j]?' '+units[j]:'') + ' ';
+      else if (j > 0 && str) str += ''; // skip empty
+    }
+    str = str.trim().replace(/\s+/g, ' ');
+    return str.charAt(0).toUpperCase() + str.slice(1) + ' đồng';
+  }
+
+  // Print consolidated PHIẾU THU for one customer (covers all month payments)
   function printReceipt(custId) {
     const c = CUSTOMERS.find(x=>x.id===custId);
-    const pays = custPayments(c);
-    if (pays.length === 0) { alert('Khách hàng chưa có giao dịch thu nào.'); return; }
+    const pays = custPayments(c).slice().sort((a,b) => a.day - b.day);
+    if (pays.length === 0) { alert('Khách hàng chưa có khoản thu nào trong tháng để in phiếu.'); return; }
     const today = new Date();
     const printDate = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
     const total = pays.reduce((s,p)=>s+p.amount,0);
+    const receiptNo = String(nextReceiptNo + parseInt(c.id.replace(/\D/g,''),10)).padStart(5, '0');
+
+    // Aggregate which invoices were paid (and how much per invoice)
+    const invPaidMap = {};
+    pays.forEach(p => {
+      p.invIds.forEach((id, idx) => {
+        // For demo: assume amount split equally if multiple invIds
+        const share = p.amount / Math.max(1, p.invIds.length);
+        invPaidMap[id] = (invPaidMap[id] || 0) + share;
+      });
+    });
+    const invRows = Object.keys(invPaidMap).map(id => {
+      const inv = INVOICES.find(x => x.id == id); if (!inv) return '';
+      return `
+        <tr>
+          <td>${inv.code}</td>
+          <td>${inv.route}<br><span style="color:#64748b;font-size:11px;">${inv.orderCode} · phát hành ${dStr(inv.issuedDay)}</span></td>
+          <td style="text-align:right;">${FMT(inv.amount)}</td>
+          <td style="text-align:right;color:#15803d;font-weight:700;">${FMT(Math.round(invPaidMap[id]))}</td>
+        </tr>`;
+    }).join('');
+    const payRows = pays.map((p,i) => `
+      <tr>
+        <td style="text-align:center;">${i+1}</td>
+        <td>${dStr(p.day)}</td>
+        <td>${p.method==='bank'?'Chuyển khoản':'Tiền mặt'}${p.note?` · ${p.note}`:''}</td>
+        <td style="text-align:right;">${FMT(p.amount)}</td>
+      </tr>`).join('');
 
     document.getElementById('printArea').innerHTML = `
       <div class="receipt">
@@ -1169,38 +1235,66 @@
           <div>
             <div class="co">${COMPANY.name}</div>
             <div class="co-sub">${COMPANY.addr} · MST: ${COMPANY.mst}</div>
+            <div class="co-sub">Ngân hàng: ${COMPANY.bank.name} · ${COMPANY.bank.acct} · ${COMPANY.bank.holder}</div>
           </div>
-          <div style="text-align:right;font-size:11px;color:#475569;">Bảng tổng hợp · Ngày in: ${printDate}</div>
+          <div style="text-align:right;font-size:11px;color:#475569;">
+            <b>Số:</b> PT-2026-${receiptNo}<br>
+            Quyển số: 05/2026<br>
+            Ngày in: ${printDate}
+          </div>
         </div>
-        <div class="receipt-title">SAO KÊ THANH TOÁN T05/2026</div>
-        <div class="receipt-sub">Khách hàng: ${c.name} (${c.mst})</div>
 
+        <div class="receipt-title">PHIẾU THU TIỀN</div>
+        <div class="receipt-sub">Tháng 05 / 2026 · Mẫu số 01-TT (Thông tư 200/2014/TT-BTC)</div>
+
+        <div class="receipt-info">
+          <div><b>Họ tên người nộp:</b> ${c.contact}</div>
+          <div><b>Đơn vị:</b> ${c.name}</div>
+          <div><b>Địa chỉ / SĐT:</b> ${c.phone}</div>
+          <div><b>Mã số thuế:</b> ${c.mst}</div>
+          <div style="grid-column:1/-1;"><b>Lý do nộp:</b> Thanh toán cước phí vận chuyển hàng hoá theo các hoá đơn liệt kê dưới đây.</div>
+        </div>
+
+        <div style="font-weight:800;font-size:13px;margin:8px 0 4px;">A. Hoá đơn được thanh toán</div>
         <table>
-          <thead><tr><th style="width:60px;">STT</th><th style="width:110px;">Ngày</th><th>Diễn giải</th><th style="width:120px;">Hình thức</th><th style="width:160px;text-align:right;">Số tiền</th></tr></thead>
-          <tbody>
-            ${pays.map((p,i) => `
-              <tr>
-                <td style="text-align:center;">${i+1}</td>
-                <td>${dStr(p.day)}</td>
-                <td>${p.note || 'Thanh toán cước vận chuyển'} (${p.invIds.map(id=>{const inv=INVOICES.find(x=>x.id===id);return inv?inv.code:'';}).filter(Boolean).join(', ')})</td>
-                <td>${p.method==='bank'?'Chuyển khoản':'Tiền mặt'}</td>
-                <td style="text-align:right;">${FMT(p.amount)}</td>
-              </tr>`).join('')}
-            <tr style="background:#f1f5f9;font-weight:800;">
-              <td colspan="4" style="text-align:right;">Tổng cộng:</td>
-              <td style="text-align:right;color:#15803d;">${FMT(total)}</td>
-            </tr>
-          </tbody>
+          <thead><tr>
+            <th style="width:130px;">Số HĐ</th>
+            <th>Tuyến / Đơn hàng</th>
+            <th style="width:140px;text-align:right;">Giá trị HĐ</th>
+            <th style="width:140px;text-align:right;">Số tiền thu</th>
+          </tr></thead>
+          <tbody>${invRows || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">— không có —</td></tr>'}</tbody>
         </table>
 
-        <div style="margin-top:14px;font-size:13px;">
-          <div><b>Doanh số tháng:</b> ${FMT(custTotal(c))}</div>
-          <div><b>Đã thu:</b> ${FMT(custPaid(c))}</div>
-          <div><b>Còn nợ:</b> <span style="color:#dc2626;font-weight:800;">${FMT(custDebt(c))}</span></div>
+        <div style="font-weight:800;font-size:13px;margin:8px 0 4px;">B. Chi tiết các lần thu (${pays.length} lần)</div>
+        <table>
+          <thead><tr>
+            <th style="width:50px;text-align:center;">STT</th>
+            <th style="width:110px;">Ngày thu</th>
+            <th>Hình thức / Ghi chú</th>
+            <th style="width:160px;text-align:right;">Số tiền</th>
+          </tr></thead>
+          <tbody>${payRows}</tbody>
+        </table>
+
+        <div class="receipt-net">
+          <div>
+            <div class="lbl">TỔNG SỐ TIỀN ĐÃ THU</div>
+            <div class="receipt-amt-text">Bằng chữ: <i>${numToVnd(total)}</i></div>
+          </div>
+          <div class="val">${FMT(total)}</div>
         </div>
+
+        <div style="font-size:12px;margin:6px 0 14px;display:flex;justify-content:space-between;">
+          <div><b>Doanh số tháng:</b> ${FMT(custTotal(c))}</div>
+          <div><b>Đã thu:</b> <span style="color:#15803d;">${FMT(custPaid(c))}</span></div>
+          <div><b>Còn nợ:</b> <span style="color:${custDebt(c)>0?'#dc2626':'#15803d'};font-weight:800;">${FMT(custDebt(c))}</span></div>
+        </div>
+
         <div class="receipt-sign">
-          <div><div class="lbl">NGƯỜI NHẬN</div><div class="nm">${c.contact}</div></div>
-          <div><div class="lbl">KẾ TOÁN</div><div class="nm">________</div></div>
+          <div><div class="lbl">NGƯỜI NỘP TIỀN</div><div style="font-size:11px;color:#64748b;">(Ký, họ tên)</div><div class="nm">${c.contact}</div></div>
+          <div><div class="lbl">THỦ QUỸ</div><div style="font-size:11px;color:#64748b;">(Ký, họ tên)</div><div class="nm">________</div></div>
+          <div><div class="lbl">KẾ TOÁN TRƯỞNG</div><div style="font-size:11px;color:#64748b;">(Ký, họ tên, đóng dấu)</div><div class="nm">________</div></div>
         </div>
       </div>
     `;

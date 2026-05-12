@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duyệt phí tài xế – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* Compact stat bar */
+    .stat-bar {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+      background:white; border:1px solid var(--border); border-radius:12px;
+      padding:8px; margin-bottom:12px;
+    }
+    .stat-pill { display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:8px; }
+    .stat-pill + .stat-pill { border-left:1px solid #f1f5f9; }
+    .stat-pill .ico {
+      width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-size:14px; flex-shrink:0;
+    }
+    .stat-pill .txt { min-width:0; line-height:1.25; }
+    .stat-pill .lbl { font-size:11px; color:var(--text-muted); font-weight:600; }
+    .stat-pill .val { font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; }
+    .stat-pill .val .money { font-weight:600; color:var(--text-muted); font-size:12px; margin-left:4px; }
+    .stat-pill.pending  .ico { background:#fef3c7; } .stat-pill.pending  .val span:first-child { color:#92400e; }
+    .stat-pill.approved .ico { background:#dcfce7; } .stat-pill.approved .val span:first-child { color:#15803d; }
+    .stat-pill.rejected .ico { background:#fee2e2; } .stat-pill.rejected .val span:first-child { color:#b91c1c; }
+    .stat-pill.total    .ico { background:#e0e7ff; } .stat-pill.total    .val span:first-child { color:var(--primary); }
+    @media (max-width: 768px) { .stat-bar { grid-template-columns:repeat(2,1fr); } .stat-pill + .stat-pill { border-left:none; } }
+
+    /* Toolbar duyệt */
+    .approval-toolbar {
+      display:flex; align-items:center; gap:10px; padding:10px 14px; background:white;
+      border:1px solid var(--border); border-radius:12px; margin-bottom:12px; flex-wrap:wrap;
+    }
+    .view-switch { display:flex; background:#f1f5f9; padding:3px; border-radius:8px; gap:2px; }
+    .view-switch button {
+      background:transparent; border:none; padding:6px 14px; font-size:13px; font-weight:600;
+      color:var(--text-muted); border-radius:6px; cursor:pointer;
+    }
+    .view-switch button.active { background:white; color:var(--primary); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+
+    /* Group card (per driver / per order) */
+    .grp-card {
+      background:white; border:1px solid var(--border); border-radius:12px; margin-bottom:12px;
+      overflow:hidden;
+    }
+    .grp-head {
+      display:flex; align-items:center; gap:12px; padding:12px 16px;
+      background:linear-gradient(180deg,#f8fafc,#ffffff); border-bottom:1px solid var(--border);
+      cursor:pointer;
+      position:sticky; top:0; z-index:5;
+    }
+    .grp-head .caret {
+      width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;
+      color:var(--text-muted); transition:transform .2s; flex-shrink:0;
+    }
+    .grp-card.is-collapsed .grp-head .caret { transform:rotate(-90deg); }
+    .grp-card.is-collapsed .grp-body { display:none; }
+    .grp-avatar {
+      width:38px; height:38px; border-radius:10px;
+      background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white;
+      display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;
+    }
+    .grp-avatar.order { background:linear-gradient(135deg,#0ea5e9,#0284c7); }
+    .grp-info { flex:1; min-width:0; }
+    .grp-name { font-weight:700; font-size:14px; color:var(--text); }
+    .grp-meta { font-size:12px; color:var(--text-muted); margin-top:2px; }
+    .grp-totals { display:flex; gap:14px; align-items:center; margin-right:8px; }
+    .grp-stat { text-align:right; }
+    .grp-stat .v { font-weight:700; font-size:14px; }
+    .grp-stat .l { font-size:11px; color:var(--text-muted); }
+    .grp-actions { display:flex; gap:6px; flex-shrink:0; }
+
+    .grp-body { padding:6px 0; }
+    .grp-body.collapsed { display:none; }
+
+    .grp-more {
+      display:flex; align-items:center; justify-content:center; gap:6px;
+      padding:9px; background:#f8fafc; border-top:1px solid #f1f5f9;
+      font-size:12px; font-weight:600; color:var(--primary); cursor:pointer; user-select:none;
+    }
+    .grp-more:hover { background:#eff6ff; }
+
+    /* Density: compact mode = ít padding hơn để hiện nhiều dòng */
+    body.compact .fee-row { padding:6px 16px; gap:10px; }
+    body.compact .fee-icon { width:24px; height:24px; font-size:12px; border-radius:6px; }
+    body.compact .fee-name { font-size:12px; }
+    body.compact .fee-meta { margin-top:1px; }
+    body.compact .fee-note, body.compact .fee-reject { display:none; }
+    body.compact .fee-amount { font-size:13px; }
+    body.compact .grp-head { padding:8px 14px; }
+    body.compact .grp-avatar { width:30px; height:30px; font-size:13px; }
+
+    /* Fee item row */
+    .fee-row {
+      display:flex; align-items:center; gap:12px; padding:11px 16px;
+      border-bottom:1px solid #f1f5f9; transition:background .15s;
+    }
+    .fee-row:last-child { border-bottom:none; }
+    .fee-row:hover { background:#fafbfc; }
+    .fee-row.is-approved { background:#f0fdf4; }
+    .fee-row.is-rejected { background:#fef2f2; }
+
+    .fee-check input { width:16px; height:16px; cursor:pointer; }
+    .fee-icon {
+      width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-size:15px; flex-shrink:0; background:#f1f5f9;
+    }
+    .fee-main { flex:1; min-width:0; }
+    .fee-name { font-weight:600; font-size:13px; color:var(--text); }
+    .fee-meta { font-size:11px; color:var(--text-muted); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap; }
+    .fee-meta .sep { color:#cbd5e1; }
+    .fee-note { font-size:12px; color:#475569; margin-top:3px; font-style:italic; }
+    .fee-reject {
+      font-size:12px; color:#b91c1c; margin-top:3px; padding:4px 8px;
+      background:#fef2f2; border-left:2px solid #dc2626; border-radius:3px;
+    }
+    .fee-amount { font-weight:700; font-size:14px; color:var(--text); white-space:nowrap; }
+    .fee-status { display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:120px; }
+    .fee-actions { display:flex; gap:4px; }
+
+    /* Status pills */
+    .pill {
+      display:inline-flex; align-items:center; gap:3px; padding:2px 8px; font-size:11px;
+      font-weight:600; border-radius:10px;
+    }
+    .pill.pending  { background:#fef3c7; color:#92400e; }
+    .pill.approved { background:#dcfce7; color:#15803d; }
+    .pill.rejected { background:#fee2e2; color:#b91c1c; }
+    .pill.admin    { background:#ede9fe; color:#6d28d9; }
+
+    /* Add fee modal form */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-grid .full { grid-column:1/-1; }
+    .form-grid label { font-size:12px; color:var(--text-muted); font-weight:600; display:block; margin-bottom:5px; }
+    .form-grid input, .form-grid select {
+      width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+      font-family:inherit; font-size:13px; background:white;
+    }
+    .form-grid input:focus, .form-grid select:focus { outline:none; border-color:var(--primary); }
+    .amount-k {
+      font-size:18px; font-weight:700; color:#16a34a; text-align:right; letter-spacing:0.5px;
+    }
+    .amount-hint { font-size:11px; color:var(--text-muted); margin-top:4px; text-align:right; }
+    .type-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+    .type-chip {
+      background:#f1f5f9; border:1px solid transparent; padding:6px 10px; border-radius:18px;
+      font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+    }
+    .type-chip.active { background:#e0e7ff; border-color:var(--primary); color:var(--primary); font-weight:600; }
+
+    .btn-approve { background:#16a34a; color:white; border:none; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:3px; }
+    .btn-approve:hover { background:#15803d; }
+    .btn-reject  { background:white; color:#dc2626; border:1px solid #fecaca; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:3px; }
+    .btn-reject:hover { background:#fef2f2; }
+    .btn-undo    { background:white; color:#475569; border:1px solid var(--border); padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; }
+    .btn-undo:hover { background:#f1f5f9; }
+
+    /* Sticky bulk action bar */
+    .bulk-bar {
+      position:sticky; bottom:0; background:white; border:1px solid var(--primary);
+      border-radius:12px; padding:10px 16px; margin-top:8px;
+      display:flex; align-items:center; gap:12px; box-shadow:0 -4px 12px rgba(0,0,0,0.06);
+    }
+    .bulk-bar .count { font-weight:700; color:var(--primary); }
+
+    /* Modal */
+    .modal-bg {
+      position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:200;
+      display:none; align-items:center; justify-content:center; padding:16px;
+    }
+    .modal-bg.show { display:flex; }
+    .modal {
+      background:white; border-radius:14px; width:100%; max-width:440px; overflow:hidden;
+      box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    }
+    .modal-head { padding:14px 18px; border-bottom:1px solid var(--border); font-weight:700; }
+    .modal-body { padding:18px; }
+    .modal-body label { font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px; font-weight:600; }
+    .modal-body textarea {
+      width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;
+      font-family:inherit; font-size:13px; resize:vertical; min-height:80px;
+    }
+    .modal-quick { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .modal-quick button {
+      background:#f1f5f9; border:none; padding:5px 10px; border-radius:14px; font-size:11px;
+      cursor:pointer; color:#475569;
+    }
+    .modal-quick button:hover { background:#e2e8f0; }
+    .modal-foot { padding:12px 18px; background:#f8fafc; display:flex; justify-content:flex-end; gap:8px; }
+
+    .empty-state { text-align:center; padding:32px; color:var(--text-muted); font-size:13px; }
+
+    /* ===== Add fee modal: clean form ===== */
+    .ff-section { margin-bottom:18px; }
+    .ff-section:last-child { margin-bottom:0; }
+    .ff-section-title {
+      font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;
+      letter-spacing:0.5px; margin-bottom:8px; display:flex; align-items:center; gap:6px;
+    }
+    .ff-section-title::before {
+      content:''; width:3px; height:12px; background:var(--primary); border-radius:2px;
+    }
+    .ff-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .ff-row.single { grid-template-columns:1fr; }
+    .ff-field label {
+      display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:5px;
+    }
+    .ff-field label .req { color:#dc2626; margin-left:2px; }
+    .ff-input, .ff-select {
+      width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px;
+      font-family:inherit; font-size:13px; background:white; color:var(--text);
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .ff-input:focus, .ff-select:focus {
+      outline:none; border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(79,70,229,0.1);
+    }
+    .ff-select { appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat:no-repeat; background-position:right 10px center; padding-right:30px; }
+
+    /* Type picker grid */
+    .ff-type-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+    .ff-type-card {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+      padding:9px 4px; background:white; border:1.5px solid var(--border); border-radius:8px;
+      font-size:11px; font-weight:600; color:#475569; cursor:pointer; transition:all .15s;
+    }
+    .ff-type-card .ico { font-size:18px; line-height:1; }
+    .ff-type-card:hover { border-color:#94a3b8; background:#f8fafc; }
+    .ff-type-card.active {
+      background:#eef2ff; border-color:var(--primary); color:var(--primary);
+      box-shadow:0 0 0 3px rgba(79,70,229,0.08);
+    }
+
+    /* Amount input with suffix */
+    .ff-amount-wrap {
+      position:relative; display:flex; align-items:center; gap:8px;
+      border:1px solid var(--border); border-radius:8px; padding:0 10px 0 12px;
+      background:white; transition:border-color .15s, box-shadow .15s;
+    }
+    .ff-amount-wrap:focus-within {
+      border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,70,229,0.1);
+    }
+    .ff-amount-input {
+      flex:1; border:none; outline:none; padding:10px 0; font-size:13px;
+      font-weight:600; color:var(--text); font-family:inherit; background:transparent;
+    }
+    .ff-amount-input::placeholder { color:#cbd5e1; font-weight:normal; }
+    .ff-amount-suffix {
+      font-size:12px; font-weight:700; color:#94a3b8; padding:3px 8px;
+      background:#f1f5f9; border-radius:5px;
+    }
+
+    /* Status segmented */
+    .ff-segment { display:flex; gap:6px; }
+    .ff-segment label {
+      flex:1; display:flex; align-items:center; gap:6px; padding:9px 10px;
+      border:1.5px solid var(--border); border-radius:8px; cursor:pointer;
+      font-size:12px; font-weight:600; color:#475569; background:white;
+      transition:all .15s;
+    }
+    .ff-segment label:hover { background:#f8fafc; }
+    .ff-segment input { display:none; }
+    .ff-segment input:checked + .ff-seg-inner {
+      color:var(--primary);
+    }
+    .ff-segment label.is-checked {
+      background:#eef2ff; border-color:var(--primary); color:var(--primary);
+    }
+
+    /* Fee list (preset + custom) */
+    .ff-fee-list { display:flex; flex-direction:column; gap:6px; }
+    .ff-fee-row {
+      display:flex; align-items:center; gap:10px; padding:8px 10px;
+      background:#f8fafc; border:1px solid var(--border); border-radius:8px;
+      transition:border-color .15s, background .15s;
+    }
+    .ff-fee-row:focus-within { border-color:var(--primary); background:white; box-shadow:0 0 0 3px rgba(79,70,229,0.08); }
+    .ff-fee-row.has-value { background:white; border-color:#16a34a; }
+    .ff-fee-icon {
+      width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+      font-size:14px; flex-shrink:0;
+    }
+    .ff-fee-name {
+      flex:1; min-width:0; font-size:13px; font-weight:600; color:var(--text);
+    }
+    .ff-fee-name input {
+      width:100%; border:none; background:transparent; outline:none; padding:4px 0;
+      font-family:inherit; font-size:13px; font-weight:600; color:var(--text);
+    }
+    .ff-fee-name input::placeholder { color:#94a3b8; font-weight:500; }
+    .ff-fee-amt-wrap {
+      display:flex; align-items:center; gap:6px; padding:0 8px;
+      background:white; border:1px solid var(--border); border-radius:6px; width:130px; flex-shrink:0;
+    }
+    .ff-fee-row.has-value .ff-fee-amt-wrap { border-color:#16a34a; }
+    .ff-fee-amt {
+      flex:1; min-width:0; border:none; outline:none; padding:7px 0;
+      font-family:inherit; font-size:13px; font-weight:700; text-align:right;
+      color:var(--text); background:transparent;
+    }
+    .ff-fee-amt::placeholder { color:#cbd5e1; font-weight:500; }
+    .ff-fee-cur { font-size:11px; font-weight:700; color:#94a3b8; }
+    .ff-fee-remove {
+      width:26px; height:26px; border-radius:6px; border:none; background:transparent;
+      color:#94a3b8; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .ff-fee-remove:hover { background:#fee2e2; color:#dc2626; }
+
+    .ff-add-custom {
+      display:flex; align-items:center; gap:6px; margin-top:8px;
+      background:white; border:1px dashed #cbd5e1; color:var(--primary);
+      padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;
+      width:100%; justify-content:center;
+    }
+    .ff-add-custom:hover { background:#eef2ff; border-color:var(--primary); }
+
+    .ff-total-box {
+      padding:9px 12px; background:#dcfce7; border:1px solid #86efac; border-radius:8px;
+      font-size:14px; font-weight:700; color:#15803d;
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-bao-gia.html" class="nav-item"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <a href="m6-duyet-phi.html" class="nav-item active"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 6</span><span class="sep">›</span><span class="current">Duyệt phí tài xế</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">✅ Duyệt phí tài xế nhập</div>
+        <div class="page-subtitle">Kiểm tra & duyệt các phí cầu đường, xăng dầu, phà, bến bãi, đậu xe… do tài xế nhập trên app</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="openAddFeeModal()">+ Nhập hộ tài xế</button>
+        <button class="btn btn-secondary" onclick="approveAll()">✓ Duyệt toàn bộ</button>
+        <button class="btn btn-primary" onclick="approveSelected()">✓ Duyệt mục đã chọn</button>
+      </div>
+    </div>
+
+    <!-- Stats (compact bar) -->
+    <div class="stat-bar">
+      <div class="stat-pill pending">
+        <div class="ico">⏳</div>
+        <div class="txt">
+          <div class="lbl">Chờ duyệt</div>
+          <div class="val"><span id="statPending">0</span> <span class="money" id="statPendingMoney">0 ₫</span></div>
+        </div>
+      </div>
+      <div class="stat-pill approved">
+        <div class="ico">✓</div>
+        <div class="txt">
+          <div class="lbl">Đã duyệt</div>
+          <div class="val"><span id="statApproved">0</span> <span class="money" id="statApprovedMoney">0 ₫</span></div>
+        </div>
+      </div>
+      <div class="stat-pill rejected">
+        <div class="ico">✗</div>
+        <div class="txt">
+          <div class="lbl">Đã từ chối</div>
+          <div class="val"><span id="statRejected">0</span> <span class="money" id="statRejectedMoney">0 ₫</span></div>
+        </div>
+      </div>
+      <div class="stat-pill total">
+        <div class="ico">📊</div>
+        <div class="txt">
+          <div class="lbl">Tổng phí tháng 5</div>
+          <div class="val"><span id="statTotal">0</span> <span class="money" id="statTotalMoney">0 ₫</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="approval-toolbar">
+      <div class="view-switch">
+        <button class="active" data-view="driver" onclick="setView('driver')">👤 Theo tài xế</button>
+        <button data-view="order" onclick="setView('order')">📦 Theo đơn hàng</button>
+      </div>
+      <select class="form-control" style="width:140px;" id="filterStatus" onchange="render()">
+        <option value="all">Tất cả trạng thái</option>
+        <option value="pending" selected>Chỉ chờ duyệt</option>
+        <option value="approved">Đã duyệt</option>
+        <option value="rejected">Đã từ chối</option>
+      </select>
+      <select class="form-control" style="width:160px;" id="filterType" onchange="render()">
+        <option value="all">Tất cả loại phí</option>
+        <option value="toll">Cầu đường</option>
+        <option value="fuel">Xăng dầu</option>
+        <option value="parking">Bến bãi/Đậu xe</option>
+        <option value="ferry">Phà</option>
+        <option value="other">Khác</option>
+      </select>
+      <input type="text" class="form-control search-input" placeholder="🔍 Tìm tài xế, đơn hàng, mô tả..." id="filterSearch" oninput="render()">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="btn btn-secondary btn-sm" onclick="expandAll(true)" title="Mở tất cả nhóm">⊕ Mở hết</button>
+        <button class="btn btn-secondary btn-sm" onclick="expandAll(false)" title="Đóng tất cả nhóm">⊖ Đóng hết</button>
+        <div class="view-switch" style="margin-left:4px;">
+          <button class="active" id="densComfort" onclick="setDensity('comfort')" title="Hiển thị đầy đủ">☰ Thường</button>
+          <button id="densCompact" onclick="setDensity('compact')" title="Hiển thị gọn (xem nhiều hơn)">≡ Gọn</button>
+        </div>
+      </div>
+      <div style="margin-left:auto; font-size:12px; color:var(--text-muted);" id="resultCount">0 phí</div>
+    </div>
+
+    <div id="groupContainer"></div>
+
+    <!-- Bulk action bar (sticky) -->
+    <div class="bulk-bar" id="bulkBar" style="display:none;">
+      <span class="count" id="selCount">0</span><span>mục được chọn</span>
+      <span style="color:var(--text-muted); font-size:12px;">·</span>
+      <span style="color:var(--text-muted); font-size:12px;">Tổng: <strong id="selSum" style="color:var(--text);">0 ₫</strong></span>
+      <div style="margin-left:auto; display:flex; gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="clearSelection()">Bỏ chọn</button>
+        <button class="btn-reject" onclick="rejectSelected()">✗ Từ chối đã chọn</button>
+        <button class="btn-approve" onclick="approveSelected()">✓ Duyệt đã chọn</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Reject reason modal -->
+<div class="modal-bg" id="rejectModal" onclick="if(event.target===this)closeRejectModal()">
+  <div class="modal">
+    <div class="modal-head">Lý do từ chối</div>
+    <div class="modal-body">
+      <label>Ghi chú gửi cho tài xế</label>
+      <textarea id="rejectReason" placeholder="VD: Không đúng tuyến chạy, thiếu hóa đơn, sai số tiền…"></textarea>
+      <div class="modal-quick">
+        <button onclick="setReason('Thiếu hóa đơn/biên lai')">Thiếu hóa đơn</button>
+        <button onclick="setReason('Sai số tiền so với thực tế')">Sai số tiền</button>
+        <button onclick="setReason('Không đúng tuyến chạy')">Không đúng tuyến</button>
+        <button onclick="setReason('Trùng phí đã nhập')">Trùng phí</button>
+        <button onclick="setReason('Phí không hợp lệ')">Không hợp lệ</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeRejectModal()">Hủy</button>
+      <button class="btn-reject" onclick="confirmReject()">✗ Xác nhận từ chối</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add fee on behalf of driver modal -->
+<div class="modal-bg" id="addFeeModal" onclick="if(event.target===this)closeAddFeeModal()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-head" style="display:flex; align-items:center; gap:10px;">
+      <div style="width:34px; height:34px; border-radius:9px; background:#ede9fe; color:#6d28d9; display:flex; align-items:center; justify-content:center; font-size:18px;">✍️</div>
+      <div style="font-size:15px;">Nhập phí hộ tài xế</div>
+    </div>
+    <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+
+      <!-- 1. Đối tượng -->
+      <div class="ff-section">
+        <div class="ff-section-title">Đối tượng áp dụng</div>
+        <div class="ff-row">
+          <div class="ff-field">
+            <label>Tài xế<span class="req">*</span></label>
+            <select id="addFeeDriver" class="ff-select"></select>
+          </div>
+          <div class="ff-field">
+            <label>Gắn với<span class="req">*</span></label>
+            <select id="addFeeOrder" class="ff-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Khoản phí -->
+      <div class="ff-section">
+        <div class="ff-section-title">Khoản phí thường gặp</div>
+        <div class="ff-fee-list" id="addFeePresetList"></div>
+
+        <div class="ff-section-title" style="margin-top:14px;">Phí khác</div>
+        <div class="ff-fee-list" id="addFeeCustomList"></div>
+        <button type="button" class="ff-add-custom" onclick="addCustomRow()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Thêm khoản phí khác
+        </button>
+
+        <div class="ff-row" style="margin-top:12px;">
+          <div class="ff-field">
+            <label>Ngày phát sinh</label>
+            <input type="date" id="addFeeDate" class="ff-input">
+          </div>
+          <div class="ff-field">
+            <label>Tổng cộng</label>
+            <div class="ff-total-box"><span id="addFeeTotal">0 ₫</span> · <span id="addFeeCount" style="color:var(--text-muted); font-weight:600;">0 khoản</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Trạng thái + ghi chú -->
+      <div class="ff-section">
+        <div class="ff-section-title">Xử lý & ghi chú</div>
+        <div class="ff-field" style="margin-bottom:10px;">
+          <label>Trạng thái sau khi lưu</label>
+          <div class="ff-segment" id="addFeeStatusSeg">
+            <label class="is-checked" onclick="pickStatus(this,'approved')">✓ Duyệt luôn</label>
+            <label onclick="pickStatus(this,'pending')">⏳ Để chờ duyệt</label>
+          </div>
+          <input type="hidden" id="addFeeStatus" value="approved">
+        </div>
+        <div class="ff-field">
+          <label>Ghi chú</label>
+          <input type="text" id="addFeeNote" class="ff-input">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeAddFeeModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="submitAddFee()">✓ Lưu phí</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  // ===== Master data =====
+  const DRIVERS = {
+    'TX01': { name: 'Nguyễn Văn Hùng', plate: '51C-12345' },
+    'TX02': { name: 'Trần Quang Minh', plate: '51D-56789' },
+    'TX03': { name: 'Lê Văn Tâm',     plate: '51E-22334' },
+  };
+  const ORDERS = {
+    'DH-2026-0501': { route: 'HCM → Hà Nội',     customer: 'CTY ABC' },
+    'DH-2026-0502': { route: 'HCM → Đà Nẵng',    customer: 'CTY XYZ' },
+    'DH-2026-0503': { route: 'HCM → Cần Thơ',    customer: 'CTY DEF' },
+    'DH-2026-0504': { route: 'HCM → Vũng Tàu',   customer: 'CTY GHI' },
+    'GENERAL':      { route: 'Phí chung',        customer: '—' },
+  };
+  const FEE_TYPES = {
+    toll:    { icon:'🛣️', label:'Cầu đường', bg:'#dbeafe' },
+    fuel:    { icon:'⛽', label:'Xăng dầu',  bg:'#fee2e2' },
+    parking: { icon:'🅿️', label:'Bến bãi/Đậu xe', bg:'#fef3c7' },
+    ferry:   { icon:'⛴️', label:'Phà',       bg:'#cffafe' },
+    other:   { icon:'📝', label:'Khác',      bg:'#f1f5f9' },
+  };
+
+  // status: pending | approved | rejected
+  // enteredBy: 'driver' (default) | 'admin' (admin nhập hộ)
+  let FEES = [
+    // ===== TX01 - chuyến HCM-HN: nhiều trạm + dầu =====
+    { id:1,  driverId:'TX01', orderId:'DH-2026-0501', type:'toll',    name:'Trạm Long Thành',          amount:185000,  date:'10/05', note:'Lượt đi',                  status:'pending' },
+    { id:2,  driverId:'TX01', orderId:'DH-2026-0501', type:'fuel',    name:'Đổ dầu PetroVN',           amount:2160000, date:'10/05', note:'80L · Trạm Phan Thiết',    status:'pending' },
+    { id:3,  driverId:'TX01', orderId:'DH-2026-0501', type:'parking', name:'Bãi xe Đà Nẵng',           amount:120000,  date:'11/05', note:'Qua đêm',                  status:'pending' },
+    { id:4,  driverId:'TX01', orderId:'DH-2026-0501', type:'toll',    name:'Trạm Hải Vân',             amount:140000,  date:'11/05', note:'',                          status:'approved' },
+    { id:5,  driverId:'TX01', orderId:'DH-2026-0501', type:'toll',    name:'Trạm Cầu Ré - Huế',        amount:75000,   date:'11/05', note:'',                          status:'pending' },
+    { id:6,  driverId:'TX01', orderId:'DH-2026-0501', type:'toll',    name:'Trạm Ợ Đông - Quảng Bình',    amount:65000,   date:'11/05', note:'',                          status:'pending' },
+    { id:7,  driverId:'TX01', orderId:'DH-2026-0501', type:'fuel',    name:'Đổ dầu Vinh',              amount:1800000, date:'11/05', note:'70L',                       status:'pending' },
+    { id:8,  driverId:'TX01', orderId:'DH-2026-0501', type:'toll',    name:'Trạm Cao Bồ - Ninh Bình',  amount:90000,   date:'12/05', note:'',                          status:'pending' },
+    { id:9,  driverId:'TX01', orderId:'DH-2026-0501', type:'toll',    name:'Trạm Pháp Vân - HN',           amount:35000,   date:'12/05', note:'',                          status:'pending' },
+    { id:10, driverId:'TX01', orderId:'DH-2026-0501', type:'parking', name:'Bến xe Giáp Bát',            amount:80000,   date:'12/05', note:'Trả hàng',                 status:'pending' },
+    { id:11, driverId:'TX01', orderId:'GENERAL',      type:'other',   name:'Rửa xe',                   amount:80000,   date:'09/05', note:'Trước chuyến đi',          status:'pending' },
+    { id:12, driverId:'TX01', orderId:'GENERAL',      type:'fuel',    name:'AdBlue',                 amount:350000,  date:'09/05', note:'10L',                       status:'pending', enteredBy:'admin' },
+
+    // ===== TX02 - chuyến HCM-Đà Nẵng =====
+    { id:20, driverId:'TX02', orderId:'DH-2026-0502', type:'toll',    name:'Trạm Dầu Giây',            amount:95000,   date:'09/05', note:'',                          status:'pending' },
+    { id:21, driverId:'TX02', orderId:'DH-2026-0502', type:'fuel',    name:'Đổ dầu Cam Ranh',          amount:1850000, date:'09/05', note:'70L',                       status:'rejected', rejectReason:'Thiếu hóa đơn/biên lai' },
+    { id:22, driverId:'TX02', orderId:'DH-2026-0502', type:'ferry',   name:'Phà Cửa Đại',              amount:250000,  date:'09/05', note:'',                          status:'pending' },
+    { id:23, driverId:'TX02', orderId:'DH-2026-0502', type:'parking', name:'Đậu xe khách sạn',         amount:150000,  date:'10/05', note:'1 đêm',                    status:'pending' },
+    { id:24, driverId:'TX02', orderId:'DH-2026-0502', type:'toll',    name:'Trạm Ninh Thuận',          amount:55000,   date:'09/05', note:'',                          status:'pending' },
+    { id:25, driverId:'TX02', orderId:'DH-2026-0502', type:'toll',    name:'Trạm Nha Trang',           amount:60000,   date:'09/05', note:'',                          status:'pending' },
+    { id:26, driverId:'TX02', orderId:'DH-2026-0502', type:'other',   name:'Mua dây chằng hàng',         amount:120000,  date:'09/05', note:'2 bộ',                      status:'pending' },
+    { id:27, driverId:'TX02', orderId:'DH-2026-0502', type:'toll',    name:'Trạm Phú Yên',             amount:55000,   date:'09/05', note:'',                          status:'pending', enteredBy:'admin' },
+
+    // ===== TX03 =====
+    { id:30, driverId:'TX03', orderId:'DH-2026-0503', type:'toll',    name:'Trạm Trung Lương',         amount:65000,   date:'08/05', note:'',                          status:'pending' },
+    { id:31, driverId:'TX03', orderId:'DH-2026-0503', type:'fuel',    name:'Đổ xăng Cái Bè',           amount:920000,  date:'08/05', note:'40L',                       status:'pending' },
+    { id:32, driverId:'TX03', orderId:'DH-2026-0503', type:'ferry',   name:'Phà Vàm Cống',              amount:120000,  date:'08/05', note:'',                          status:'pending' },
+    { id:33, driverId:'TX03', orderId:'DH-2026-0503', type:'parking', name:'Bãi Cần Thơ',                amount:90000,   date:'08/05', note:'',                          status:'pending' },
+    { id:34, driverId:'TX03', orderId:'DH-2026-0504', type:'toll',    name:'Trạm Long Thành',          amount:55000,   date:'12/05', note:'Lượt về',                  status:'pending' },
+    { id:35, driverId:'TX03', orderId:'DH-2026-0504', type:'parking', name:'Bãi container Cát Lái',    amount:200000,  date:'12/05', note:'',                          status:'approved' },
+    { id:36, driverId:'TX03', orderId:'GENERAL',      type:'other',   name:'Phí gửi đồ khách quên',    amount:30000,   date:'12/05', note:'Khách bỏ quên áo khoác',   status:'pending' },
+  ];
+
+  let view = 'driver';                  // 'driver' | 'order'
+  let selected = new Set();
+  let pendingRejectIds = [];            // ids in flight for the reject modal
+  let density = 'comfort';              // 'comfort' | 'compact'
+  let collapsedGroups = new Set();      // keys of collapsed groups
+  let expandedRows = new Set();         // keys of groups showing all rows ("Xem thêm")
+  const ROWS_PER_GROUP = 6;             // cap mỗi nhóm, còn lại ẩn sau "Xem thêm"
+
+  const fmtVND = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+
+  // ===== Filtering =====
+  function getFiltered() {
+    const status = document.getElementById('filterStatus').value;
+    const type   = document.getElementById('filterType').value;
+    const q      = document.getElementById('filterSearch').value.trim().toLowerCase();
+    return FEES.filter(f => {
+      if (status !== 'all' && f.status !== status) return false;
+      if (type   !== 'all' && f.type   !== type) return false;
+      if (q) {
+        const driver = DRIVERS[f.driverId]?.name.toLowerCase() || '';
+        const order  = (f.orderId || '').toLowerCase();
+        const route  = ORDERS[f.orderId]?.route.toLowerCase() || '';
+        if (!driver.includes(q) && !order.includes(q) && !route.includes(q) && !f.name.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  // ===== Stats =====
+  function renderStats() {
+    const sum = (arr) => arr.reduce((s,f)=>s+f.amount,0);
+    const pending  = FEES.filter(f=>f.status==='pending');
+    const approved = FEES.filter(f=>f.status==='approved');
+    const rejected = FEES.filter(f=>f.status==='rejected');
+    document.getElementById('statPending').textContent  = pending.length;
+    document.getElementById('statApproved').textContent = approved.length;
+    document.getElementById('statRejected').textContent = rejected.length;
+    document.getElementById('statTotal').textContent    = FEES.length;
+    document.getElementById('statPendingMoney').textContent  = fmtVND(sum(pending));
+    document.getElementById('statApprovedMoney').textContent = fmtVND(sum(approved));
+    document.getElementById('statRejectedMoney').textContent = fmtVND(sum(rejected));
+    document.getElementById('statTotalMoney').textContent    = fmtVND(sum(FEES));
+  }
+
+  // ===== Group rendering =====
+  function setView(v) {
+    view = v;
+    document.querySelectorAll('.view-switch button').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === v);
+    });
+    render();
+  }
+
+  function render() {
+    renderStats();
+    const list = getFiltered();
+    document.getElementById('resultCount').textContent = `${list.length} phí · ${fmtVND(list.reduce((s,f)=>s+f.amount,0))}`;
+    const container = document.getElementById('groupContainer');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="card"><div class="empty-state">🎉 Không có phí nào khớp bộ lọc.</div></div>`;
+      updateBulkBar();
+      return;
+    }
+    const groups = {};
+    list.forEach(f => {
+      const key = view === 'driver' ? f.driverId : f.orderId;
+      (groups[key] = groups[key] || []).push(f);
+    });
+    container.innerHTML = Object.entries(groups).map(([key, items]) => renderGroup(key, items)).join('');
+    updateBulkBar();
+  }
+
+  function renderGroup(key, items) {
+    const total   = items.reduce((s,f)=>s+f.amount,0);
+    const pending = items.filter(f=>f.status==='pending').length;
+    let title, sub, avatar, avatarClass='';
+    if (view === 'driver') {
+      const d = DRIVERS[key] || {name:key, plate:''};
+      title = d.name;
+      sub = `${d.plate} · ${items.length} phí`;
+      avatar = d.name.split(' ').pop().charAt(0);
+    } else {
+      const o = ORDERS[key] || {route:key, customer:''};
+      title = key === 'GENERAL' ? 'Phí chung (không gắn đơn)' : key;
+      sub = `${o.route} · ${o.customer} · ${items.length} phí`;
+      avatar = '📦';
+      avatarClass = 'order';
+    }
+    const groupActions = pending > 0
+      ? `<button class="btn-approve" onclick="event.stopPropagation(); approveGroup('${key}')">✓ Duyệt cả nhóm (${pending})</button>
+         <button class="btn-reject"  onclick="event.stopPropagation(); rejectGroup('${key}')">✗ Từ chối cả nhóm</button>`
+      : `<span class="pill approved">✓ Đã xử lý hết</span>`;
+
+    const isCollapsed = collapsedGroups.has(key);
+    const showAll     = expandedRows.has(key);
+    const limit       = (showAll || items.length <= ROWS_PER_GROUP + 2) ? items.length : ROWS_PER_GROUP;
+    const visible     = items.slice(0, limit);
+    const hiddenCount = items.length - limit;
+    const moreBtn     = hiddenCount > 0
+      ? `<div class="grp-more" onclick="toggleShowAll('${key}')">↓ Xem thêm ${hiddenCount} phí</div>`
+      : (showAll && items.length > ROWS_PER_GROUP + 2
+          ? `<div class="grp-more" onclick="toggleShowAll('${key}')">↑ Thu gọn</div>`
+          : '');
+
+    return `
+      <div class="grp-card ${isCollapsed?'is-collapsed':''}" data-key="${key}">
+        <div class="grp-head" onclick="toggleGroup('${key}')">
+          <span class="caret">▾</span>
+          <div class="grp-avatar ${avatarClass}">${avatar}</div>
+          <div class="grp-info">
+            <div class="grp-name">${title}</div>
+            <div class="grp-meta">${sub}</div>
+          </div>
+          <div class="grp-totals">
+            <div class="grp-stat"><div class="v">${fmtVND(total)}</div><div class="l">Tổng phí nhóm</div></div>
+            ${pending > 0 ? `<div class="grp-stat"><div class="v" style="color:#92400e;">${pending}</div><div class="l">Chờ duyệt</div></div>` : ''}
+          </div>
+          <div class="grp-actions">${groupActions}</div>
+        </div>
+        <div class="grp-body">
+          ${visible.map(renderFee).join('')}
+          ${moreBtn}
+        </div>
+      </div>`;
+  }
+
+  function renderFee(f) {
+    const t = FEE_TYPES[f.type];
+    const driver = DRIVERS[f.driverId];
+    const order  = ORDERS[f.orderId] || {route:f.orderId};
+    let actions = '';
+    if (f.status === 'pending') {
+      actions = `
+        <button class="btn-approve" onclick="approveOne(${f.id})">✓ Duyệt</button>
+        <button class="btn-reject"  onclick="openRejectModal([${f.id}])">✗ Từ chối</button>`;
+    } else if (f.status === 'approved') {
+      actions = `<button class="btn-undo" onclick="undoApprove(${f.id})" title="Hủy duyệt nếu duyệt nhầm">↶ Hủy duyệt</button>`;
+    } else {
+      actions = `<button class="btn-undo" onclick="undoReject(${f.id})" title="Mở lại nếu từ chối nhầm">↶ Mở lại</button>
+                 <button class="btn-approve" onclick="approveOne(${f.id})">✓ Duyệt lại</button>`;
+    }
+    const pillCls = f.status;
+    const pillTxt = f.status === 'pending' ? '⏳ Chờ duyệt' : f.status === 'approved' ? '✓ Đã duyệt' : '✗ Từ chối';
+    const adminPill = f.enteredBy === 'admin' ? `<span class="pill admin" style="margin-left:4px;" title="Admin nhập hộ">📝 Nhập hộ</span>` : '';
+    const subInfo = view === 'driver'
+      ? `${f.orderId === 'GENERAL' ? 'Phí chung' : f.orderId + ' · ' + (order.route || '')}`
+      : `${driver ? driver.name + ' · ' + driver.plate : f.driverId}`;
+    return `
+      <div class="fee-row is-${f.status}">
+        <div class="fee-check">
+          ${f.status==='pending' ? `<input type="checkbox" ${selected.has(f.id)?'checked':''} onchange="toggleSelect(${f.id}, this.checked)">` : `<span style="display:inline-block;width:16px;"></span>`}
+        </div>
+        <div class="fee-icon" style="background:${t.bg};">${t.icon}</div>
+        <div class="fee-main">
+          <div class="fee-name">${f.name} <span class="pill ${pillCls}" style="margin-left:6px;">${pillTxt}</span>${adminPill}</div>
+          <div class="fee-meta">
+            <span>${t.label}</span><span class="sep">·</span>
+            <span>${f.date}/2026</span><span class="sep">·</span>
+            <span>${subInfo}</span>
+          </div>
+          ${f.note ? `<div class="fee-note">📝 ${f.note}</div>` : ''}
+          ${f.rejectReason ? `<div class="fee-reject">✗ Lý do từ chối: ${f.rejectReason}</div>` : ''}
+        </div>
+        <div class="fee-status">
+          <div class="fee-amount">${fmtVND(f.amount)}</div>
+          <div class="fee-actions">${actions}</div>
+        </div>
+      </div>`;
+  }
+
+  function toggleGroup(key) {
+    if (collapsedGroups.has(key)) collapsedGroups.delete(key); else collapsedGroups.add(key);
+    render();
+  }
+  function toggleShowAll(key) {
+    if (expandedRows.has(key)) expandedRows.delete(key); else expandedRows.add(key);
+    render();
+  }
+  function expandAll(open) {
+    collapsedGroups.clear();
+    if (!open) {
+      // collect current group keys then collapse all
+      const keys = new Set();
+      getFiltered().forEach(f => keys.add(view==='driver'?f.driverId:f.orderId));
+      keys.forEach(k => collapsedGroups.add(k));
+    } else {
+      // "Mở hết" cũng mở full row trong mỗi nhóm
+      const keys = new Set();
+      getFiltered().forEach(f => keys.add(view==='driver'?f.driverId:f.orderId));
+      keys.forEach(k => expandedRows.add(k));
+    }
+    render();
+  }
+  function setDensity(d) {
+    density = d;
+    document.body.classList.toggle('compact', d === 'compact');
+    document.getElementById('densComfort').classList.toggle('active', d === 'comfort');
+    document.getElementById('densCompact').classList.toggle('active', d === 'compact');
+  }
+
+  // ===== Selection =====
+  function toggleSelect(id, on) {
+    if (on) selected.add(id); else selected.delete(id);
+    updateBulkBar();
+  }
+  function clearSelection() { selected.clear(); render(); }
+  function updateBulkBar() {
+    const ids = [...selected].filter(id => FEES.find(f=>f.id===id)?.status === 'pending');
+    selected = new Set(ids);
+    const bar = document.getElementById('bulkBar');
+    if (ids.length === 0) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    document.getElementById('selCount').textContent = ids.length;
+    const sum = ids.reduce((s,id)=> s + (FEES.find(f=>f.id===id)?.amount || 0), 0);
+    document.getElementById('selSum').textContent = fmtVND(sum);
+  }
+
+  // ===== Actions =====
+  function approveOne(id) {
+    const f = FEES.find(x=>x.id===id); if (!f) return;
+    f.status = 'approved'; delete f.rejectReason; selected.delete(id); render();
+  }
+  function undoApprove(id) {
+    const f = FEES.find(x=>x.id===id); if (!f) return;
+    if (!confirm(`Hủy duyệt phí "${f.name}" (${fmtVND(f.amount)})?\nPhí sẽ trở về trạng thái Chờ duyệt.`)) return;
+    f.status = 'pending'; render();
+  }
+  function undoReject(id) {
+    const f = FEES.find(x=>x.id===id); if (!f) return;
+    f.status = 'pending'; delete f.rejectReason; render();
+  }
+  function approveSelected() {
+    if (selected.size === 0) { alert('Chưa chọn mục nào.'); return; }
+    selected.forEach(id => { const f = FEES.find(x=>x.id===id); if (f) { f.status='approved'; delete f.rejectReason; } });
+    selected.clear(); render();
+  }
+  function rejectSelected() {
+    if (selected.size === 0) { alert('Chưa chọn mục nào.'); return; }
+    openRejectModal([...selected]);
+  }
+  function approveGroup(key) {
+    const targets = FEES.filter(f => (view==='driver'?f.driverId:f.orderId) === key && f.status === 'pending');
+    if (targets.length === 0) return;
+    if (!confirm(`Duyệt tất cả ${targets.length} phí chờ duyệt của nhóm này?`)) return;
+    targets.forEach(f => f.status='approved');
+    render();
+  }
+  function rejectGroup(key) {
+    const targets = FEES.filter(f => (view==='driver'?f.driverId:f.orderId) === key && f.status === 'pending');
+    if (targets.length === 0) return;
+    openRejectModal(targets.map(f=>f.id));
+  }
+  function approveAll() {
+    const targets = FEES.filter(f => f.status === 'pending');
+    if (targets.length === 0) { alert('Không có phí nào đang chờ duyệt.'); return; }
+    if (!confirm(`Duyệt TOÀN BỘ ${targets.length} phí đang chờ duyệt?`)) return;
+    targets.forEach(f => f.status='approved');
+    selected.clear(); render();
+  }
+
+  // ===== Reject modal =====
+  function openRejectModal(ids) {
+    pendingRejectIds = ids;
+    document.getElementById('rejectReason').value = '';
+    document.getElementById('rejectModal').classList.add('show');
+  }
+  function closeRejectModal() {
+    document.getElementById('rejectModal').classList.remove('show');
+    pendingRejectIds = [];
+  }
+  function setReason(t) {
+    const ta = document.getElementById('rejectReason');
+    ta.value = t; ta.focus();
+  }
+  function confirmReject() {
+    const reason = document.getElementById('rejectReason').value.trim() || 'Không hợp lệ';
+    pendingRejectIds.forEach(id => {
+      const f = FEES.find(x=>x.id===id);
+      if (f) { f.status = 'rejected'; f.rejectReason = reason; selected.delete(id); }
+    });
+    closeRejectModal(); render();
+  }
+
+  // ===== Add fee on behalf of driver =====
+  let nextId = Math.max(...FEES.map(f=>f.id)) + 1;
+
+  function formatK(input) {
+    let v = input.value.replace(/[^\d]/g,'');
+    if (!v) { input.value = ''; return; }
+    input.value = parseInt(v,10).toLocaleString('vi-VN');
+  }
+  function parseK(s) { return parseInt((s||'').replace(/[^\d]/g,''),10) || 0; }
+  function updateAmountHint() { /* hint removed */ }
+
+  function openAddFeeModal() {
+    // Populate driver select
+    const ds = document.getElementById('addFeeDriver');
+    ds.innerHTML = Object.entries(DRIVERS).map(([id,d]) =>
+      `<option value="${id}">${d.name} — ${d.plate}</option>`).join('');
+    // Populate order select
+    const os = document.getElementById('addFeeOrder');
+    os.innerHTML = Object.entries(ORDERS).map(([id,o]) => {
+      const label = id === 'GENERAL' ? 'Phí chung (không gắn đơn)' : `${id} — ${o.route}`;
+      return `<option value="${id}">${label}</option>`;
+    }).join('');
+    // Preset fee rows
+    const pl = document.getElementById('addFeePresetList');
+    pl.innerHTML = Object.entries(FEE_TYPES).filter(([k]) => k !== 'other').map(([k,t]) => `
+      <div class="ff-fee-row" data-type="${k}">
+        <div class="ff-fee-icon" style="background:${t.bg};">${t.icon}</div>
+        <div class="ff-fee-name">${t.label}</div>
+        <div class="ff-fee-amt-wrap">
+          <input type="text" class="ff-fee-amt" inputmode="numeric" placeholder="0" oninput="formatK(this); recalcAddFee()">
+          <span class="ff-fee-cur">K</span>
+        </div>
+      </div>
+    `).join('');
+    // Custom list reset
+    document.getElementById('addFeeCustomList').innerHTML = '';
+    // Date today
+    const today = new Date();
+    document.getElementById('addFeeDate').value =
+      `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    // Other fields
+    document.getElementById('addFeeNote').value = '';
+    document.getElementById('addFeeStatus').value = 'approved';
+    document.querySelectorAll('#addFeeStatusSeg label').forEach((l,i) => l.classList.toggle('is-checked', i===0));
+    recalcAddFee();
+    document.getElementById('addFeeModal').classList.add('show');
+  }
+  function closeAddFeeModal() {
+    document.getElementById('addFeeModal').classList.remove('show');
+  }
+  function pickStatus(el, val) {
+    document.querySelectorAll('#addFeeStatusSeg label').forEach(l => l.classList.remove('is-checked'));
+    el.classList.add('is-checked');
+    document.getElementById('addFeeStatus').value = val;
+  }
+
+  let customRowSeq = 0;
+  function addCustomRow() {
+    const id = 'custRow' + (++customRowSeq);
+    const row = document.createElement('div');
+    row.className = 'ff-fee-row';
+    row.dataset.custom = '1';
+    row.id = id;
+    row.innerHTML = `
+      <div class="ff-fee-icon" style="background:#f1f5f9;">📝</div>
+      <div class="ff-fee-name">
+        <input type="text" placeholder="Tên phí (VD: Rửa xe, Mua dây chằng…)" oninput="recalcAddFee()">
+      </div>
+      <div class="ff-fee-amt-wrap">
+        <input type="text" class="ff-fee-amt" inputmode="numeric" placeholder="0" oninput="formatK(this); recalcAddFee()">
+        <span class="ff-fee-cur">K</span>
+      </div>
+      <button type="button" class="ff-fee-remove" title="Xoá" onclick="removeCustomRow('${id}')">×</button>`;
+    document.getElementById('addFeeCustomList').appendChild(row);
+    row.querySelector('input[type="text"]').focus();
+  }
+  function removeCustomRow(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    recalcAddFee();
+  }
+
+  function recalcAddFee() {
+    let count = 0, total = 0;
+    document.querySelectorAll('#addFeePresetList .ff-fee-row, #addFeeCustomList .ff-fee-row').forEach(row => {
+      const k = parseK(row.querySelector('.ff-fee-amt').value);
+      row.classList.toggle('has-value', k > 0);
+      if (k > 0) { count++; total += k * 1000; }
+    });
+    document.getElementById('addFeeTotal').textContent = fmtVND(total);
+    document.getElementById('addFeeCount').textContent = count + ' khoản';
+  }
+
+  function submitAddFee() {
+    const driverId = document.getElementById('addFeeDriver').value;
+    const orderId  = document.getElementById('addFeeOrder').value;
+    const dateRaw  = document.getElementById('addFeeDate').value;
+    const status   = document.getElementById('addFeeStatus').value;
+    const note     = document.getElementById('addFeeNote').value.trim();
+    const d = dateRaw ? new Date(dateRaw) : new Date();
+    const date = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+
+    const newFees = [];
+    // Preset rows
+    document.querySelectorAll('#addFeePresetList .ff-fee-row').forEach(row => {
+      const k = parseK(row.querySelector('.ff-fee-amt').value);
+      if (k <= 0) return;
+      const type = row.dataset.type;
+      newFees.push({ type, name: FEE_TYPES[type].label, amount: k * 1000 });
+    });
+    // Custom rows
+    document.querySelectorAll('#addFeeCustomList .ff-fee-row').forEach(row => {
+      const k = parseK(row.querySelector('.ff-fee-amt').value);
+      const name = row.querySelector('.ff-fee-name input').value.trim();
+      if (k <= 0) return;
+      if (!name) { /* skip custom rows missing name */ return; }
+      newFees.push({ type:'other', name, amount: k * 1000 });
+    });
+
+    if (newFees.length === 0) {
+      alert('Vui lòng nhập ít nhất 1 khoản phí (có số tiền).');
+      return;
+    }
+
+    newFees.forEach(f => {
+      FEES.unshift({
+        id: nextId++,
+        driverId, orderId,
+        type: f.type,
+        name: f.name,
+        amount: f.amount,
+        date, note, status,
+        enteredBy: 'admin'
+      });
+    });
+    closeAddFeeModal();
+    render();
+  }
+
+  // init
+  render();
+</script>
+</body>
+</html>

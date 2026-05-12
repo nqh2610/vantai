@@ -3,41 +3,236 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Điều phối chuyến – VanChuyển Pro</title>
+  <title>Điều phối xe – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
-    .board-col { background: #f8fafc; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-    @media (max-width: 1024px) { .board { grid-template-columns: 1fr; } .driver-panel { width: 100%; } }
-    @media (max-width: 768px) { .board { overflow-x: auto; display: flex; gap: 12px; } .board-col { min-width: 270px; } }
-    .board-col-head {
-      padding: 11px 14px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
+    :root {
+      --primary:    #4338ca;
+      --primary-soft:#eef2ff;
+      --ink:        #0f172a;
+      --ink-2:      #334155;
+      --ink-3:      #64748b;
+      --line:       #e5e7eb;
+      --line-2:     #f1f5f9;
+      --bg-soft:    #f8fafc;
+      --green:      #16a34a;
+      --amber:      #d97706;
+      --red:        #dc2626;
     }
-    .board-col-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .col-count { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
-    .board-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 200px; }
-    .trip-card {
-      background: white; border-radius: 10px; border: 1px solid var(--border);
-      padding: 12px; cursor: grab; transition: all 0.13s;
+
+    body { background: var(--bg-soft); }
+
+    /* Layout */
+    .dp-wrap { padding: 20px 24px; display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; max-width: 1500px; margin: 0 auto; }
+    @media (max-width: 1100px) { .dp-wrap { grid-template-columns: 1fr; padding: 14px; } }
+    .dp-left  { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 14px; }
+    .dp-right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+    /* ── Order card (left) ── */
+    .ord-card { background: white; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+
+    /* Header gọn hơn */
+    .ord-head { padding: 14px 16px 12px; background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%); border-bottom: 1px solid var(--line); }
+    .ord-head .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .ord-head .code { font-size: 10.5px; font-weight: 700; color: var(--primary); letter-spacing: .05em; background: white; padding: 3px 8px; border-radius: 999px; border: 1px solid #c7d2fe; font-family: ui-monospace, Menlo, monospace; }
+    .ord-head .vat-flag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+    .ord-head .vat-flag.on { background: var(--primary); color: white; }
+    .ord-head .vat-flag.off { background: var(--line-2); color: var(--ink-3); }
+    .ord-head .title { font-size: 15px; font-weight: 700; color: var(--ink); margin-top: 8px; letter-spacing: -.01em; line-height: 1.3; }
+    .ord-head .sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+    .ord-head .sub a { color: var(--ink-2); text-decoration: none; font-weight: 500; }
+    .ord-head .sub a:hover { color: var(--primary); }
+
+    .ord-body { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* Tuyến đường */
+    .route-mini { display: flex; align-items: stretch; gap: 9px; }
+    .route-mini .rail { display: flex; flex-direction: column; align-items: center; padding: 4px 0 2px; }
+    .route-mini .rail .d1 { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+    .route-mini .rail .ln { width: 2px; flex: 1; background: linear-gradient(to bottom, var(--primary) 0%, #c7d2fe 100%); margin: 2px 0; min-height: 18px; border-radius: 2px; }
+    .route-mini .rail .d2 { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--primary); background: white; flex-shrink: 0; }
+    .route-mini .pts { flex: 1; font-size: 12.5px; line-height: 1.45; color: var(--ink); display: flex; flex-direction: column; gap: 4px; }
+    .route-mini .pts .pt { font-weight: 500; }
+    .route-mini .pts .pt .ll { font-size: 10px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 1px; }
+
+    /* Quick stats: km, time, depart, weight */
+    .qs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px; background: var(--bg-soft); border-radius: 8px; border: 1px solid var(--line); }
+    .qs-cell { display: flex; align-items: center; gap: 7px; padding: 4px 6px; }
+    .qs-cell .ic { width: 26px; height: 26px; border-radius: 6px; background: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; border: 1px solid var(--line); }
+    .qs-cell .txt { display: flex; flex-direction: column; min-width: 0; }
+    .qs-cell .txt .l { font-size: 9.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+    .qs-cell .txt .v { font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Veh required tags */
+    .ord-vehreq { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .ord-vehreq .lbl { font-size: 10.5px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-right: 2px; }
+    .ord-tag { background: var(--primary-soft); color: var(--primary); padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+
+    /* Price breakdown collapsible */
+    .ord-price { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: white; }
+    .ord-price summary { list-style: none; padding: 9px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; user-select: none; transition: background .12s; }
+    .ord-price summary::-webkit-details-marker { display: none; }
+    .ord-price summary:hover { background: var(--bg-soft); }
+    .ord-price summary .lbl { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .ord-price summary .lbl .chev { transition: transform .15s; font-size: 9px; color: var(--ink-3); }
+    .ord-price[open] summary .lbl .chev { transform: rotate(90deg); }
+    .ord-price summary .total { font-size: 17px; font-weight: 700; color: var(--primary); letter-spacing: -.01em; }
+    .ord-price .pr-body { padding: 4px 12px 10px; border-top: 1px dashed var(--line); }
+    .pr-list { display: flex; flex-direction: column; gap: 1px; font-size: 12px; color: var(--ink-2); padding-top: 6px; }
+    .pr-row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; }
+    .pr-row > span:last-child { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 500; }
+    .pr-row.muted > span { color: var(--ink-3); font-style: italic; font-weight: 400; }
+    .pr-row.sub { border-top: 1px dashed var(--line); padding-top: 6px; margin-top: 4px; font-weight: 600; }
+    .pr-sub { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; margin-top: 6px; padding-left: 2px; }
+
+    /* Note */
+    .ord-note { display: flex; gap: 7px; padding: 9px 11px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; font-size: 11.5px; color: #78350f; line-height: 1.45; }
+    .ord-note .ic { flex-shrink: 0; font-size: 13px; line-height: 1; }
+
+    .stat-strip { display: grid; grid-template-columns: repeat(3, 1fr); padding: 0; border-top: 1px solid var(--line); background: var(--bg-soft); }
+    .stat-strip .it { text-align: center; padding: 12px 6px; }
+    .stat-strip .it + .it { border-left: 1px solid var(--line); }
+    .stat-strip .it .n { font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -.02em; }
+    .stat-strip .it .l { font-size: 10px; color: var(--ink-3); margin-top: 2px; font-weight: 500; }
+    .stat-strip .it.green .n { color: var(--green); }
+    .stat-strip .it.amber .n { color: var(--amber); }
+
+    .tip { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+    .tip b { color: var(--ink); font-weight: 600; }
+
+    /* ── Toolbar ── */
+    .dp-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .dp-toolbar .search { flex: 1; min-width: 240px; position: relative; }
+    .dp-toolbar .search input { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; outline: none; background: white; transition: border-color .12s; }
+    .dp-toolbar .search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,56,202,.08); }
+    .dp-toolbar .search .si { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-size: 14px; }
+    .dp-toolbar .seg { display: inline-flex; background: white; border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 2px; }
+    .dp-toolbar .seg button { padding: 5px 11px; font-size: 12.5px; font-weight: 500; background: transparent; border: 0; cursor: pointer; color: var(--ink-2); border-radius: 6px; transition: all .12s; }
+    .dp-toolbar .seg button:hover:not(.on) { background: var(--line-2); }
+    .dp-toolbar .seg button.on { background: var(--ink); color: white; font-weight: 600; }
+    .dp-toolbar select { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 12.5px; background: white; cursor: pointer; color: var(--ink); }
+
+    /* ── Tabs ── */
+    .dp-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); }
+    .dp-tab { padding: 10px 14px 11px; font-size: 13px; font-weight: 500; color: var(--ink-3); background: none; border: 0; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .12s; display: inline-flex; align-items: center; gap: 7px; }
+    .dp-tab:hover { color: var(--ink); }
+    .dp-tab.on { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+    .dp-tab .pill { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 18px; padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--line-2); color: var(--ink-2); }
+    .dp-tab.on .pill { background: var(--ink); color: white; }
+
+    /* ── Driver cards ── */
+    .vlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+    .vd-card {
+      background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 14px 18px;
+      display: flex; flex-direction: column; gap: 12px; transition: all .15s; position: relative; overflow: hidden;
     }
-    .trip-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: var(--primary); }
-    .trip-card-id { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-    .trip-card-customer { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
-    .trip-card-route { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
-    .trip-card-footer { display: flex; align-items: center; justify-content: space-between; }
-    .trip-card-time { font-size: 11px; color: var(--text-muted); }
-    .assign-btn { font-size: 11px; font-weight: 600; padding: 4px 10px; }
-    .driver-panel { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
-    .driver-row {
-      display: flex; align-items: center; gap: 10px; padding: 10px;
-      background: white; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: all 0.13s;
+    /* Accent bar trái — màu theo app status (đối tác) hoặc work status (cơ hữu) */
+    .vd-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--line);
     }
-    .driver-row:hover { border-color: var(--primary); }
-    .driver-info { flex: 1; min-width: 0; }
-    .driver-name { font-size: 12px; font-weight: 700; }
-    .driver-vehicle { font-size: 11px; color: var(--text-muted); }
-    .drag-hint { text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 12px; border: 2px dashed var(--border); border-radius: 8px; }
+    .vd-card.acc-green::before { background: var(--green); }
+    .vd-card.acc-amber::before { background: var(--amber); }
+    .vd-card.acc-red::before   { background: var(--red); }
+    .vd-card.acc-gray::before  { background: #94a3b8; }
+    .vd-card:hover { border-color: #cbd5e1; box-shadow: 0 1px 3px rgba(15,23,42,.04), 0 4px 14px rgba(15,23,42,.05); }
+    .vd-card.busy { background: #fcfcfd; }
+    .vd-card.offline { background: #fafafa; }
+    .vd-card.offline .vd-name, .vd-card.offline .vd-veh-name { color: var(--ink-3); }
+
+    /* App-status banner cho đối tác — hiển thị rõ trạng thái bật/tắt nhận cuốc */
+    .vd-app { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; }
+    .vd-app.on   { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .vd-app.off  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .vd-app.gray { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .vd-app .toggle { width: 26px; height: 14px; border-radius: 999px; position: relative; flex-shrink: 0; }
+    .vd-app.on   .toggle { background: var(--green); }
+    .vd-app.off  .toggle { background: var(--red); }
+    .vd-app.gray .toggle { background: #94a3b8; }
+    .vd-app .toggle::after { content: ''; position: absolute; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: white; transition: left .15s; }
+    .vd-app.on   .toggle::after { left: 14px; }
+    .vd-app.off  .toggle::after { left: 14px; }
+    .vd-app.gray .toggle::after { left: 2px; }
+    .vd-app .lbl { flex: 1; }
+    .vd-app .sub { color: var(--ink-3); font-weight: 500; font-size: 11px; }
+
+    .vd-head { display: flex; align-items: flex-start; gap: 11px; }
+    .vd-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; flex-shrink: 0; position: relative; cursor: zoom-in; overflow: visible; transition: transform .12s; }
+    .vd-avatar:hover { transform: scale(1.06); }
+    .vd-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+    .vd-avatar .dot { position: absolute; bottom: -1px; right: -1px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid white; z-index: 1; }
+    .vd-avatar .dot.green { background: var(--green); }
+    .vd-avatar .dot.amber { background: var(--amber); }
+    .vd-avatar .dot.red   { background: var(--red); }
+    .vd-avatar .dot.gray  { background: #cbd5e1; }
+
+    .vd-info { flex: 1; min-width: 0; padding-right: 70px; }
+    .vd-name { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+    .vd-meta { font-size: 12px; color: var(--ink-3); margin-top: 2px; line-height: 1.4; }
+    .vd-meta a { color: var(--ink-2); text-decoration: none; }
+    .vd-meta a:hover { color: var(--primary); }
+    .vd-meta .sep { color: #cbd5e1; margin: 0 5px; }
+
+    .vd-tags { position: absolute; top: 14px; right: 14px; display: flex; gap: 4px; }
+    .vd-chip { font-size: 10.5px; font-weight: 500; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); background: white; }
+    .vd-chip.match { color: var(--green); border-color: #bbf7d0; background: #f0fdf4; font-weight: 600; }
+
+    .vd-veh { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 8px; background: var(--line-2); border-radius: 9px; }
+    .vd-veh-thumb { width: 48px; height: 36px; border-radius: 6px; overflow: hidden; flex-shrink: 0; cursor: zoom-in; background: #e2e8f0; position: relative; transition: transform .12s; }
+    .vd-veh-thumb:hover { transform: scale(1.05); }
+    .vd-veh-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .vd-veh-thumb .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-3); }
+    .vd-veh-body { flex: 1; min-width: 0; }
+    .vd-veh-name { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+    .vd-veh-spec { font-size: 11.5px; color: var(--ink-3); margin-top: 1px; }
+    .vd-plate { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11.5px; font-weight: 600; color: var(--ink); background: white; border: 1px solid var(--line); border-radius: 5px; padding: 3px 7px; letter-spacing: .03em; flex-shrink: 0; }
+
+    /* Lightbox xem hình */
+    .lb-mask { position: fixed; inset: 0; background: rgba(15,23,42,.78); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; backdrop-filter: blur(4px); }
+    .lb-mask.on { display: flex; }
+    .lb-box { background: white; border-radius: 14px; overflow: hidden; max-width: 460px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.4); animation: lbIn .18s ease-out; }
+    @keyframes lbIn { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .lb-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #f1f5f9; display: block; }
+    .lb-img.portrait { aspect-ratio: 1/1; }
+    .lb-foot { padding: 14px 18px 16px; border-top: 1px solid var(--line); }
+    .lb-foot .t { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .lb-foot .s { font-size: 12px; color: var(--ink-3); margin-top: 3px; line-height: 1.5; }
+    .lb-close { position: absolute; top: 18px; right: 22px; width: 36px; height: 36px; border-radius: 50%; background: white; border: none; font-size: 20px; cursor: pointer; color: var(--ink-2); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+    .lb-close:hover { color: var(--red); }
+
+    .vd-status { font-size: 12px; color: var(--ink-2); display: flex; align-items: center; gap: 7px; padding: 0 2px; }
+    .vd-status .sd { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .vd-status .sd.green { background: var(--green); box-shadow: 0 0 0 3px rgba(22,163,74,.15); }
+    .vd-status .sd.amber { background: var(--amber); box-shadow: 0 0 0 3px rgba(217,119,6,.15); }
+    .vd-status .sd.gray  { background: #cbd5e1; }
+    .vd-status b { color: var(--ink); font-weight: 600; }
+    .vd-status .eta { color: var(--ink-3); margin-left: auto; font-size: 11.5px; }
+
+    /* Lịch chờ */
+    .vd-queue { background: #fffbeb; border: 1px dashed #fcd34d; border-radius: 8px; padding: 7px 9px; display: flex; flex-direction: column; gap: 4px; }
+    .vq-head { font-size: 10.5px; font-weight: 600; color: #92400e; letter-spacing: .03em; text-transform: uppercase; }
+    .vq-item { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink-2); }
+    .vq-item .vq-time { font-weight: 600; color: var(--ink); flex-shrink: 0; }
+    .vq-item .vq-trip { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-3); }
+    .vq-x { background: none; border: none; color: var(--ink-3); font-size: 16px; line-height: 1; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+    .vq-x:hover { color: var(--red); }
+
+    .vd-actions { display: flex; gap: 6px; padding-top: 10px; border-top: 1px solid var(--line-2); }
+    .vd-actions button { flex: 1; padding: 8px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; border: 1px solid var(--line); background: white; color: var(--ink-2); transition: all .12s; }
+    .vd-actions button:not(.pri):hover:not(:disabled) { border-color: #cbd5e1; color: var(--ink); background: var(--bg-soft); }
+    /* Phân công (xe rảnh) — indigo */
+    .vd-actions button.pri { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; box-shadow: 0 1px 2px rgba(67,56,202,.2); }
+    .vd-actions button.pri:hover:not(:disabled) { background: #3730a3; border-color: #3730a3; box-shadow: 0 2px 6px rgba(67,56,202,.35); }
+    /* Đặt lịch sau (xe đang chạy) — amber outline */
+    .vd-actions button.pri.sched { background: #fffbeb; color: #b45309; border-color: #fcd34d; box-shadow: none; }
+    .vd-actions button.pri.sched:hover:not(:disabled) { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+    .vd-actions button:disabled { opacity: 1; cursor: not-allowed; background: var(--line-2); color: var(--ink-3); border-color: var(--line); box-shadow: none; }
+
+    .empty { text-align: center; padding: 60px 20px; color: var(--ink-3); font-size: 13px; }
+    .empty .e-ic { font-size: 32px; margin-bottom: 10px; opacity: .4; }
+    .empty b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: white; padding: 12px 18px; border-radius: 10px; font-weight: 500; font-size: 13px; box-shadow: 0 8px 24px rgba(15,23,42,.18); transform: translateY(100px); opacity: 0; transition: all .25s; z-index: 1000; }
+    .toast.show { transform: translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
@@ -92,248 +287,702 @@
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <div class="topbar-breadcrumb">
-      <span class="parent">Module 2</span><span class="sep">›</span><span class="current">Điều phối chuyến xe</span>
+      <span class="parent">Module 2</span><span class="sep">›</span><span class="current">Điều phối xe – tài xế</span>
     </div>
     <div class="topbar-actions">
-      <span style="font-size:12px;color:var(--text-muted);">Thứ Hai, 11/05/2026</span>
-      <button class="btn btn-secondary btn-sm">◀ Hôm qua</button>
-      <button class="btn btn-primary btn-sm">Hôm nay</button>
-      <button class="btn btn-secondary btn-sm">Ngày mai ▶</button>
-      <button class="topbar-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="notif-badge">4</span></button>
+      <a href="m1-bao-gia.html" class="btn btn-secondary btn-sm">+ Báo giá / Đơn mới</a>
       <div class="topbar-avatar">A</div>
     </div>
   </header>
 
   <main class="page-content">
-    <div class="page-header">
-      <div>
-        <div class="page-title">🎯 Bảng điều phối xe</div>
-        <div class="page-subtitle">Kéo thả đơn hàng để phân công xe và tài xế · 11/05/2026</div>
-      </div>
-      <div class="page-actions">
-        <button class="btn btn-secondary">⬇ Xuất Excel</button>
-        <a href="m1-bao-gia.html" class="btn btn-primary">+ Tạo đơn mới</a>
-      </div>
-    </div>
+    <div class="dp-wrap">
 
-    <!-- Main layout: board + driver panel -->
-    <div style="display:flex;gap:16px;align-items:start;">
-
-      <!-- Kanban board -->
-      <div style="flex:1;min-width:0;">
-        <div class="board">
-          <!-- Col 1: Chờ điều phối -->
-          <div class="board-col">
-            <div class="board-col-head" style="border-left:3px solid #eab308;">
-              <div class="board-col-title">
-                <span>⏳ Chờ điều phối</span>
-                <span class="col-count" style="color:#854d0e;">4</span>
-              </div>
-            </div>
-            <div class="board-cards">
-              <div class="trip-card" draggable="true">
-                <div class="trip-card-id">CX-0538 · 12/05 09:00</div>
-                <div class="trip-card-customer">Công ty Nhựa Nam Việt</div>
-                <div class="trip-card-route">📍 KCN Bình Dương → Long An · 65km</div>
-                <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
-                  <span class="badge badge-gray">1 tấn</span>
-                  <span class="badge badge-blue">1.850.000 ₫</span>
-                </div>
-                <div class="trip-card-footer">
-                  <span class="trip-card-time">Tạo lúc 08:15</span>
-                  <button class="btn btn-primary assign-btn">Phân công →</button>
-                </div>
-              </div>
-              <div class="trip-card" draggable="true">
-                <div class="trip-card-id">CX-0535 · 13/05 06:00</div>
-                <div class="trip-card-customer">KCN Linh Trung I</div>
-                <div class="trip-card-route">📍 Thủ Đức → Quảng Nam · 850km</div>
-                <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
-                  <span class="badge badge-gray">Chưa chọn xe</span>
-                  <span class="badge badge-yellow">Báo giá</span>
-                </div>
-                <div class="trip-card-footer">
-                  <span class="trip-card-time">Tạo lúc 07:30</span>
-                  <button class="btn btn-primary assign-btn">Phân công →</button>
-                </div>
-              </div>
-              <div class="trip-card" draggable="true">
-                <div class="trip-card-id">CX-0534 · 12/05 14:00</div>
-                <div class="trip-card-customer">Siêu thị Co.opMart</div>
-                <div class="trip-card-route">📍 Q.Tân Bình, TP.HCM → Vũng Tàu · 120km</div>
-                <div style="display:flex;gap:4px;margin-bottom:8px;">
-                  <span class="badge badge-gray">3 tấn</span>
-                  <span class="badge badge-blue">3.800.000 ₫</span>
-                </div>
-                <div class="trip-card-footer">
-                  <span class="trip-card-time">Tạo lúc 06:55</span>
-                  <button class="btn btn-primary assign-btn">Phân công →</button>
-                </div>
-              </div>
-              <div class="drag-hint">+ Kéo thả đơn vào đây</div>
-            </div>
-          </div>
-
-          <!-- Col 2: Đã phân công -->
-          <div class="board-col">
-            <div class="board-col-head" style="border-left:3px solid #3b82f6;">
-              <div class="board-col-title">
-                <span>✅ Đã phân công</span>
-                <span class="col-count" style="color:var(--primary);">3</span>
-              </div>
-            </div>
-            <div class="board-cards">
-              <div class="trip-card" draggable="true">
-                <div class="trip-card-id">CX-0541 · 11/05 08:00</div>
-                <div class="trip-card-customer">Cty TNHH Phú Hưng</div>
-                <div class="trip-card-route">📍 Quận 12 → Thủ Dầu Một · 32km</div>
-                <div style="display:flex;gap:4px;margin-bottom:6px;">
-                  <span class="badge badge-gray">5 tấn · 51C-12345</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0fdf4;border-radius:6px;margin-bottom:8px;">
-                  <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">A</div>
-                  <div><div class="driver-name">Nguyễn Văn An</div><div class="driver-vehicle text-xs text-muted">51C-12345 · 5 tấn</div></div>
-                  <span class="badge badge-green" style="margin-left:auto;">Đã nhận</span>
-                </div>
-                <div class="trip-card-footer">
-                  <span class="trip-card-time">Phân công lúc 07:45</span>
-                  <button class="btn btn-secondary assign-btn">Chi tiết</button>
-                </div>
-              </div>
-              <div class="trip-card" draggable="true">
-                <div class="trip-card-id">CX-0539 · 11/05 05:00</div>
-                <div class="trip-card-customer">Cty CP Thép Miền Nam</div>
-                <div class="trip-card-route">📍 Bình Dương → Tây Ninh · 95km</div>
-                <div style="display:flex;gap:4px;margin-bottom:6px;">
-                  <span class="badge badge-gray">15 tấn · 51E-90123</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0fdf4;border-radius:6px;margin-bottom:8px;">
-                  <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">H</div>
-                  <div><div class="driver-name">Phạm Quốc Hùng</div><div class="driver-vehicle text-xs text-muted">51E-90123 · 15 tấn</div></div>
-                  <span class="badge badge-blue" style="margin-left:auto;">Đang chạy</span>
-                </div>
-                <div class="trip-card-footer">
-                  <span class="trip-card-time">Phân công lúc 04:30</span>
-                  <button class="btn btn-secondary assign-btn">GPS</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Col 3: Đang vận chuyển -->
-          <div class="board-col">
-            <div class="board-col-head" style="border-left:3px solid #22c55e;">
-              <div class="board-col-title">
-                <span>🚚 Đang vận chuyển</span>
-                <span class="col-count" style="color:#15803d;">3</span>
-              </div>
-            </div>
-            <div class="board-cards">
-              <div class="trip-card" style="border-left:3px solid #22c55e;">
-                <div class="trip-card-id">CX-0540 · 11/05 06:30 → ✅ 10:15</div>
-                <div class="trip-card-customer">Siêu thị Big C</div>
-                <div class="trip-card-route">📍 Đồng Nai → Quận 7, TP.HCM · 48km</div>
-                <div style="display:flex;gap:4px;margin-bottom:6px;">
-                  <span class="badge badge-gray">10 tấn</span>
-                  <span class="badge badge-green">Hoàn thành</span>
-                </div>
-                <div style="font-size:11px;background:#f0fdf4;border-radius:6px;padding:6px 8px;color:#15803d;font-weight:600;">
-                  ✅ Đã giao hàng · Đang chờ thanh toán 5.800.000 ₫
-                </div>
-              </div>
-              <div class="trip-card" style="border-left:3px solid #3b82f6;">
-                <div class="trip-card-id">CX-0541 · 11/05 08:00 — Đang chạy</div>
-                <div class="trip-card-customer">Cty TNHH Phú Hưng</div>
-                <div class="trip-card-route">📍 Quận 12 → Thủ Dầu Một · 32km</div>
-                <div style="margin:6px 0;font-size:11px;background:#eff6ff;border-radius:6px;padding:6px 8px;">
-                  📍 Vị trí hiện tại: Quốc lộ 13, Bình Dương<br>
-                  ⏱ Còn khoảng 18 phút · Đã chạy 20km
-                </div>
-                <div class="trip-card-footer">
-                  <span class="badge badge-blue">Đang chạy</span>
-                  <button class="btn btn-secondary assign-btn">Xem GPS</button>
-                </div>
-              </div>
-              <div class="trip-card" style="border-left:3px solid #3b82f6;">
-                <div class="trip-card-id">CX-0539 · 11/05 05:00 — Đang chạy</div>
-                <div class="trip-card-customer">Cty CP Thép Miền Nam</div>
-                <div class="trip-card-route">📍 Bình Dương → Tây Ninh · 95km</div>
-                <div style="margin:6px 0;font-size:11px;background:#eff6ff;border-radius:6px;padding:6px 8px;">
-                  📍 Vị trí hiện tại: Gò Dầu, Tây Ninh<br>
-                  ⏱ Còn khoảng 35 phút · Đã chạy 68km
-                </div>
-                <div class="trip-card-footer">
-                  <span class="badge badge-blue">Đang chạy</span>
-                  <button class="btn btn-secondary assign-btn">Xem GPS</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Available drivers -->
-      <div class="driver-panel">
-        <div class="card">
-          <div class="card-header" style="padding:10px 14px;">
-            <span class="card-title">🚗 Tài xế / Xe rảnh</span>
-            <span class="badge badge-green">2 sẵn sàng</span>
-          </div>
-          <div style="padding:8px;">
-            <div class="driver-row">
-              <div class="avatar avatar-sm" style="background:#dcfce7;color:#15803d;">K</div>
-              <div class="driver-info">
-                <div class="driver-name">Trần Minh Khoa</div>
-                <div class="driver-vehicle">10 tấn · 51D-56789</div>
-              </div>
-              <span class="status-dot dot-green dot-pulse"></span>
-            </div>
-            <div class="driver-row">
-              <div class="avatar avatar-sm" style="background:#dbeafe;color:#1d4ed8;">B</div>
-              <div class="driver-info">
-                <div class="driver-name">Lê Văn Bình</div>
-                <div class="driver-vehicle">3 tấn · 51F-23456</div>
-              </div>
-              <span class="status-dot dot-green dot-pulse"></span>
-            </div>
-          </div>
-          <div style="padding:4px 8px 10px;border-top:1px solid var(--border-light);">
-            <div style="padding:6px 8px;font-size:11px;font-weight:600;color:var(--text-muted);">Đang bận (3)</div>
-            <div class="driver-row" style="opacity:0.7;cursor:default;">
-              <div class="avatar avatar-sm" style="background:#ffedd5;color:#c2410c;">A</div>
-              <div class="driver-info">
-                <div class="driver-name">Nguyễn Văn An</div>
-                <div class="driver-vehicle">5 tấn · CX-0541</div>
-              </div>
-              <span class="status-dot dot-yellow"></span>
-            </div>
-            <div class="driver-row" style="opacity:0.7;cursor:default;">
-              <div class="avatar avatar-sm" style="background:#f3e8ff;color:#7e22ce;">H</div>
-              <div class="driver-info">
-                <div class="driver-name">Phạm Quốc Hùng</div>
-                <div class="driver-vehicle">15 tấn · CX-0539</div>
-              </div>
-              <span class="status-dot dot-yellow"></span>
-            </div>
-            <div class="driver-row" style="opacity:0.7;cursor:default;">
-              <div class="avatar avatar-sm" style="background:#ccfbf1;color:#0f766e;">T</div>
-              <div class="driver-info">
-                <div class="driver-name">Đỗ Thanh Tùng</div>
-                <div class="driver-vehicle">7 tấn · CX-0536</div>
-              </div>
-              <span class="status-dot dot-yellow"></span>
-            </div>
-          </div>
+      <!-- ───────── LEFT: Order to dispatch ───────── -->
+      <aside class="dp-left">
+        <div class="ord-card" id="ordCard">
+          <!-- filled by JS -->
         </div>
 
-        <!-- Alert conflicts -->
-        <div class="alert alert-warning">
-          ⚠️ <div><strong>Cảnh báo trùng lịch</strong><br>Tài xế Nguyễn Văn An có 2 chuyến trùng nhau ngày 12/05</div>
+        <div style="font-size:11.5px;color:var(--ink-3);line-height:1.5;padding:0 2px;">
+          <b style="color:var(--ink-2);font-weight:600;">Mẹo:</b> Mặc định chỉ hiện xe <b style="color:var(--ink-2);">đủ tải</b> cho đơn. Chọn <b style="color:var(--ink-2);">Mọi tải trọng</b> hoặc <b style="color:var(--ink-2);">kích thước thùng</b> để xem thêm.
         </div>
-      </div>
+      </aside>
+
+      <!-- ───────── RIGHT: Vehicle/driver list ───────── -->
+      <section class="dp-right">
+
+        <!-- Toolbar: search + filters -->
+        <div class="dp-toolbar">
+          <div class="search">
+            <span class="si">🔍</span>
+            <input id="searchInp" type="text" placeholder="Tìm tên tài xế, biển số, SĐT…" oninput="renderList()">
+          </div>
+          <div class="seg" id="segOwn">
+            <button class="on"  data-own="own"     onclick="setOwn('own')">Cơ hữu</button>
+            <button             data-own="partner" onclick="setOwn('partner')">Đối tác</button>
+            <button             data-own="all"     onclick="setOwn('all')">Tất cả</button>
+          </div>
+          <select id="tonSel" onchange="renderList()">
+            <option value="fit">Tải phù hợp đơn</option>
+            <option value="all">Mọi tải trọng</option>
+            <option value="d|1|2.6×1.4×1.4">1T (2.6×1.4×1.4)</option>
+            <option value="d|1.5|3.2×1.5×1.6">1.5T (3.2×1.5×1.6)</option>
+            <option value="d|2|4.2×1.85×1.85">2T (4.2×1.85×1.85)</option>
+            <option value="d|2|6.0×1.9×1.9">2T (6.0×1.9×1.9)</option>
+            <option value="d|2.5|4.2×1.85×1.85">2.5T (4.2×1.85×1.85)</option>
+            <option value="d|3.5|4.5×1.9×1.9">3.5T (4.5×1.9×1.9)</option>
+            <option value="d|3.5|6.0×2.0×2.0">3.5T (6.0×2.0×2.0)</option>
+            <option value="d|5|6.2×2.2×2.1">5T (6.2×2.2×2.1)</option>
+            <option value="d|8|7.4×2.3×2.2">8T (7.4×2.3×2.2)</option>
+            <option value="d|10|7.4×2.3×2.2">10T (7.4×2.3×2.2)</option>
+            <option value="d|15|9.5×2.38×2.4">15T (9.5×2.38×2.4)</option>
+          </select>
+        </div>
+
+        <!-- Tabs (động theo cơ hữu / đối tác) -->
+        <div class="dp-tabs" id="dpTabs"></div>
+
+        <!-- Card list -->
+        <div class="vlist-grid" id="vlistGrid"></div>
+
+      </section>
     </div>
   </main>
 </div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Lightbox xem hình tài xế / xe -->
+<div class="lb-mask" id="lbMask" onclick="closeLightbox(event)">
+  <button class="lb-close" onclick="closeLightbox()">×</button>
+  <div class="lb-box" onclick="event.stopPropagation()">
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <div class="lb-foot">
+      <div class="t" id="lbTitle"></div>
+      <div class="s" id="lbSub"></div>
+    </div>
+  </div>
+</div>
+
 <script src="assets/app.js"></script>
+<script>
+// ===================== Mock data =====================
+// 6 cơ hữu + 8 đối tác
+const FLEET = [
+  // ── Cơ hữu (own) ──
+  { id:'d01', own:'own',     name:'Nguyễn Văn An',     avatar:'A', phone:'0901 234 567',
+    veh:'Hyundai HD120', icon:'🚛', tons:5,   dim:'6.2×2.2×2.1', plate:'51C-12345',
+    status:'busy', currentTrip:'CX-0541 → Thủ Dầu Một', etaFree:'≈ 18 phút' },
+  { id:'d02', own:'own',     name:'Trần Minh Khoa',    avatar:'K', phone:'0912 555 888',
+    veh:'Hino FG 10T',   icon:'🏗️', tons:10,  dim:'7.4×2.3×2.2', plate:'51D-56789',
+    status:'free' },
+  { id:'d03', own:'own',     name:'Lê Văn Bình',       avatar:'B', phone:'0938 111 222',
+    veh:'Suzuki Carry',  icon:'🚐', tons:1,   dim:'2.6×1.4×1.4', plate:'51F-23456',
+    status:'free' },
+  { id:'d04', own:'own',     name:'Phạm Quốc Hùng',    avatar:'H', phone:'0903 777 333',
+    veh:'Howo 4 chân',   icon:'🏗️', tons:15,  dim:'9.5×2.38×2.4', plate:'51E-90123',
+    status:'busy', currentTrip:'CX-0539 → Tây Ninh', etaFree:'≈ 35 phút' },
+  { id:'d05', own:'own',     name:'Đỗ Thanh Tùng',     avatar:'T', phone:'0945 666 999',
+    veh:'Isuzu QKR 2T',  icon:'🚛', tons:2,   dim:'4.2×1.85×1.85', plate:'51G-77234',
+    status:'free' },
+  { id:'d06', own:'own',     name:'Võ Thành Nam',      avatar:'N', phone:'0976 888 111',
+    veh:'Hyundai 3.5T',  icon:'🚚', tons:3.5, dim:'4.5×1.9×1.9',  plate:'51H-44556',
+    status:'free' },
+
+  // ── Đối tác (partner) ──
+  { id:'p01', own:'partner', name:'Bùi Văn Tài',       avatar:'T', phone:'0918 222 333',
+    veh:'Thaco 1.5T',    icon:'🚐', tons:1.5, dim:'3.2×1.5×1.6',  plate:'52A-11122',
+    status:'free', partnerCo:'HTX Vận tải Bình Tân' },
+  { id:'p02', own:'partner', name:'Hoàng Minh Đức',    avatar:'Đ', phone:'0989 444 555',
+    veh:'Hino 5T',       icon:'🚚', tons:5,   dim:'6.2×2.2×2.1',  plate:'51J-66778',
+    status:'free', partnerCo:'Cá nhân' },
+  { id:'p03', own:'partner', name:'Lý Văn Sơn',        avatar:'S', phone:'0962 999 000',
+    veh:'Howo 8T',       icon:'🏗️', tons:8,   dim:'7.4×2.3×2.2',  plate:'51K-33445',
+    status:'free', partnerCo:'Cty Vĩnh Phát' },
+  { id:'p04', own:'partner', name:'Đinh Quang Vinh',   avatar:'V', phone:'0907 333 444',
+    veh:'Hyundai 2.5T',  icon:'🚛', tons:2.5, dim:'4.2×1.85×1.85', plate:'52B-99887',
+    status:'free', partnerCo:'HTX Phú Mỹ' },
+  { id:'p05', own:'partner', name:'Trần Hữu Phúc',     avatar:'P', phone:'0925 111 333',
+    veh:'Howo 15T',      icon:'🏗️', tons:15,  dim:'9.5×2.38×2.4', plate:'51L-22334',
+    status:'busy', ourTrip:true, currentTrip:'CX-2605-0118 → Vũng Tàu', etaFree:'≈ 1 giờ', partnerCo:'Vận tải Phúc An' },
+  { id:'p06', own:'partner', name:'Nguyễn Văn Tý',     avatar:'Ý', phone:'0888 666 777',
+    veh:'Isuzu 1T',      icon:'🚐', tons:1,   dim:'2.6×1.4×1.4',  plate:'52C-55667',
+    status:'busy', ourTrip:false, partnerCo:'Cá nhân' },
+  { id:'p07', own:'partner', name:'Lê Hoàng Nam',      avatar:'N', phone:'0911 444 222',
+    veh:'Hino 3.5T',     icon:'🚚', tons:3.5, dim:'4.5×1.9×1.9',  plate:'51M-88990',
+    status:'offline', partnerCo:'Cty Hoàng Long' },
+  { id:'p08', own:'partner', name:'Phan Văn Hải',      avatar:'H', phone:'0934 555 111',
+    veh:'Howo 10T',      icon:'🏗️', tons:10,  dim:'7.4×2.3×2.2',  plate:'51N-12321',
+    status:'offline', partnerCo:'Cty Hải Vận' },
+];
+
+// ===================== State =====================
+let order = null;
+let curTab = 'free';
+let curOwn = 'own'; // Cơ hữu mặc định
+
+// ===================== Boot =====================
+function loadOrder() {
+  try { order = JSON.parse(localStorage.getItem('vc_pending_order')||'null'); } catch(e) {}
+  if (!order) {
+    // demo fallback - đơn mẫu thực tế
+    order = {
+      id: 'CX-2605-0142',
+      customer: 'Cty TNHH Nội thất Minh Phát',
+      phone: '0903 215 678',
+      origin: 'Kho 12, đường Nguyễn Văn Linh, Q.7, TP.HCM',
+      dest:   'KCN Amata, Long Bình, Biên Hoà, Đồng Nai',
+      depTime: '2026-05-12T14:30',
+      etaDur: '≈ 1 giờ 30 phút',
+      km: 48,
+      cargoKg: 3200,        // 3.2 tấn = 3200 kg
+      cargoTons: 3.2,
+      cargoVol: 14,
+      vehReq: [{ qty: 1, label: 'Xe 3.5T thùng kín', tons: 3.5, dim: '6.0×2.0×2.0', vol: 17 }],
+      // Chi tiết cước
+      basePrice: 1050000,    // cước cơ bản
+      surcharges: [
+        { label: 'Phí cầu đường', amount: 80000 },
+        { label: 'Bốc xếp tại kho', amount: 70000 },
+        { label: 'Phụ phí hàng dễ vỡ', amount: 50000 },
+      ],
+      vat: true,             // có xuất VAT 10%
+      vatRate: 0.10,
+      total: 1375000,        // đã gồm VAT
+      totalText: '1.375.000đ',
+      note: 'Hàng dễ vỡ (kệ TV, tủ gỗ MDF). Có pallet & xe nâng tay tại kho. Liên hệ kho trước 15 phút.'
+    };
+  }
+  enrichOrder();
+}
+
+/* Bù dữ liệu thiếu để hiển thị như đơn thực tế */
+function enrichOrder() {
+  if (!order) return;
+  // Khách hàng
+  if (!order.customer || order.customer === 'Khách lẻ' || order.customer === 'Khach le') {
+    order.customer = 'Anh Trần Quốc Hùng';
+  }
+  // Số điện thoại
+  if (!order.phone) {
+    const rnd = Math.floor(100000000 + Math.random()*899999999);
+    order.phone = '09' + String(rnd).slice(0,8);
+  }
+  // Khoảng cách
+  const km = Number(order.km) || 15;
+  order.km = km;
+  // Thời gian chạy: ~40 km/h trung bình
+  if (!order.etaDur) {
+    const minutes = Math.max(20, Math.round(km / 40 * 60));
+    if (minutes >= 60) {
+      const h = Math.floor(minutes/60), m = minutes % 60;
+      order.etaDur = `≈ ${h} giờ${m ? ' '+m+' phút' : ''}`;
+    } else {
+      order.etaDur = `≈ ${minutes} phút`;
+    }
+  }
+  // Khởi hành: nếu chưa có, mặc định +30 phút từ hiện tại
+  if (!order.depTime) {
+    const t = new Date(Date.now() + 30*60*1000);
+    t.setSeconds(0,0);
+    order.depTime = t.toISOString().slice(0,16);
+  }
+  // Hàng hoá
+  if (!order.cargoKg && order.cargoTons) order.cargoKg = Math.round(order.cargoTons * 1000);
+  if (!order.cargoTons && order.cargoKg) order.cargoTons = +(order.cargoKg / 1000).toFixed(2);
+  if (!order.cargoKg)  order.cargoKg  = 800;          // 0.8 tấn mặc định cho khách lẻ
+  if (!order.cargoTons) order.cargoTons = +(order.cargoKg/1000).toFixed(2);
+  if (!order.cargoVol) order.cargoVol = Math.max(2, Math.round(order.cargoTons * 4));
+  // Xe yêu cầu
+  if (!order.vehReq || !order.vehReq.length) {
+    let label = '1T', tons = 1, dim = '2.6×1.4×1.4';
+    if (order.cargoTons > 10)      { label = '15T';  tons = 15;  dim = '9.5×2.38×2.4'; }
+    else if (order.cargoTons > 5)  { label = '10T';  tons = 10;  dim = '7.4×2.3×2.2'; }
+    else if (order.cargoTons > 3)  { label = '5T';   tons = 5;   dim = '6.2×2.2×2.1'; }
+    else if (order.cargoTons > 2)  { label = '3.5T'; tons = 3.5; dim = '4.5×1.9×1.9'; }
+    else if (order.cargoTons > 1.5){ label = '2T';   tons = 2;   dim = '4.2×1.85×1.85'; }
+    else if (order.cargoTons > 1)  { label = '1.5T'; tons = 1.5; dim = '3.2×1.5×1.6'; }
+    order.vehReq = [{ qty: 1, label: 'Xe '+label+' thùng kín', tons, dim, vol: order.cargoVol }];
+  }
+  // Cước cơ bản: ~22.000đ/km, tối thiểu 250.000đ
+  if (!order.basePrice) {
+    order.basePrice = Math.max(250000, Math.round(km * 22000 / 1000) * 1000);
+  }
+  // Phụ phí
+  if (!order.surcharges) {
+    order.surcharges = km > 30
+      ? [{ label: 'Phí cầu đường', amount: 50000 }, { label: 'Bốc xếp', amount: 50000 }]
+      : [{ label: 'Bốc xếp', amount: 50000 }];
+  }
+  // VAT
+  if (order.vat == null) order.vat = false;
+  if (order.vatRate == null) order.vatRate = 0.10;
+  // Tổng cộng (luôn tính lại để chắc chắn có số)
+  const _sur = (order.surcharges||[]).reduce((s,x)=>s+(Number(x.amount)||0), 0);
+  const _sub = (Number(order.basePrice)||0) + _sur;
+  const _vat = order.vat ? Math.round(_sub * (order.vatRate||0.1)) : 0;
+  order.total = _sub + _vat;
+  // Ghi chú
+  if (!order.note) order.note = 'Liên hệ khách trước khi đến nhận hàng.';
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  try { const d = new Date(iso); return d.toLocaleString('vi-VN', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' }); }
+  catch(e) { return iso; }
+}
+function fmtVnd(n) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toLocaleString('vi-VN') + 'đ';
+}
+function fmtKg(kg) {
+  if (kg == null) return '—';
+  if (kg >= 1000) return (kg/1000).toLocaleString('vi-VN', {maximumFractionDigits:2}) + ' tấn (' + kg.toLocaleString('vi-VN') + ' kg)';
+  return kg + ' kg';
+}
+function fmtKgShort(kg) {
+  if (kg == null) return '—';
+  if (kg >= 1000) return (kg/1000).toLocaleString('vi-VN', {maximumFractionDigits:2}) + 'T';
+  return kg + 'kg';
+}
+
+function renderOrder() {
+  const surTotal = (order.surcharges||[]).reduce((s,x)=>s+(x.amount||0), 0);
+  const subTotal = (order.basePrice||0) + surTotal;
+  const vatAmt = order.vat ? Math.round(subTotal * (order.vatRate||0.1)) : 0;
+  const total = order.total || (subTotal + vatAmt);
+
+  const surchargesHTML = (order.surcharges||[]).length
+    ? (order.surcharges||[]).map(s => `<div class="pr-row"><span>${s.label}</span><span>${fmtVnd(s.amount)}</span></div>`).join('')
+    : '<div class="pr-row muted"><span>Không có phụ phí</span><span>0đ</span></div>';
+
+  const phoneClean = (order.phone||'').replace(/\s/g,'');
+
+  document.getElementById('ordCard').innerHTML = `
+    <div class="ord-head">
+      <div class="top">
+        <span class="code">${order.id}</span>
+        <span class="vat-flag ${order.vat?'on':'off'}">${order.vat ? 'VAT '+Math.round((order.vatRate||0.1)*100)+'%' : 'Không VAT'}</span>
+      </div>
+      <div class="title">${order.customer || 'Khách lẻ'}</div>
+      ${order.phone ? `<div class="sub">☎ <a href="tel:${phoneClean}">${order.phone}</a></div>` : ''}
+    </div>
+
+    <div class="ord-body">
+      <!-- Tuyến -->
+      <div class="route-mini">
+        <div class="rail"><div class="d1"></div><div class="ln"></div><div class="d2"></div></div>
+        <div class="pts">
+          <div class="pt"><span class="ll">Điểm đi</span>${order.origin || '—'}</div>
+          <div class="pt"><span class="ll">Điểm đến</span>${order.dest || '—'}</div>
+        </div>
+      </div>
+
+      <!-- Quick stats: 4 ô -->
+      <div class="qs-grid">
+        <div class="qs-cell">
+          <div class="ic">📍</div>
+          <div class="txt"><span class="l">Khoảng cách</span><span class="v">${order.km || 0} km</span></div>
+        </div>
+        <div class="qs-cell">
+          <div class="ic">⏱</div>
+          <div class="txt"><span class="l">Thời gian chạy</span><span class="v">${order.etaDur || '—'}</span></div>
+        </div>
+        <div class="qs-cell">
+          <div class="ic">🗓</div>
+          <div class="txt"><span class="l">Khởi hành</span><span class="v">${fmtTime(order.depTime) || '—'}</span></div>
+        </div>
+        <div class="qs-cell">
+          <div class="ic">⚖</div>
+          <div class="txt"><span class="l">Hàng hoá</span><span class="v">${fmtKgShort(order.cargoKg)} · ${order.cargoVol||0}m³</span></div>
+        </div>
+      </div>
+
+      <!-- Xe yêu cầu -->
+      ${(order.vehReq||[]).length ? `<div class="ord-vehreq">
+        <span class="lbl">Xe đặt</span>
+        ${(order.vehReq||[]).map(r=>`<span class="ord-tag">${r.qty?r.qty+'× ':''}${r.label||''}${r.dim?` <em style="font-style:normal;color:var(--ink-3);font-weight:500;margin-left:3px;">(${r.dim} m)</em>`:''}</span>`).join('')}
+      </div>` : ''}
+
+      <!-- Cước (collapsible) -->
+      <details class="ord-price" open>
+        <summary>
+          <span class="lbl"><span class="chev">▶</span>Tổng tiền đơn</span>
+          <span class="total">${fmtVnd(total)}</span>
+        </summary>
+        <div class="pr-body">
+          <div class="pr-list">
+            <div class="pr-row"><span>Cước cơ bản</span><span>${fmtVnd(order.basePrice)}</span></div>
+            <div class="pr-sub">Phụ phí</div>
+            ${surchargesHTML}
+            <div class="pr-row sub"><span>Tạm tính</span><span>${fmtVnd(subTotal)}</span></div>
+            <div class="pr-row"><span>VAT ${order.vat ? Math.round((order.vatRate||0.1)*100)+'%' : '(không xuất)'}</span><span>${order.vat ? fmtVnd(vatAmt) : '0đ'}</span></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  `;
+}
+
+// ===================== Filtering =====================
+function isFit(d) {
+  const needTons = (order?.cargoTons || 0);
+  const needVol  = (order?.cargoVol  || 0);
+  // require vehicle capacity ≥ cargo (if cargo is 0, treat as 'any')
+  if (needTons > 0 && d.tons < needTons) return false;
+  if (needVol  > 0) {
+    // approximate volume from tons; we have d (tons + dim). use known vol if possible
+    // Use heuristic vol = parsed dim product
+    const m = (d.dim||'').match(/^([\d.]+)x?[×x]([\d.]+)x?[×x]([\d.]+)/i) || (d.dim||'').match(/([\d.]+)×([\d.]+)×([\d.]+)/);
+    if (m) { const vol = parseFloat(m[1])*parseFloat(m[2])*parseFloat(m[3]); if (vol < needVol) return false; }
+  }
+  return true;
+}
+
+function passesFilters(d) {
+  // Ownership
+  if (curOwn !== 'all' && d.own !== curOwn) return false;
+  // Tonnage / dim filter (ghép chung 1 dropdown)
+  const v = document.getElementById('tonSel').value;
+  if (v === 'fit') {
+    if (!isFit(d)) return false;
+  } else if (v !== 'all') {
+    const parts = v.split('|');
+    if (parts[0] === 't') {
+      // chỉ lọc theo tải trọng
+      if (parseFloat(d.tons) !== parseFloat(parts[1])) return false;
+    } else if (parts[0] === 'd') {
+      // lọc theo cả tải + kích thước
+      if (parseFloat(d.tons) !== parseFloat(parts[1])) return false;
+      if ((d.dim||'').replace(/\s/g,'') !== parts[2]) return false;
+    }
+  }
+  // Search
+  const q = (document.getElementById('searchInp').value||'').toLowerCase().trim();
+  if (q) {
+    const hay = `${d.name} ${d.plate} ${d.phone} ${d.veh}`.toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+/* Phân loại trạng thái để gắn vào tab */
+function tabKeyOf(d) {
+  if (d.status === 'free') return 'free';
+  if (d.own === 'own') return 'busy'; // cơ hữu bận = đang chạy
+  if (d.ourTrip) return 'busy';        // đối tác đang chạy đơn của mình
+  if (d.status === 'offline') return 'offline';
+  return 'busy-other'; // đối tác bận việc khác
+}
+
+function tabFilter(d) {
+  return tabKeyOf(d) === curTab;
+}
+
+/* Render tabs theo cơ hữu / đối tác / tất cả */
+function renderTabs() {
+  const list = FLEET.filter(passesFilters);
+  const cnt = (k) => list.filter(d => tabKeyOf(d) === k).length;
+
+  let tabs;
+  if (curOwn === 'own') {
+    tabs = [
+      { k: 'free', label: 'Sẵn sàng', n: cnt('free') },
+      { k: 'busy', label: 'Đang chạy', n: cnt('busy') },
+    ];
+  } else if (curOwn === 'partner') {
+    tabs = [
+      { k: 'free',       label: 'Sẵn sàng',  n: cnt('free') },
+      { k: 'busy',       label: 'Đang chạy', n: cnt('busy') },
+      { k: 'busy-other', label: 'Bận',       n: cnt('busy-other') },
+      { k: 'offline',    label: 'Offline',    n: cnt('offline') },
+    ];
+  } else {
+    tabs = [
+      { k: 'free',       label: 'Sẵn sàng',  n: cnt('free') },
+      { k: 'busy',       label: 'Đang chạy', n: cnt('busy') },
+      { k: 'busy-other', label: 'Bận (ĐT)',  n: cnt('busy-other') },
+      { k: 'offline',    label: 'Offline (ĐT)', n: cnt('offline') },
+    ];
+  }
+
+  // Đảm bảo curTab hợp lệ
+  if (!tabs.find(t => t.k === curTab)) curTab = tabs[0].k;
+
+  document.getElementById('dpTabs').innerHTML = tabs.map(t =>
+    `<button class="dp-tab ${t.k===curTab?'on':''}" onclick="setTab('${t.k}')">${t.label} <span class="pill">${t.n}</span></button>`
+  ).join('');
+}
+
+// ===================== Render list =====================
+function statusBadge(d) {
+  // Cơ hữu đang chạy, hoặc đối tác đang chạy CHUYẾN CỦA MÌNH → hiển thị chi tiết
+  if (d.status === 'busy' && (d.own === 'own' || d.ourTrip)) {
+    return `<div class="vd-status"><span class="sd amber"></span><b>Đang chạy</b> · ${d.currentTrip||'—'}<span class="eta">${d.etaFree?'xong sau '+d.etaFree:''}</span></div>`;
+  }
+  return '';
+}
+
+/* Lịch chờ: hiển thị các chuyến đã đặt lịch cho tài xế */
+function queueBadge(d) {
+  if (!d.queue || !d.queue.length) return '';
+  const items = d.queue.map((q,i) => `
+    <div class="vq-item">
+      <span class="vq-time">${fmtTime(q.depTime)}</span>
+      <span class="vq-trip">${q.tripId} · ${q.dest}</span>
+      <button class="vq-x" title="Huỷ lịch" onclick="unschedule('${d.id}',${i})">×</button>
+    </div>`).join('');
+  return `<div class="vd-queue">
+    <div class="vq-head">📅 Lịch chờ (${d.queue.length})</div>
+    ${items}
+  </div>`;
+}
+
+/* App-status banner: chỉ hiển thị cho đối tác */
+function appBanner(d) {
+  if (d.own !== 'partner') return '';
+  if (d.status === 'offline') {
+    return `<div class="vd-app gray">
+      <span class="toggle"></span>
+      <span class="lbl">App: Chưa bật <span class="sub">· tài xế offline</span></span>
+    </div>`;
+  }
+  if (d.status === 'free' || d.ourTrip) {
+    return `<div class="vd-app on">
+      <span class="toggle"></span>
+      <span class="lbl">App: Đang bật nhận cuốc</span>
+    </div>`;
+  }
+  // partner busy with other work
+  return `<div class="vd-app off">
+    <span class="toggle"></span>
+    <span class="lbl">App: Đang bận <span class="sub">· không nhận cuốc</span></span>
+  </div>`;
+}
+
+function cardHTML(d) {
+  const fit = isFit(d);
+  const cls = ['vd-card'];
+  if (d.status === 'busy') cls.push('busy');
+  if (d.status === 'offline') cls.push('offline');
+
+  // Accent bar trái
+  if (d.own === 'partner') {
+    if (d.status === 'free') cls.push('acc-green');
+    else if (d.ourTrip) cls.push('acc-amber'); // đang chạy đơn mình
+    else if (d.status === 'offline') cls.push('acc-gray'); // chưa bật app
+    else cls.push('acc-red'); // bận việc khác
+  } else {
+    if (d.status === 'busy') cls.push('acc-amber');
+    else cls.push('acc-green');
+  }
+
+  const tags = [];
+  tags.push(`<span class="vd-chip">${d.own==='own'?'Cơ hữu':'Đối tác'}</span>`);
+  if (fit && d.status==='free') tags.push(`<span class="vd-chip match">✓ Phù hợp</span>`);
+
+  let dotCls = 'gray';
+  if (d.status === 'free') dotCls = 'green';
+  else if (d.own === 'partner' && d.ourTrip) dotCls = 'amber';   // đối tác chạy đơn mình
+  else if (d.own === 'partner' && d.status === 'offline') dotCls = 'gray'; // chưa bật app
+  else if (d.own === 'partner') dotCls = 'red';                  // bận việc khác
+  else if (d.status === 'busy') dotCls = 'amber';                // cơ hữu bận
+
+  const phoneClean = (d.phone||'').replace(/\s/g,'');
+  // Có thể điều phối: rảnh → gán liền; bận (cơ hữu hoặc đối tác đang chạy đơn mình) → đặt lịch sau.
+  // Không cho: đối tác bận việc khác / offline.
+  const canSchedule = d.status === 'busy' && (d.own === 'own' || d.ourTrip);
+  const canAssign = d.status === 'free' || canSchedule;
+  let btnLabel = 'Phân công';
+  if (canSchedule) btnLabel = 'Đặt lịch sau';
+  else if (d.status === 'busy') btnLabel = 'Không nhận cuốc';
+  else if (d.status === 'offline') btnLabel = 'Không nhận cuốc';
+
+  return `
+    <div class="${cls.join(' ')}" data-id="${d.id}">
+      <div class="vd-tags">${tags.join('')}</div>
+      <div class="vd-head">
+        <div class="vd-avatar" title="Xem hình tài xế" onclick="showDriverPhoto('${d.id}')">
+          <img src="${driverPhoto(d)}" alt="${d.name}" onerror="this.style.display='none';this.parentNode.insertAdjacentText('afterbegin','${d.avatar}')">
+          <span class="dot ${dotCls}"></span>
+        </div>
+        <div class="vd-info">
+          <div class="vd-name">${d.name}</div>
+          <div class="vd-meta"><a href="tel:${phoneClean}">${d.phone}</a>${d.partnerCo?`<span class="sep">·</span>${d.partnerCo}`:''}</div>
+        </div>
+      </div>
+      ${appBanner(d)}
+      <div class="vd-veh">
+        <div class="vd-veh-thumb" title="Xem hình xe" onclick="showVehiclePhoto('${d.id}')">
+          <img src="${vehiclePhoto(d)}" alt="${d.veh}" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=&quot;ph&quot;>${d.icon}</span>'">
+        </div>
+        <div class="vd-veh-body">
+          <div class="vd-veh-name">${d.veh}</div>
+          <div class="vd-veh-spec">${d.tons} tấn · ${d.dim} m</div>
+        </div>
+        <div class="vd-plate">${d.plate}</div>
+      </div>
+      ${statusBadge(d)}
+      ${queueBadge(d)}
+      <div class="vd-actions">
+        <button onclick="viewDriver('${d.id}')">Chi tiết</button>
+        <button class="pri ${canSchedule?'sched':''}" ${canAssign?'':'disabled'} onclick="assign('${d.id}')">${btnLabel}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderList() {
+  renderTabs();
+
+  // sidebar stats: phù hợp với đơn
+  const totalFitFree = FLEET.filter(d => isFit(d) && d.status==='free').length;
+  const totalFitBusy = FLEET.filter(d => isFit(d) && d.status==='busy').length;
+  const sf = document.getElementById('sCntFree'); if (sf) sf.textContent = totalFitFree;
+  const sb = document.getElementById('sCntBusy'); if (sb) sb.textContent = totalFitBusy;
+  const st = document.getElementById('sCntTotal'); if (st) st.textContent = FLEET.length;
+
+  // list
+  const list = FLEET.filter(d => passesFilters(d) && tabFilter(d));
+  // sort: phù hợp trước; tải nhỏ trước
+  list.sort((a,b) => {
+    if (isFit(a)!==isFit(b)) return isFit(a) ? -1 : 1;
+    return a.tons - b.tons;
+  });
+
+  const grid = document.getElementById('vlistGrid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="e-ic">⊘</div><b>Không có xe trong tab này</b>Thử bỏ bớt bộ lọc hoặc chuyển tab khác.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(cardHTML).join('');
+}
+
+// ===================== Tabs / filters =====================
+function setTab(t) {
+  curTab = t;
+  renderList();
+}
+function setOwn(o) {
+  curOwn = o;
+  document.querySelectorAll('#segOwn button').forEach(b => b.classList.toggle('on', b.dataset.own === o));
+  curTab = 'free'; // reset về tab đầu khi đổi seg
+  renderList();
+}
+
+// ===================== Photos / Lightbox =====================
+// Hash từ id để chọn ảnh ổn định
+function _hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h*31 + s.charCodeAt(i)) >>> 0; return h; }
+function driverPhoto(d) {
+  // pravatar.cc: 70 ảnh chân dung sẵn (1..70)
+  const n = (_hash(d.id) % 70) + 1;
+  return `https://i.pravatar.cc/200?img=${n}`;
+}
+function vehiclePhoto(d) {
+  // Picsum random theo seed (có thể thay bằng ảnh xe thật về sau)
+  return `https://picsum.photos/seed/${d.id}-truck/320/240`;
+}
+
+function openLightbox(src, title, sub, portrait) {
+  const m = document.getElementById('lbMask');
+  const img = document.getElementById('lbImg');
+  img.src = src;
+  img.classList.toggle('portrait', !!portrait);
+  document.getElementById('lbTitle').textContent = title || '';
+  document.getElementById('lbSub').textContent = sub || '';
+  m.classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+  if (e && e.target.closest('.lb-box')) return;
+  document.getElementById('lbMask').classList.remove('on');
+  document.body.style.overflow = '';
+}
+function showDriverPhoto(id) {
+  const d = FLEET.find(x => x.id === id); if (!d) return;
+  openLightbox(driverPhoto(d), d.name, `${d.phone} · ${d.own==='own'?'Cơ hữu':d.partnerCo||'Đối tác'}`, true);
+}
+function showVehiclePhoto(id) {
+  const d = FLEET.find(x => x.id === id); if (!d) return;
+  openLightbox(vehiclePhoto(d), `${d.veh} · ${d.plate}`, `${d.tons} tấn · ${d.dim} m`, false);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ===================== Actions =====================
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--green)';
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function assign(id) {
+  const d = FLEET.find(x => x.id === id); if (!d) return;
+
+  // Trường hợp 1: tài xế rảnh → gán liền
+  if (d.status === 'free') {
+    if (!confirm(`Phân công đơn ${order.id} cho ${d.name} (${d.plate})?`)) return;
+    d.status = 'busy';
+    d.currentTrip = `${order.id} → ${order.dest}`;
+    d.etaFree = '≈ 1 giờ';
+    if (d.own === 'partner') d.ourTrip = true;
+    localStorage.removeItem('vc_pending_order');
+    showToast(`Đã phân công ${d.name} cho đơn ${order.id}`);
+    renderList();
+    return;
+  }
+
+  // Trường hợp 2: tài xế bận (mình đang quản lý) → đặt lịch sau
+  const canSchedule = d.status === 'busy' && (d.own === 'own' || d.ourTrip);
+  if (!canSchedule) return;
+
+  // Default time: order.depTime hoặc +2h từ hiện tại
+  const def = order.depTime || (() => {
+    const t = new Date(Date.now() + 2*60*60*1000);
+    return t.toISOString().slice(0,16);
+  })();
+  const input = prompt(
+    `Đặt lịch ${order.id} cho ${d.name} (đang chạy ${d.currentTrip||'—'}).\nNhập giờ xuất phát (YYYY-MM-DD HH:MM):`,
+    def.replace('T',' ')
+  );
+  if (!input) return;
+  const norm = input.trim().replace(' ','T');
+  const dt = new Date(norm);
+  if (isNaN(dt.getTime())) { alert('Giờ không hợp lệ'); return; }
+
+  d.queue = d.queue || [];
+  d.queue.push({
+    tripId: order.id,
+    dest: order.dest,
+    depTime: norm,
+    addedAt: Date.now()
+  });
+  // Sắp xếp theo giờ tăng dần
+  d.queue.sort((a,b) => new Date(a.depTime) - new Date(b.depTime));
+  localStorage.removeItem('vc_pending_order');
+  showToast(`Đã đặt lịch ${order.id} cho ${d.name} lúc ${fmtTime(norm)}`, 'var(--amber)');
+  renderList();
+}
+function unschedule(id, idx) {
+  const d = FLEET.find(x => x.id === id); if (!d || !d.queue) return;
+  const q = d.queue[idx]; if (!q) return;
+  if (!confirm(`Huỷ lịch ${q.tripId} (${fmtTime(q.depTime)}) cho ${d.name}?`)) return;
+  d.queue.splice(idx, 1);
+  showToast(`Đã huỷ lịch ${q.tripId}`, 'var(--ink-3)');
+  renderList();
+}
+function viewDriver(id) {
+  const d = FLEET.find(x => x.id === id); if (!d) return;
+  alert(`${d.name}\nSĐT: ${d.phone}\nXe: ${d.veh} · ${d.tons} tấn · ${d.plate}\nKích thước: ${d.dim} m\nLoại: ${d.own==='own'?'Cơ hữu':'Đối tác – '+(d.partnerCo||'')}\nTrạng thái: ${d.status}`);
+}
+
+// ===================== Init =====================
+loadOrder();
+renderOrder();
+renderList();
+</script>
 </body>
 </html>

@@ -7,12 +7,12 @@
   <link rel="stylesheet" href="assets/style.css">
   <style>
     :root {
-      --bg: #f5f7fb;
-      --border: #e5e7eb;
+      --bg: #f8fafc;
+      --border: #e2e8f0;
       --border-2: #f1f5f9;
-      --primary: #1d4ed8;
-      --primary-50: #eff6ff;
-      --primary-100: #dbeafe;
+      --primary: #4f46e5;
+      --primary-50: #eef2ff;
+      --primary-100: #e0e7ff;
       --text-1: #0f172a;
       --text-2: #475569;
       --text-3: #94a3b8;
@@ -38,7 +38,7 @@
     .qq-btn { padding:7px 14px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-2); transition:all .15s; }
     .qq-btn:hover { background:#f8fafc; border-color:#cbd5e1; }
     .qq-btn.primary { background:var(--primary); color:white; border-color:var(--primary); }
-    .qq-btn.primary:hover { background:#1e40af; }
+    .qq-btn.primary:hover { background:#4338ca; }
 
     /* ── Wrapper ── */
     .qq-wrap {
@@ -330,13 +330,13 @@
 
     /* ── Price card (right) ── */
     .qq-price-hero {
-      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
       color: white;
       padding: 14px 16px;
     }
-    .qq-price-hero .lbl { font-size: 11px; font-weight:600; color:#bfdbfe; letter-spacing:.06em; text-transform:uppercase; }
+    .qq-price-hero .lbl { font-size: 11px; font-weight:600; color:#c7d2fe; letter-spacing:.06em; text-transform:uppercase; }
     .qq-price-hero .val { font-size: 30px; font-weight: 900; line-height: 1.05; margin-top: 3px; }
-    .qq-price-hero .sub { font-size: 11px; color:#bfdbfe; margin-top: 3px; }
+    .qq-price-hero .sub { font-size: 11px; color:#c7d2fe; margin-top: 3px; }
 
     .price-rows { padding: 9px 14px; }
     .price-rows .r {
@@ -1113,9 +1113,33 @@ function copyQuote() {
   navigator.clipboard.writeText(txt).then(()=>alert('Đã sao chép!')).catch(()=>alert(txt));
 }
 function clearForm() { if(confirm('Xoá toàn bộ form?')) location.reload(); }
-function createOrder() { window.location.href = 'm1-don-hang.html'; }
-function dispatchVehicle() { window.location.href = 'm2-dieu-phoi.html'; }
-function createOrderAndDispatch() { window.location.href = 'm2-dieu-phoi.html'; }
+function createOrder() { saveOrderForDispatch(); window.location.href = 'm1-don-hang.html'; }
+function dispatchVehicle() { saveOrderForDispatch(); window.location.href = 'm2-dieu-phoi.html'; }
+function createOrderAndDispatch() { saveOrderForDispatch(); window.location.href = 'm2-dieu-phoi.html'; }
+
+function saveOrderForDispatch() {
+  try {
+    const cargoVol = getCargoVol ? getCargoVol() : (parseFloat(document.getElementById('cargCBM')?.value)||0);
+    const cargoTons = (parseFloat(document.getElementById('weight')?.value)||0)/1000;
+    const e = cartEntries();
+    const vehReq = e.map(([id,q])=>{ const v=VEHICLES.find(x=>x.id===id); return { id, qty:q, label:v?.label, tons:v?.tons, vol:v?.vol, dim:v?.dim }; });
+    const order = {
+      id: 'CX-' + String(Math.floor(Math.random()*900)+100),
+      createdAt: Date.now(),
+      customer: document.getElementById('custName')?.value || 'Khách lẻ',
+      phone:    document.getElementById('custPhone')?.value || '',
+      origin:   document.getElementById('origin')?.value || '',
+      dest:     document.getElementById('dest')?.value || '',
+      depTime:  document.getElementById('depTime')?.value || '',
+      km: simKm,
+      cargoTons, cargoVol,
+      vehReq,
+      total: document.getElementById('grandTotal')?.textContent || '',
+      note: document.getElementById('note')?.value || ''
+    };
+    localStorage.setItem('vc_pending_order', JSON.stringify(order));
+  } catch(e) { console.warn('save order fail', e); }
+}
 function sendQuote() {
   const g  = document.getElementById('grandTotal').textContent;
   const o  = document.getElementById('origin').value  || 'Điểm đi';

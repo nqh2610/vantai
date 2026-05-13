@@ -1,0 +1,189 @@
+{
+  "vehicles": [
+    {
+      "id": "v1t",
+      "label": "1 Tấn",
+      "dim": "2.6×1.4×1.4",
+      "tons": 1,
+      "vol": 5.1,
+      "priceBase": 180000,
+      "pricePerKm": 17000,
+      "toll": 60000
+    },
+    {
+      "id": "v15t",
+      "label": "1.5 Tấn",
+      "dim": "3.2×1.5×1.6",
+      "tons": 1.5,
+      "vol": 7.7,
+      "priceBase": 210000,
+      "pricePerKm": 19000,
+      "toll": 60000
+    },
+    {
+      "id": "v2ta",
+      "label": "2T (4.2m)",
+      "dim": "4.2×1.85×1.85",
+      "tons": 2,
+      "vol": 14.4,
+      "priceBase": 250000,
+      "pricePerKm": 21000,
+      "toll": 80000
+    },
+    {
+      "id": "v2tb",
+      "label": "2T (6.0m)",
+      "dim": "6.0×1.9×1.9",
+      "tons": 2,
+      "vol": 21.7,
+      "priceBase": 280000,
+      "pricePerKm": 22000,
+      "toll": 80000
+    },
+    {
+      "id": "v25t",
+      "label": "2.5 Tấn",
+      "dim": "4.2×1.85×1.85",
+      "tons": 2.5,
+      "vol": 14.4,
+      "priceBase": 300000,
+      "pricePerKm": 24000,
+      "toll": 80000
+    },
+    {
+      "id": "v35ta",
+      "label": "3.5T 4.5m",
+      "dim": "4.5×1.9×1.9",
+      "tons": 3.5,
+      "vol": 16.2,
+      "priceBase": 320000,
+      "pricePerKm": 26000,
+      "toll": 90000
+    },
+    {
+      "id": "v35tb",
+      "label": "3.5T 6.0m",
+      "dim": "6.0×2.0×2.0",
+      "tons": 3.5,
+      "vol": 24.0,
+      "priceBase": 340000,
+      "pricePerKm": 28000,
+      "toll": 90000
+    },
+    {
+      "id": "v5t",
+      "label": "5 Tấn",
+      "dim": "6.2×2.2×2.1",
+      "tons": 5,
+      "vol": 28.6,
+      "priceBase": 350000,
+      "pricePerKm": 32000,
+      "toll": 90000
+    },
+    {
+      "id": "v8t",
+      "label": "8 Tấn",
+      "dim": "7.4×2.3×2.2",
+      "tons": 8,
+      "vol": 37.4,
+      "priceBase": 400000,
+      "pricePerKm": 38000,
+      "toll": 120000
+    },
+    {
+      "id": "v10t",
+      "label": "10 Tấn",
+      "dim": "7.4×2.3×2.2",
+      "tons": 10,
+      "vol": 37.4,
+      "priceBase": 450000,
+      "pricePerKm": 44000,
+      "toll": 120000
+    },
+    {
+      "id": "v15t2",
+      "label": "15 Tấn",
+      "dim": "9.5×2.38×2.4",
+      "tons": 15,
+      "vol": 54.3,
+      "priceBase": 550000,
+      "pricePerKm": 52000,
+      "toll": 150000
+    }
+  ],
+  "vat": 0.15,
+  "surcharges": [
+    {
+      "id": "toll",
+      "name": "🛣️ Phí cầu đường",
+      "type": "custom_input",
+      "unit": "K",
+      "default": 0
+    },
+    {
+      "id": "port",
+      "name": "🏭 Phí cảng/bến",
+      "type": "custom_input",
+      "unit": "K",
+      "default": 0
+    },
+    {
+      "id": "peak",
+      "name": "⏰ Giờ cao điểm",
+      "type": "percent",
+      "value": 15,
+      "default": false
+    },
+    {
+      "id": "night",
+      "name": "🌙 Ban đêm",
+      "type": "percent",
+      "value": 20,
+      "default": false
+    },
+    {
+      "id": "bulky",
+      "name": "📦 Hàng cồng kềnh",
+      "type": "percent",
+      "value": 20,
+      "default": false
+    },
+    {
+      "id": "return",
+      "name": "🔄 Chở thêm chiều về",
+      "type": "percent",
+      "value": 40,
+      "default": false
+    },
+    {
+      "id": "carry",
+      "name": "🚶 Khiêng",
+      "type": "per_unit",
+      "unit": "người",
+      "price": 200000,
+      "default": 0
+    },
+    {
+      "id": "floor",
+      "name": "🏢 Lên tầng",
+      "type": "per_unit",
+      "unit": "tầng",
+      "price": 50000,
+      "default": 0
+    },
+    {
+      "id": "uninstall",
+      "name": "🔧 Tháo gỡ",
+      "type": "custom_input",
+      "unit": "K",
+      "default": 0
+    },
+    {
+      "id": "install",
+      "name": "⚙️ Lắp ráp",
+      "type": "custom_input",
+      "unit": "K",
+      "default": 0
+    }
+  ]
+}

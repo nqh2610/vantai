@@ -784,19 +784,38 @@
 
 <script src="assets/app.js"></script>
 <script>
-const VEHICLES = [
-  { id:'v1t',   label:'1 Tấn',     tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
-  { id:'v15t',  label:'1.5 Tấn',   tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
-  { id:'v2ta',  label:'2T (4.2m)', tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
-  { id:'v2tb',  label:'2T (6.0m)', tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
-  { id:'v25t',  label:'2.5 Tấn',   tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
-  { id:'v35ta', label:'3.5T 4.5m', tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
-  { id:'v35tb', label:'3.5T 6.0m', tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
-  { id:'v5t',   label:'5 Tấn',     tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
-  { id:'v8t',   label:'8 Tấn',     tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
-  { id:'v10t',  label:'10 Tấn',    tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
-  { id:'v15t2', label:'15 Tấn',    tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
-];
+// ═════════════════════════════════════════════════════════════════════════
+// Load config từ config.json
+// ═════════════════════════════════════════════════════════════════════════
+let VEHICLES = [];
+let CONFIG = {};
+const ICONS = { v1t:'🚐', v15t:'🚐', v2ta:'🚛', v2tb:'🚛', v25t:'🚛', v35ta:'🚚', v35tb:'🚚', v5t:'🚚', v8t:'🏗️', v10t:'🏗️', v15t2:'🏗️' };
+
+async function initConfig() {
+  try {
+    const res = await fetch('config.json');
+    CONFIG = await res.json();
+    VEHICLES = CONFIG.vehicles.map(v => ({ ...v, icon: ICONS[v.id] || '🚗' }));
+    console.log('✓ Config loaded:', VEHICLES.length, 'vehicles', 'VAT:', CONFIG.vat);
+  } catch (e) {
+    console.warn('Cannot load config.json, using defaults:', e);
+    // Fallback: hardcoded vehicles
+    VEHICLES = [
+      { id:'v1t',   label:'1 Tấn',     tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
+      { id:'v15t',  label:'1.5 Tấn',   tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
+      { id:'v2ta',  label:'2T (4.2m)', tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
+      { id:'v2tb',  label:'2T (6.0m)', tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
+      { id:'v25t',  label:'2.5 Tấn',   tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
+      { id:'v35ta', label:'3.5T 4.5m', tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
+      { id:'v35tb', label:'3.5T 6.0m', tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
+      { id:'v5t',   label:'5 Tấn',     tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
+      { id:'v8t',   label:'8 Tấn',     tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
+      { id:'v10t',  label:'10 Tấn',    tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
+      { id:'v15t2', label:'15 Tấn',    tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
+    ];
+    CONFIG = { vat: 0.15, surcharges: [] };
+  }
+}
 
 let cart = {};        // { vehId: qty }
 let primaryId = null; // id used for default 'sel' when nothing picked
@@ -1077,7 +1096,7 @@ function updatePrice() {
   }
 
   const hasVAT  = document.getElementById('vatToggle').checked;
-  const vatAmt  = hasVAT ? Math.round(subT * 0.15) : 0;
+  const vatAmt  = hasVAT ? Math.round(subT * (CONFIG.vat || 0.15)) : 0;
   const afterVAT= subT + vatAmt;
   const discV   = parseFloat(document.getElementById('discValue').value) || 0;
   const isPctDisc = document.getElementById('discPctBtn').classList.contains('active');
@@ -1248,8 +1267,24 @@ async function calculateDistanceOSRM() {
   }
 }
 
-// Setup address autocomplete listeners
-document.addEventListener('DOMContentLoaded', () => {
+// Setup address autocomplete listeners & init form
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load config from JSON
+  await initConfig();
+  
+  // Initialize form
+  cart = { 'v35ta': 1 };
+  renderVehicles();
+  onRouteChange();
+  
+  const _dt = document.getElementById('depTime');
+  if (_dt) {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    _dt.value = d.toISOString().slice(0,16);
+  }
+  
+  // Setup address autocomplete
   const originInput = document.getElementById('origin');
   const destInput = document.getElementById('dest');
   
@@ -1263,18 +1298,6 @@ document.addEventListener('DOMContentLoaded', () => {
     destInput.addEventListener('blur', () => setTimeout(() => hideSuggestions('dest'), 200));
   }
 });
-
-// ═════════════════════════════════════════════════════════════════════════
-
-cart = { 'v35ta': 1 };
-renderVehicles();
-onRouteChange();
-const _dt = document.getElementById('depTime');
-if (_dt) {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  _dt.value = d.toISOString().slice(0,16);
-}
 </script>
 </body>
 </html>

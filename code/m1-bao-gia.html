@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Báo giá nhanh – VanChuyển Pro</title>
   <link rel="stylesheet" href="assets/style.css">
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --bg: #f8fafc;
@@ -707,26 +710,9 @@
 
         <!-- Bản đồ lên trên -->
         <section class="card">
-          <div class="qq-map">
-            <svg viewBox="0 0 360 170" preserveAspectRatio="xMidYMid slice">
-              <rect width="360" height="170" fill="#e8eaed"/>
-              <ellipse cx="60" cy="135" rx="60" ry="34" fill="#c8e6b8"/>
-              <ellipse cx="310" cy="34" rx="50" ry="30" fill="#c8e6b8"/>
-              <line x1="0" y1="85" x2="360" y2="85" stroke="#bdc1c6" stroke-width="8"/>
-              <line x1="0" y1="85" x2="360" y2="85" stroke="#ffffff" stroke-width="5"/>
-              <line x1="180" y1="0" x2="180" y2="170" stroke="#bdc1c6" stroke-width="8"/>
-              <line x1="180" y1="0" x2="180" y2="170" stroke="#ffffff" stroke-width="5"/>
-              <path d="M40,145 C100,125 150,85 200,65 S300,30 330,20" fill="none" stroke="#1a73e8" stroke-width="9" stroke-linecap="round" opacity=".25"/>
-              <path d="M40,145 C100,125 150,85 200,65 S300,30 330,20" fill="none" stroke="#1a73e8" stroke-width="4.5" stroke-linecap="round"/>
-              <circle cx="40" cy="145" r="10" fill="#1a73e8" opacity=".2"/>
-              <circle cx="40" cy="145" r="5.5" fill="#1a73e8" stroke="#fff" stroke-width="2"/>
-              <g transform="translate(330,20)">
-                <path d="M0,3 C0,-9 -10,-13 -10,-19 C-10,-28 10,-28 10,-19 C10,-13 0,-9 0,3 Z" fill="#ea4335" stroke="#b31412" stroke-width="1"/>
-                <circle cx="0" cy="-19" r="3.5" fill="#fff"/>
-              </g>
-            </svg>
-            <div class="badge">🗺️ <span id="mapKm">48 km</span> · <span id="mapTime">67 ph</span></div>
-            <div class="stamp">© Demo</div>
+          <div id="map" style="width:100%; height:220px; border-radius:10px; background:#e8eaed;"></div>
+          <div style="padding:10px 14px; display:flex; gap:8px; align-items:center; font-size:13px; color:var(--text-2);">
+            🗺️ <span id="mapKm">48 km</span> · <span id="mapTime">67 ph</span>
           </div>
         </section>
 
@@ -1177,6 +1163,7 @@ function sendQuote() {
 let addressSuggestions = { origin: [], dest: [] };
 let routeCoords = { origin_lat: null, origin_lon: null, dest_lat: null, dest_lon: null };
 let lastCalculatedKm = 0;
+let searchTimeouts = { origin: null, dest: null }; // Debounce
 
 async function searchNominatim(query, fieldType) {
   if (query.length < 2) {
@@ -1184,34 +1171,78 @@ async function searchNominatim(query, fieldType) {
     return;
   }
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&countrycodes=vn`;
-    const response = await fetch(url, { headers: { 'Accept-Language': 'vi-VN,vi' } });
+    // Use Nominatim with CORS proxy (api.allorigins.win)
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&countrycodes=vn`;
+    const corsUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`;
+    
+    const response = await fetch(corsUrl);
     const results = await response.json();
+    
+    if (!Array.isArray(results)) {
+      console.warn('Invalid response:', results);
+      return;
+    }
+    
     addressSuggestions[fieldType] = results;
     showSuggestions(results, fieldType);
+    console.log(`✓ Found ${results.length} addresses for "${query}"`);
   } catch (e) {
-    console.warn('Nominatim search error:', e);
+    console.warn('Search error:', e.message);
   }
+}
+
+function debouncedSearch(query, fieldType, delayMs = 300) {
+  // Clear previous timeout
+  if (searchTimeouts[fieldType]) {
+    clearTimeout(searchTimeouts[fieldType]);
+  }
+  
+  // Set new timeout
+  searchTimeouts[fieldType] = setTimeout(() => {
+    searchNominatim(query, fieldType);
+  }, delayMs);
 }
 
 function showSuggestions(results, fieldType) {
   const field = document.getElementById(fieldType);
+  if (!field) return;
+  
   let suggestDiv = document.getElementById(`suggest_${fieldType}`);
   
   if (!suggestDiv) {
     suggestDiv = document.createElement('div');
     suggestDiv.id = `suggest_${fieldType}`;
-    suggestDiv.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 7px 7px;box-shadow:0 4px 8px rgba(0,0,0,.1);z-index:1000;max-height:200px;overflow-y:auto;';
-    field.parentElement.style.position = 'relative';
-    field.parentElement.appendChild(suggestDiv);
+    suggestDiv.style.cssText = `
+      position: fixed;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      z-index: 99999;
+      max-height: 250px;
+      overflow-y: auto;
+      min-width: 300px;
+      font-size: 12px;
+    `;
+    document.body.appendChild(suggestDiv);
   }
   
-  suggestDiv.innerHTML = results.map((r, i) => `
-    <div onclick="selectAddress('${fieldType}', ${i})" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:12px;">
-      <strong>${r.display_name.split(',')[0]}</strong><br>
-      <span style="color:#999;font-size:11px;">${r.display_name}</span>
-    </div>
-  `).join('');
+  // Position dropdown below input field
+  const rect = field.getBoundingClientRect();
+  suggestDiv.style.left = rect.left + 'px';
+  suggestDiv.style.top = (rect.bottom + 4) + 'px';
+  suggestDiv.style.width = rect.width + 'px';
+  
+  if (results.length === 0) {
+    suggestDiv.innerHTML = '<div style="padding:8px 12px;color:#999;">Không tìm thấy kết quả</div>';
+  } else {
+    suggestDiv.innerHTML = results.map((r, i) => `
+      <div onclick="selectAddress('${fieldType}', ${i})" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;background:white;transition:background 0.1s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+        <strong>${r.display_name.split(',')[0]}</strong><br>
+        <span style="color:#999;font-size:11px;">${r.display_name}</span>
+      </div>
+    `).join('');
+  }
   suggestDiv.style.display = 'block';
 }
 
@@ -1243,7 +1274,7 @@ async function calculateDistanceOSRM() {
   if (!lon1 || !lat1 || !lon2 || !lat2) return;
 
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full`;
     const response = await fetch(url);
     const data = await response.json();
     
@@ -1257,18 +1288,93 @@ async function calculateDistanceOSRM() {
       document.getElementById('mapKm').textContent = lastCalculatedKm + ' km';
       document.getElementById('mapTime').textContent = minutes + ' ph';
       
+      // Draw route on map
+      updateMapRoute(lat1, lon1, lat2, lon2, route.geometry);
+      
       renderVehicles();
       updatePrice();
     }
   } catch (e) {
     console.warn('OSRM error:', e);
-    // Fallback to default calculation
     onRouteChange();
   }
 }
 
+// ═════════════════════════════════════════════════════════════════════════
+// LEAFLET MAP FUNCTIONS
+// ═════════════════════════════════════════════════════════════════════════
+
+let mapInstance = null;
+let originMarker = null, destMarker = null, routePolyline = null;
+
+function initMap() {
+  if (mapInstance) return; // Already initialized
+  
+  setTimeout(() => {
+    const mapEl = document.getElementById('map');
+    if (!mapEl) {
+      console.warn('Map element not found, retrying...');
+      setTimeout(initMap, 500);
+      return;
+    }
+    
+    // Default center (Hà Nội, Việt Nam)
+    mapInstance = L.map('map').setView([21.0285, 105.8542], 11);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(mapInstance);
+    
+    console.log('✓ Map initialized');
+  }, 100);
+}
+
+function updateMapRoute(lat1, lon1, lat2, lon2, geometry) {
+  // Wait for map to initialize
+  if (!mapInstance) {
+    console.log('Map not ready, retrying...');
+    setTimeout(() => updateMapRoute(lat1, lon1, lat2, lon2, geometry), 500);
+    return;
+  }
+  
+  // Remove old markers & route
+  if (originMarker) mapInstance.removeLayer(originMarker);
+  if (destMarker) mapInstance.removeLayer(destMarker);
+  if (routePolyline) mapInstance.removeLayer(routePolyline);
+  
+  // Add markers with blue/red icons
+  originMarker = L.marker([lat1, lon1], {
+    icon: L.icon({ iconUrl: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 40%22%3E%3Ccircle cx=%2215%22 cy=%2215%22 r=%2210%22 fill=%22%234f46e5%22/%3E%3Cpath d=%22M15 25 L5 40 Q15 42 15 42 Q15 42 25 40 Z%22 fill=%224f46e5%22/%3E%3C/svg%3E', iconSize: [30, 40], iconAnchor: [15, 40] })
+  }).addTo(mapInstance).bindPopup('<b>📍 Điểm đi</b>');
+  
+  destMarker = L.marker([lat2, lon2], {
+    icon: L.icon({ iconUrl: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 40%22%3E%3Ccircle cx=%2215%22 cy=%2215%22 r=%2210%22 fill=%22%23ea4335%22/%3E%3Cpath d=%22M15 25 L5 40 Q15 42 15 42 Q15 42 25 40 Z%22 fill=%22%23ea4335%22/%3E%3C/svg%3E', iconSize: [30, 40], iconAnchor: [15, 40] })
+  }).addTo(mapInstance).bindPopup('<b>📍 Điểm đến</b>');
+  
+  // Draw route polyline from geometry
+  if (geometry && geometry.coordinates && geometry.coordinates.length > 0) {
+    const coords = geometry.coordinates.map(c => [c[1], c[0]]); // OSRM [lon,lat] → Leaflet [lat,lon]
+    routePolyline = L.polyline(coords, {
+      color: '#4f46e5',
+      weight: 4,
+      opacity: 0.7,
+      lineCap: 'round'
+    }).addTo(mapInstance);
+  }
+  
+  // Auto-fit map bounds
+  const group = new L.featureGroup([originMarker, destMarker]);
+  mapInstance.fitBounds(group.getBounds(), { padding: [50, 50] });
+  
+  console.log('✓ Route drawn on map');
+}
+
 // Setup address autocomplete listeners & init form
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize map first
+  initMap();
+  
   // Load config from JSON
   await initConfig();
   
@@ -1289,13 +1395,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   const destInput = document.getElementById('dest');
   
   if (originInput) {
-    originInput.addEventListener('input', (e) => searchNominatim(e.target.value, 'origin'));
+    originInput.addEventListener('input', (e) => {
+      if (e.target.value.length < 2) {
+        hideSuggestions('origin');
+      } else {
+        debouncedSearch(e.target.value, 'origin', 500);
+      }
+    });
     originInput.addEventListener('blur', () => setTimeout(() => hideSuggestions('origin'), 200));
+    originInput.addEventListener('focus', (e) => {
+      if (e.target.value.length >= 2 && addressSuggestions.origin.length > 0) {
+        showSuggestions(addressSuggestions.origin, 'origin');
+      }
+    });
   }
   
   if (destInput) {
-    destInput.addEventListener('input', (e) => searchNominatim(e.target.value, 'dest'));
+    destInput.addEventListener('input', (e) => {
+      if (e.target.value.length < 2) {
+        hideSuggestions('dest');
+      } else {
+        debouncedSearch(e.target.value, 'dest', 500);
+      }
+    });
     destInput.addEventListener('blur', () => setTimeout(() => hideSuggestions('dest'), 200));
+    destInput.addEventListener('focus', (e) => {
+      if (e.target.value.length >= 2 && addressSuggestions.dest.length > 0) {
+        showSuggestions(addressSuggestions.dest, 'dest');
+      }
+    });
   }
 });
 </script>

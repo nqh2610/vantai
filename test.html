@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Routing Free (OSM + OSRM)</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input { width: 300px; padding: 8px; margin-bottom: 5px; }
+    .suggestions {
+      border: 1px solid #ccc;
+      max-width: 300px;
+      background: #fff;
+      position: absolute;
+      z-index: 1000;
+    }
+    .suggestions div {
+      padding: 5px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background: #eee;
+    }
+    #map { height: 400px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<h2>🚗 Tính khoảng cách + thời gian (FREE)</h2>
+
+<label>Điểm đi:</label><br>
+<input id="start" oninput="search(this, 'startList')" autocomplete="off">
+<div id="startList" class="suggestions"></div><br>
+
+<label>Điểm đến:</label><br>
+<input id="end" oninput="search(this, 'endList')" autocomplete="off">
+<div id="endList" class="suggestions"></div><br>
+
+<button onclick="calculate()">Tính</button>
+
+<h3 id="result"></h3>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+let map = L.map('map').setView([10.7769, 106.7009], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let startCoord = null;
+let endCoord = null;
+let routeLayer = null;
+
+// Autocomplete
+async function search(input, listId) {
+  const query = input.value;
+  if (query.length < 3) return;
+
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const list = document.getElementById(listId);
+  list.innerHTML = "";
+
+  data.slice(0, 5).forEach(place => {
+    const div = document.createElement("div");
+    div.innerText = place.display_name;
+
+    div.onclick = () => {
+      input.value = place.display_name;
+      list.innerHTML = "";
+
+      if (listId === "startList") {
+        startCoord = [parseFloat(place.lat), parseFloat(place.lon)];
+      } else {
+        endCoord = [parseFloat(place.lat), parseFloat(place.lon)];
+      }
+    };
+
+    list.appendChild(div);
+  });
+}
+
+// Calculate route
+async function calculate() {
+  if (!startCoord || !endCoord) {
+    alert("Chọn đủ điểm đi và đến!");
+    return;
+  }
+
+  const url = `https://router.project-osrm.org/route/v1/driving/${startCoord[1]},${startCoord[0]};${endCoord[1]},${endCoord[0]}?overview=full&geometries=geojson`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const route = data.routes[0];
+
+  const distance = route.distance / 1000;
+  const duration = route.duration / 60;
+
+  document.getElementById("result").innerText =
+    `📏 ${distance.toFixed(2)} km | ⏱ ${duration.toFixed(1)} phút`;
+
+  // Vẽ route
+  if (routeLayer) map.removeLayer(routeLayer);
+
+  routeLayer = L.geoJSON(route.geometry).addTo(map);
+  map.fitBounds(routeLayer.getBounds());
+}
+</script>
+
+</body>
+</html>

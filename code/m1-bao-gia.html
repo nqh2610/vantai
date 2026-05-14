@@ -328,7 +328,7 @@
                 <!-- Phí cảng/bến -->
                 <label class="chip">
                   <input type="checkbox" id="sc_port" onchange="updatePrice();updateScBadge();syncRow(this)">
-                  <span class="t">🏭 Phí cảng/bến</span>
+                  <span class="t">🏭 Phí cảng/bến/phà</span>
                   <span class="nin-wrap"><input type="number" class="nin w" id="sc_port_v" value="0" min="0" step="10" oninput="autoTick('sc_port',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"><span class="k-suf">K</span></span>
                 </label>
                 <!-- Giờ cao điểm -->
@@ -468,7 +468,7 @@ function initConfig() {
     "vat":0.15,
     "surcharges":[
       {"id":"toll","name":"🛣️ Phí cầu đường","type":"custom_input","unit":"K","default":0},
-      {"id":"port","name":"🏭 Phí cảng/bến","type":"custom_input","unit":"K","default":0},
+      {"id":"port","name":"🏭 Phí cảng/bến/phà","type":"custom_input","unit":"K","default":0},
       {"id":"peak","name":"⏰ Giờ cao điểm","type":"percent","value":15,"default":false},
       {"id":"night","name":"🌙 Ban đêm","type":"percent","value":20,"default":false},
       {"id":"bulky","name":"📦 Hàng cồng kềnh","type":"percent","value":20,"default":false},
@@ -632,12 +632,14 @@ function resetForm() {
   
   // Reset cargo
   document.getElementById('weight').value = '';
-  document.getElementById('length').value = '';
-  document.getElementById('width').value = '';
-  document.getElementById('height').value = '';
-  document.getElementById('cbmInput').value = '';
-  document.querySelectorAll('input[name="cargoMode"]').forEach(r => r.checked = false);
-  document.querySelector('input[name="cargoMode"][value="cbm"]').checked = true;
+  document.getElementById('cargL').value = '';
+  document.getElementById('cargW').value = '';
+  document.getElementById('cargH').value = '';
+  document.getElementById('cargCBM').value = '';
+  document.getElementById('modeCbmBtn').classList.add('active');
+  document.getElementById('modeDimBtn').classList.remove('active');
+  document.getElementById('cargoCbm').style.display = '';
+  document.getElementById('cargoDim').style.display = 'none';
   cargoMode = 'cbm';
   fitIds = [];
   
@@ -662,6 +664,12 @@ function resetForm() {
   customScs = [];
   _csSeq = 0;
   renderCustomScs();
+  
+  // Reset discount và VAT
+  document.getElementById('discValue').value = '0';
+  document.getElementById('vatToggle').checked = false;
+  document.getElementById('discPctBtn').classList.add('active');
+  document.getElementById('discAmtBtn').classList.remove('active');
   
   // Reset giá
   updatePrice();

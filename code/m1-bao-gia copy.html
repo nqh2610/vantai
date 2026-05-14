@@ -47,17 +47,6 @@
       align-items: start;
     }
     @media (max-width: 1100px) { .qq-wrap { grid-template-columns: 1fr; } }
-    @media (max-width: 768px) {
-      .qq-wrap { padding: 14px 14px 380px; }
-      .qq-left { gap: 10px; }
-      .qq-right { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: auto; max-height: 380px; border-radius: 12px 12px 0 0; border: 1px solid var(--border); box-shadow: 0 -2px 8px rgba(0,0,0,.1); z-index: 100; padding: 12px 14px; overflow-y: auto; }
-      .card { border-radius: 8px; }
-      .card-h { padding: 8px 12px; font-size: 12px; }
-      .card-h h3 { font-size: 12px; }
-      .card-b { padding: 10px 12px; font-size: 12px; }
-      .inp, .nin { font-size: 12px; padding: 7px 9px; }
-      .chip { font-size: 11px; padding: 6px 8px; }
-    }
 
     .qq-left  { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
     .qq-right { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 14px; }
@@ -189,22 +178,12 @@
     .qq-price-hero .lbl { font-size: 11px; font-weight:600; color:#c7d2fe; letter-spacing:.06em; text-transform:uppercase; }
     .qq-price-hero .val { font-size: 30px; font-weight: 900; line-height: 1.05; margin-top: 3px; }
     .qq-price-hero .sub { font-size: 11px; color:#c7d2fe; margin-top: 3px; }
-    @media (max-width: 768px) {
-      .qq-price-hero { padding: 10px 12px; }
-      .qq-price-hero .lbl { font-size: 9px; }
-      .qq-price-hero .val { font-size: 24px; }
-      .qq-price-hero .sub { font-size: 10px; }
-    }
 
     .price-rows { padding: 9px 14px; }
     .price-rows .r { display:flex; justify-content:space-between; align-items:baseline; padding: 4px 0; font-size: 12.5px; color: var(--text-2); }
     .price-rows .r .v { font-weight: 700; color: var(--text-1); }
     .price-rows .r.disc, .price-rows .r.disc .v { color: var(--green); }
     .price-rows .r.subt { border-top: 1px dashed var(--border); margin-top: 3px; padding-top: 6px; font-weight: 700; color: var(--text-1); }
-    @media (max-width: 768px) {
-      .price-rows { padding: 8px 10px; }
-      .price-rows .r { padding: 3px 0; font-size: 11px; }
-    }
 
     .disc-row { display:flex; gap:6px; align-items:center; padding: 8px 14px; border-top: 1px solid var(--border-2); }
     .disc-row .lbl { font-size: 12px; color: var(--text-1); font-weight:600; flex:1; margin:0; text-transform:none; letter-spacing:0; }
@@ -229,15 +208,6 @@
 <body>
   <div class="main-wrapper">
     <main class="page-content">
-      <div class="qq-head">
-        <div>
-          <h1>Tool báo giá nhanh</h1>        
-        </div>
-        <div class="actions">
-          <button class="qq-btn" onclick="resetForm()">Làm mới</button>         
-        </div>
-      </div>
-
       <div class="qq-wrap">
         <!-- LEFT (form) -->
         <div class="qq-left">
@@ -245,17 +215,32 @@
           <section class="card" id="cardRoute">
             <div class="card-h">
               <span class="step">1</span>
-              <h3>Quãng đường (km)</h3>
+              <h3>Tuyến & Giờ</h3>
               <button class="toggle-btn" type="button" onclick="toggleCard('cardRoute')"><span class="arr">▾</span></button>
             </div>
             <div class="card-b">
               <div style="display:grid;gap:10px;">
-                <div>                 
-                  <div style="display:grid;grid-template-columns: 1fr auto; gap:8px;align-items:end;">
-                    <input type="number" id="kmInput" class="inp" placeholder="Nhập quãng đường" style="font-size:13px;" min="0" onchange="onKmChange()" oninput="onKmChange()">
-                    <button type="button" class="qq-btn primary" onclick="openGoogleMaps()" style="font-size:12px;padding:9px 16px;white-space:nowrap;">🗺️ Maps</button>
+                <div style="display:grid;grid-template-columns: 1fr 1fr auto; gap:10px;align-items:end;position:relative;">
+                  <div style="position:relative;">
+                    <label class="lbl">📍 Điểm đi</label>
+                    <input type="text" id="routeOrigin" class="inp" placeholder="VD: Đồng Nai" style="font-size:13px;" oninput="searchLocation(this, 'origin')">
+                    <div id="originSuggestions" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--border);border-radius:7px;max-height:200px;overflow-y:auto;z-index:10;display:none;"></div>
                   </div>
+                  <div style="position:relative;">
+                    <label class="lbl">🏁 Điểm đến</label>
+                    <input type="text" id="routeDest" class="inp" placeholder="VD: Hà Nội" style="font-size:13px;" oninput="searchLocation(this, 'dest')">
+                    <div id="destSuggestions" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--border);border-radius:7px;max-height:200px;overflow-y:auto;z-index:10;display:none;"></div>
+                  </div>
+                  <button type="button" class="qq-btn primary" onclick="resetForm()" style="font-size:12px;padding:9px 16px;white-space:nowrap;">🔄 Nhập mới</button>
                 </div>
+                <div style="padding: 10px; background: var(--primary-50); border-radius: 7px; font-size: 13px; color: var(--text-2); border: 1px solid var(--primary-100);">
+                  <strong>Quãng đường:</strong> <span id="displayKm" style="color: var(--primary); font-weight: 700; font-size: 14px;">Chưa tính</span> km
+                  <div id="kmError" style="color: var(--amber); font-size: 11px; margin-top: 4px; display: none;"></div>
+                </div>
+              </div>
+              <div style="margin-top: 10px;">
+                <label class="lbl">⏰ Giờ xuất phát</label>
+                <input class="inp" type="datetime-local" id="depTime">
               </div>
             </div>
           </section>
@@ -280,17 +265,17 @@
                   <div class="size-head">
                     <span class="lbl">Kích thước</span>
                     <div class="mode-toggle">
-                      <button id="modeCbmBtn" class="active" onclick="setCargoMode('cbm')">m³</button>
-                      <button id="modeDimBtn" onclick="setCargoMode('dim')">D × R × C</button>
+                      <button id="modeDimBtn" class="active" onclick="setCargoMode('dim')">D × R × C</button>
+                      <button id="modeCbmBtn" onclick="setCargoMode('cbm')">m³</button>
                     </div>
                   </div>
-                  <div id="cargoCbm" class="size-grid cbm">
-                    <div class="num-wrap"><input class="inp" type="number" min="0" step="0.1" id="cargCBM" placeholder="VD: 12.5" oninput="calcCargo()"><span class="suffix">m³</span></div>
-                  </div>
-                  <div id="cargoDim" class="size-grid dim" style="display:none;">
+                  <div id="cargoDim" class="size-grid dim">
                     <div class="num-wrap"><input class="inp" type="number" min="0" step="0.1" id="cargL" placeholder="Dài" oninput="calcCargo()"><span class="suffix">m</span></div>
                     <div class="num-wrap"><input class="inp" type="number" min="0" step="0.1" id="cargW" placeholder="Rộng" oninput="calcCargo()"><span class="suffix">m</span></div>
                     <div class="num-wrap"><input class="inp" type="number" min="0" step="0.1" id="cargH" placeholder="Cao" oninput="calcCargo()"><span class="suffix">m</span></div>
+                  </div>
+                  <div id="cargoCbm" class="size-grid cbm" style="display:none;">
+                    <div class="num-wrap"><input class="inp" type="number" min="0" step="0.1" id="cargCBM" placeholder="VD: 12.5" oninput="calcCargo()"><span class="suffix">m³</span></div>
                   </div>
                 </div>
               </div>
@@ -320,73 +305,48 @@
             </div>
             <div class="card-b">
               <div class="chip-grid">
-                <!-- Phí cầu đường -->
                 <label class="chip">
-                  <input type="checkbox" id="sc_toll" onchange="updatePrice();updateScBadge();syncRow(this)">
+                  <input type="checkbox" id="sc_toll" onchange="updatePrice();syncRow(this)">
                   <span class="t">🛣️ Phí cầu đường</span>
-                  <span class="nin-wrap"><input type="number" class="nin w" id="sc_toll_v" value="0" min="0" step="10" oninput="autoTick('sc_toll',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"><span class="k-suf">K</span></span>
+                  <span class="nin-wrap"><input type="number" class="nin w" id="sc_toll_v" value="0" min="0" step="10" oninput="autoTick('sc_toll',this);updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
                 </label>
-                <!-- Phí cảng/bến -->
                 <label class="chip">
-                  <input type="checkbox" id="sc_port" onchange="updatePrice();updateScBadge();syncRow(this)">
-                  <span class="t">🏭 Phí cảng/bến</span>
-                  <span class="nin-wrap"><input type="number" class="nin w" id="sc_port_v" value="0" min="0" step="10" oninput="autoTick('sc_port',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"><span class="k-suf">K</span></span>
+                  <input type="checkbox" id="sc_port" onchange="updatePrice();syncRow(this)">
+                  <span class="t">⚓ Phí cảng/bến</span>
+                  <span class="nin-wrap"><input type="number" class="nin w" id="sc_port_v" value="0" min="0" step="10" oninput="autoTick('sc_port',this);updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
                 </label>
-                <!-- Giờ cao điểm -->
                 <label class="chip">
-                  <input type="checkbox" id="sc_peak" onchange="updatePrice();updateScBadge();syncRow(this)">
-                  <span class="t">⏰ Giờ cao điểm</span>
+                  <input type="checkbox" id="sc_peak" onchange="updatePrice();syncRow(this)">
+                  <span class="t">🚦 Giờ cao điểm</span>
                   <span class="p">+15%</span>
                 </label>
-                <!-- Ban đêm -->
                 <label class="chip">
-                  <input type="checkbox" id="sc_night" onchange="updatePrice();updateScBadge();syncRow(this)">
+                  <input type="checkbox" id="sc_night" onchange="updatePrice();syncRow(this)">
                   <span class="t">🌙 Ban đêm (22h–6h)</span>
                   <span class="p">+20%</span>
                 </label>
-                <!-- Hàng cồng kềnh -->
                 <label class="chip">
-                  <input type="checkbox" id="sc_bulky" onchange="updatePrice();updateScBadge();syncRow(this)">
+                  <input type="checkbox" id="sc_bulky" onchange="updatePrice();syncRow(this)">
                   <span class="t">📦 Hàng cồng kềnh</span>
                   <span class="p">+20%</span>
                 </label>
-                <!-- Chở thêm chiều về -->
                 <label class="chip">
-                  <input type="checkbox" id="sc_return" onchange="updatePrice();updateScBadge();syncRow(this)">
-                  <span class="t">🔄 Chở thêm chiều về</span>
+                  <input type="checkbox" id="sc_return" onchange="updatePrice();syncRow(this)">
+                  <span class="t">↩️ Chở thêm chiều về</span>
                   <span class="p">+40%</span>
                 </label>
-                <!-- Khiêng -->
-                <label class="chip">
-                  <input type="checkbox" id="sc_carry" onchange="updatePrice();syncRow(this)">
-                  <span class="t">💪 Khiêng <input type="number" class="nin" id="sc_carry_n" value="0" min="0" oninput="autoTick('sc_carry',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"> ng</span>
-                  <span class="p">×200K</span>
-                  <input type="hidden" id="sc_carry_v" value="200000">
-                </label>
-                <!-- Lên tầng -->
-                <label class="chip">
-                  <input type="checkbox" id="sc_floor" onchange="updatePrice();syncRow(this)">
-                  <span class="t">🏢 Lên <input type="number" class="nin" id="sc_floor_n" value="0" min="0" oninput="autoTick('sc_floor',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"> tầng</span>
-                  <span class="p">×50K</span>
-                  <input type="hidden" id="sc_floor_v" value="50000">
-                </label>
-                <!-- Tháo gỡ -->
-                <label class="chip">
-                  <input type="checkbox" id="sc_uninstall" onchange="updatePrice();updateScBadge();syncRow(this)">
-                  <span class="t">🔧 Tháo gỡ</span>
-                  <span class="nin-wrap"><input type="number" class="nin w" id="sc_uninstall_v" value="0" min="0" step="10" oninput="autoTick('sc_uninstall',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"><span class="k-suf">K</span></span>
-                </label>
-                <!-- Lắp ráp -->
-                <label class="chip">
-                  <input type="checkbox" id="sc_install" onchange="updatePrice();updateScBadge();syncRow(this)">
-                  <span class="t">⚙️ Lắp ráp</span>
-                  <span class="nin-wrap"><input type="number" class="nin w" id="sc_install_v" value="0" min="0" step="10" oninput="autoTick('sc_install',this);updatePrice()" onclick="event.preventDefault()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0'"><span class="k-suf">K</span></span>
-                </label>
               </div>
+            </div>
+          </section>
 
-              <!-- Custom surcharges (user-defined) -->
-              <div id="customScList" class="chip-grid" style="margin-top:7px;"></div>
-              <button type="button" class="qq-btn" style="margin-top:8px;width:100%;border-style:dashed;color:var(--primary);border-color:var(--primary);background:var(--primary-50);font-weight:700;" onclick="addCustomSc()">+ Thêm phụ phí khác</button>
+          <!-- Ghi chú -->
+          <section class="card" id="cardNote">
+            <div class="card-h">
+              <h3>📝 Ghi chú</h3>
+              <button class="toggle-btn" type="button" onclick="toggleCard('cardNote')"><span class="arr">▾</span></button>
+            </div>
+            <div class="card-b">
+              <input class="inp" id="note" type="text" placeholder="VD: Khách yêu cầu giao trước 17h...">
             </div>
           </section>
         </div>
@@ -430,8 +390,12 @@
                 <button id="discPctBtn" class="active" onclick="setDiscMode('pct')">%</button>
                 <button id="discAmtBtn" onclick="setDiscMode('amt')">₫</button>
               </div>
-              <input type="number" id="discValue" min="0" step="1" placeholder="0" oninput="updatePrice()" onfocus="if(this.value=='0') this.value=''" onblur="if(!this.value) this.value='0';">
+              <input type="number" id="discValue" min="0" step="1" placeholder="0" oninput="updatePrice()">
               <span id="discUnit" style="font-size:12px;font-weight:700;color:var(--green);">%</span>
+            </div>
+
+            <div class="qq-actions">
+              <button class="primary" onclick="createOrder()">🚛 Tạo đơn</button>
             </div>
           </section>
         </div>
@@ -447,8 +411,6 @@
 
 let VEHICLES = [];
 let CONFIG = {};
-let customScs = [];
-let _csSeq = 0;
 const ICONS = { v1t:'🚐', v15t:'🚐', v2ta:'🚛', v2tb:'🚛', v25t:'🚛', v35ta:'🚚', v35tb:'🚚', v5t:'🚚', v8t:'🏗️', v10t:'🏗️', v15t2:'🏗️' };
 
 async function initConfig() {
@@ -479,7 +441,7 @@ async function initConfig() {
 let cart = {};
 let fitIds = [];
 let simKm = 0;
-let cargoMode = 'cbm';
+let cargoMode = 'dim';
 
 function cartEntries() { return Object.entries(cart).filter(([id,q]) => q > 0); }
 function cartTotalQty() { return cartEntries().reduce((s,[,q])=>s+q,0); }
@@ -522,7 +484,7 @@ function renderVehicles() {
       <div class="specs">${v.dim} · ${v.vol}m³ · ${v.tons}T</div>
       <div style="display:flex;align-items:center;gap:4px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--border);">
         <button class="vcard .qbtn" type="button" onclick="event.stopPropagation();changeVehQty('${v.id}',-1)" style="width:20px;height:20px;border-radius:4px;border:1px solid var(--border);background:white;cursor:pointer;font-weight:800;color:var(--text-2);font-size:12px;">−</button>
-        <span style="flex:1;text-align:center;font-size:12px;font-weight:900;${qty > 0 ? 'color:white;background:var(--primary);padding:4px 8px;border-radius:6px;' : 'color:var(--text-2);'}">${qty}</span>
+        <span style="flex:1;text-align:center;font-size:11px;font-weight:800;color:var(--text-1);">${qty}</span>
         <button class="vcard .qbtn" type="button" onclick="event.stopPropagation();changeVehQty('${v.id}',1)" style="width:20px;height:20px;border-radius:4px;border:1px solid var(--border);background:white;cursor:pointer;font-weight:800;color:var(--text-2);font-size:12px;">+</button>
       </div>
       <div class="price" style="text-align:center;margin-top:4px;">${fmt(tot)}</div>
@@ -543,20 +505,7 @@ function changeVehQty(id, d) {
 function calcCargo() {
   const vol = getCargoVol();
   const wt = (parseFloat(document.getElementById('weight').value) || 0) / 1000;
-  
-  // Chỉ gợi ý xe nếu có nhập volume hoặc weight
-  if (vol > 0 || wt > 0) {
-    fitIds = VEHICLES.filter(v => (vol <= 0 || v.vol >= vol) && (wt <= 0 || v.tons >= wt)).map(v => v.id);
-    // Auto-deselect unfit vehicles from cart
-    for (const vid in cart) {
-      if (!fitIds.includes(vid)) {
-        delete cart[vid];
-      }
-    }
-  } else {
-    fitIds = [];
-  }
-  
+  fitIds = VEHICLES.filter(v => (vol <= 0 || v.vol >= vol) && (wt <= 0 || v.tons >= wt)).map(v => v.id);
   const hint = document.getElementById('cargoHint');
   if (vol > 0 || wt > 0) {
     hint.style.display = 'block';
@@ -576,26 +525,136 @@ function openGoogleMapsPopup() {
 let locationCache = { origin: null, dest: null };
 let searchTimeout = null;
 
-// REMOVED: searchLocation - autocomplete không còn được sử dụng
-// User sử dụng Google Maps để nhập km thủ công
-
-function openGoogleMaps() {
-  window.open('https://www.google.com/maps/dir/?api=1&travelmode=driving', '_blank');
-}
-
-function onKmChange() {
-  const kmInput = document.getElementById('kmInput');
-  const km = parseInt(kmInput.value) || 0;
+async function searchLocation(input, type) {
+  const query = input.value.trim();
+  const suggestionsDiv = document.getElementById(type === 'origin' ? 'originSuggestions' : 'destSuggestions');
   
-  if (km > 0) {
-    simKm = km;
-    renderVehicles();
-    updatePrice();
-  } else {
-    simKm = 0;
-    renderVehicles();
-    updatePrice();
+  if (!query || query.length < 1) {
+    suggestionsDiv.style.display = 'none';
+    suggestionsDiv.innerHTML = '';
+    return;
   }
+  
+  clearTimeout(searchTimeout);
+  suggestionsDiv.innerHTML = '<div style="padding:8px;color:var(--text-3);font-size:12px;">🔍 Đang tìm...</div>';
+  suggestionsDiv.style.display = 'block';
+  
+  searchTimeout = setTimeout(async () => {
+    try {
+      // Tìm kiếm với limit cao hơn (50) để có nhiều kết quả để lọc
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=50&countrycodes=vn`, {
+        headers: {
+          'User-Agent': 'VanChuyenApp/1.0'
+        }
+      });
+      
+      if (!res.ok) {
+        suggestionsDiv.innerHTML = `<div style="padding:8px;color:var(--text-3);font-size:12px;">⚠️ Tìm kiếm tạm thời không khả dụng (${res.status})</div>`;
+        return;
+      }
+      
+      const data = await res.json();
+      
+      if (!data.length) {
+        suggestionsDiv.innerHTML = '<div style="padding:8px;color:var(--text-3);font-size:12px;">Không tìm thấy kết quả</div>';
+        return;
+      }
+      
+      // Hàm tính điểm khớp (fuzzy matching)
+      const calculateMatchScore = (text, query) => {
+        const textLower = text.toLowerCase().replace(/\s+/g, ' ');
+        const queryLower = query.toLowerCase();
+        const queryWords = queryLower.split(/\s+/).filter(w => w.length > 0);
+        
+        let score = 0;
+        
+        // Điểm cao nếu text bắt đầu với query
+        if (textLower.startsWith(queryLower)) score += 100;
+        
+        // Điểm cao nếu text chứa query liên tục
+        if (textLower.includes(queryLower)) score += 50;
+        
+        // Điểm cho mỗi từ của query trong text
+        queryWords.forEach(word => {
+          if (textLower.includes(word)) score += 20;
+        });
+        
+        // Phạt nếu query quá ngắn so với text (ví dụ: "lê" so với "lê đại hành" được điểm ít hơn)
+        if (textLower.split(/\s+/).length > queryWords.length * 2) {
+          score -= 15;
+        }
+        
+        return score;
+      };
+      
+      // Sắp xếp theo điểm khớp + loại đối tượng
+      const scored = data.map(item => ({
+        item,
+        score: calculateMatchScore(item.display_name, query),
+        isHighway: item.class === 'highway' ? 0 : 1
+      }));
+      
+      const sorted = scored.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score; // Cao nhất trước
+        return a.isHighway - b.isHighway; // Đường trước
+      });
+      
+      // Lấy 15 kết quả tốt nhất
+      const filtered = sorted.slice(0, 15);
+      
+      // Hàm xác định loại đối tượng
+      const getTypeLabel = (cls) => {
+        const typeMap = {
+          'highway': '🛣️ Đường',
+          'place': '📍 Địa điểm',
+          'building': '🏢 Tòa nhà',
+          'amenity': '🏪 Tiện ích',
+          'shop': '🛒 Cửa hàng',
+          'tourism': '🎒 Du lịch',
+          'residential': '🏘️ Khu dân cư'
+        };
+        return typeMap[cls] || `📌 ${cls}`;
+      };
+      
+      let html = '';
+      filtered.forEach(({item, score}) => {
+        const fullAddress = item.display_name;
+        const parts = fullAddress.split(',').map(p => p.trim());
+        const mainName = parts[0];
+        const typeLabel = getTypeLabel(item.class);
+        
+        // Hiển thị tối đa 2-3 phần của địa chỉ (vd: "Lê Thị Kim, Phường Tân Bình, Thành phố Hồ Chí Minh")
+        const displayAddress = parts.slice(0, Math.min(3, parts.length)).join(', ');
+        
+        html += `
+        <div onclick="selectLocation(${item.lat}, ${item.lon}, '${fullAddress.replace(/'/g, "\\'")}', '${type}')" 
+             style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border-2);font-size:12px;color:var(--text-2);transition:all .1s;">
+          <div style="font-weight:600;margin-bottom:2px;">${mainName}</div>
+          <div style="color:var(--text-3);font-size:11px;">${displayAddress}</div>
+        </div>`;
+      });
+      
+      suggestionsDiv.innerHTML = html;
+      
+      // Nếu kết quả ít (≤2) → thêm gợi ý từ khóa
+      if (filtered.length <= 2) {
+        suggestionsDiv.innerHTML += `
+        <div style="padding:12px;background:var(--green-50);border-top:1px solid var(--border-2);font-size:11px;color:var(--green);font-weight:600;">
+          💡 Thử thêm: +Quận, +Thành phố, +Đường, +Phường
+        </div>`;
+      }
+      
+      suggestionsDiv.querySelectorAll('div').forEach(el => {
+        if (el.onclick) {
+          el.onmouseover = () => el.style.background = 'var(--bg)';
+          el.onmouseout = () => el.style.background = 'transparent';
+        }
+      });
+    } catch (e) {
+      console.warn('Search error:', e);
+      suggestionsDiv.innerHTML = '<div style="padding:8px;color:var(--text-3);font-size:12px;">Lỗi tìm kiếm</div>';
+    }
+  }, 800);
 }
 
 function selectLocation(lat, lon, fullAddress, type) {
@@ -617,11 +676,18 @@ function selectLocation(lat, lon, fullAddress, type) {
 }
 
 function resetForm() {
-  // Reset km input
-  document.getElementById('kmInput').value = '';
+  // Xóa input tuyến đường
+  document.getElementById('routeOrigin').value = '';
+  document.getElementById('routeDest').value = '';
+  document.getElementById('depTime').value = '';
+  
+  // Reset location cache
+  locationCache = { origin: null, dest: null };
   
   // Reset km
   simKm = 0;
+  document.getElementById('displayKm').textContent = 'Chưa tính';
+  document.getElementById('kmError').style.display = 'none';
   
   // Reset cargo
   document.getElementById('weight').value = '';
@@ -630,38 +696,22 @@ function resetForm() {
   document.getElementById('height').value = '';
   document.getElementById('cbmInput').value = '';
   document.querySelectorAll('input[name="cargoMode"]').forEach(r => r.checked = false);
-  document.querySelector('input[name="cargoMode"][value="cbm"]').checked = true;
-  cargoMode = 'cbm';
+  document.querySelector('input[name="cargoMode"][value="dim"]').checked = true;
+  cargoMode = 'dim';
   fitIds = [];
   
   // Reset xe chọn
   cart = {};
   
   // Reset phụ phí
-  ['toll','port','peak','night','bulky','return','carry','floor','uninstall','install'].forEach(id => {
-    const cb = document.getElementById('sc_' + id);
-    const val = document.getElementById('sc_' + id + '_v');
-    if (cb) cb.checked = false;
-    if (val) val.value = '0';
-  });
-  
-  // Reset per-unit inputs (carry_n, floor_n)
-  const carryN = document.getElementById('sc_carry_n');
-  const floorN = document.getElementById('sc_floor_n');
-  if (carryN) carryN.value = '0';
-  if (floorN) floorN.value = '0';
-  
-  // Reset custom surcharges
-  customScs = [];
-  _csSeq = 0;
-  renderCustomScs();
+  document.querySelectorAll('input[name="surcharge"]').forEach(cb => cb.checked = false);
   
   // Reset giá
   updatePrice();
   renderVehicles();
   
   // Focus vào input đầu tiên
-  document.getElementById('kmInput').focus();
+  document.getElementById('routeOrigin').focus();
 }
 
 function calculateHaversineKm(lat1, lon1, lat2, lon2) {
@@ -724,6 +774,9 @@ function applyMapKm() {
   // Removed - now using calculateKmFromLocations
 }
 
+function onKmChange() {
+  // Removed - km now set from Google Maps popup
+}
 
 function syncRow(cb) {
   const row = cb.closest('.chip');
@@ -739,90 +792,23 @@ function autoTick(cbId, inp) {
 }
 
 function updateScBadge() {
-  const ids = ['sc_toll','sc_port','sc_peak','sc_night','sc_bulky','sc_return','sc_carry','sc_floor','sc_uninstall','sc_install'];
+  const ids = ['sc_night','sc_peak','sc_return','sc_bulky','sc_port','sc_toll'];
   let n = ids.filter(i => { const el=document.getElementById(i); return el && el.checked; }).length;
-  n += customScs.filter(c => c.on && c.amount > 0).length;
   const b = document.getElementById('scCountBadge');
   b.textContent = n;
   b.style.display = n > 0 ? 'inline-block' : 'none';
-}
-
-function addCustomSc() {
-  customScs.push({ id: 'cs' + (++_csSeq), name: '', amount: 0, on: false });
-  document.getElementById('cardSurcharge').classList.remove('collapsed');
-  renderCustomScs();
-  updateScBadge();
-  updatePrice();
-}
-function removeCustomSc(e, id) {
-  e.preventDefault(); e.stopPropagation();
-  customScs = customScs.filter(c => c.id !== id);
-  renderCustomScs();
-  updateScBadge();
-  updatePrice();
-}
-function toggleCustomSc(id, on) {
-  const c = customScs.find(x => x.id === id); if (!c) return;
-  c.on = on;
-  renderCustomScs();
-  updateScBadge();
-  updatePrice();
-}
-function setCustomScAmount(id, v) {
-  const c = customScs.find(x => x.id === id); if (!c) return;
-  c.amount = parseFloat(v) || 0;
-  c.on = c.amount > 0;
-  const inp = document.querySelector(`#customScList input[oninput*="'${id}'"]`);
-  const chip = inp && inp.closest('.chip');
-  if (chip) {
-    chip.classList.toggle('on', c.on);
-    const cb = chip.querySelector('input[type="checkbox"]');
-    if (cb) cb.checked = c.on;
-  }
-  updateScBadge();
-  updatePrice();
-}
-function setCustomScName(id, v) {
-  const c = customScs.find(x => x.id === id); if (!c) return;
-  c.name = v;
-}
-function renderCustomScs() {
-  const wrap = document.getElementById('customScList');
-  if (!wrap) return;
-  wrap.innerHTML = customScs.map(c => `
-    <label class="chip${c.on?' on':''}" style="position:relative;">
-      <input type="checkbox" ${c.on?'checked':''} onchange="toggleCustomSc('${c.id}', this.checked)">
-      <input type="text" class="inp" style="flex:1;height:26px;padding:2px 8px;font-size:12px;" value="${c.name.replace(/"/g,'&quot;')}" placeholder="Tên phụ phí" oninput="setCustomScName('${c.id}', this.value)" onclick="event.preventDefault()">
-      <span class="nin-wrap"><input type="number" class="nin w" min="0" step="10" value="${c.amount}" placeholder="Số" oninput="setCustomScAmount('${c.id}', this.value)" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
-      <button type="button" title="Xoá" onclick="removeCustomSc(event,'${c.id}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;font-weight:800;padding:0 2px;">×</button>
-    </label>
-  `).join('');
 }
 
 function getSurcharges(base) {
   let total = 0;
   const on = id => document.getElementById(id)?.checked;
   const val = id => parseFloat(document.getElementById(id)?.value || 0) || 0;
-  
-  // Phụ phí theo phần trăm
-  if (on('sc_night'))  total += base * 0.20;      // Ban đêm +20%
-  if (on('sc_peak'))   total += base * 0.15;      // Giờ cao điểm +15%
-  if (on('sc_bulky'))  total += base * 0.20;      // Hàng cồng kềnh +20%
-  if (on('sc_return')) total += base * 0.40;      // Chở thêm chiều về +40%
-  
-  // Phụ phí cố định (nhập tay bằng K)
-  if (on('sc_toll'))   total += val('sc_toll_v') * 1000;      // Phí cầu đường
-  if (on('sc_port'))   total += val('sc_port_v') * 1000;      // Phí cảng/bến
-  if (on('sc_uninstall')) total += val('sc_uninstall_v') * 1000;  // Tháo gỡ
-  if (on('sc_install')) total += val('sc_install_v') * 1000;   // Lắp ráp
-  
-  // Phụ phí theo đơn vị
-  if (on('sc_carry')) total += val('sc_carry_v') * val('sc_carry_n');  // Khiêng
-  if (on('sc_floor')) total += val('sc_floor_v') * val('sc_floor_n');   // Lên tầng
-  
-  // Phụ phí tùy chỉnh (user-defined)
-  for (const c of customScs) { if (c.on) total += (c.amount || 0) * 1000; }
-  
+  if (on('sc_night'))  total += base * 0.20;
+  if (on('sc_peak'))   total += base * 0.15;
+  if (on('sc_port'))   total += val('sc_port_v') * 1000;
+  if (on('sc_toll'))   total += val('sc_toll_v') * 1000;
+  if (on('sc_return')) total += base * 0.40;
+  if (on('sc_bulky'))  total += base * 0.20;
   return Math.round(total);
 }
 
@@ -860,7 +846,7 @@ function updatePrice() {
     
     if (km <= 0) {
       document.getElementById('grandTotal').textContent = entries.length === 0 ? 'Chọn xe' : 'Nhập quãng đường';
-      document.getElementById('grandSub').textContent   = entries.length === 0 ? 'Chưa có dữ liệu' : 'Nhấn 🗺️ Maps để mở Google Maps & nhập km';
+      document.getElementById('grandSub').textContent   = entries.length === 0 ? 'Chưa có dữ liệu' : 'Nhấn 🗺️ để nhập km';
     } else {
       document.getElementById('grandTotal').textContent = 'Chọn xe';
       document.getElementById('grandSub').textContent   = 'Chưa có dữ liệu';
@@ -924,6 +910,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   cart = { 'v35ta': 1 };
   renderVehicles();
   updatePrice();
+  const _dt = document.getElementById('depTime');
+  if (_dt) {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    _dt.value = d.toISOString().slice(0,16);
+  }
   console.log('✓ Form ready');
 });
 </script>

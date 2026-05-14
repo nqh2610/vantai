@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo giá nhanh – VanChuyển Pro</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --border: #e2e8f0;
+      --border-2: #f1f5f9;
+      --primary: #4f46e5;
+      --primary-50: #eef2ff;
+      --primary-100: #e0e7ff;
+      --text-1: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --green: #16a34a;
+      --green-50: #f0fdf4;
+      --green-100: #dcfce7;
+      --amber: #f59e0b;
+      --amber-50: #fffbeb;
+    }
+    body { background: var(--bg); }
+    .page-content { padding: 0 !important; background: var(--bg); }
+
+    /* ── Top action bar ── */
+    .qq-head {
+      display:flex; align-items:center; gap:14px;
+      padding: 12px 20px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+    }
+    .qq-head h1 { font-size:16px; font-weight:700; color:var(--text-1); margin:0; }
+    .qq-head .sub { font-size:12px; color:var(--text-3); margin-top:2px; }
+    .qq-head .actions { margin-left:auto; display:flex; gap:8px; }
+    .qq-btn { padding:7px 14px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-2); transition:all .15s; }
+    .qq-btn:hover { background:#f8fafc; border-color:#cbd5e1; }
+    .qq-btn.primary { background:var(--primary); color:white; border-color:var(--primary); }
+    .qq-btn.primary:hover { background:#4338ca; }
+
+    /* ── Wrapper ── */
+    .qq-wrap {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .qq-wrap { grid-template-columns: 1fr; } }
+
+    .qq-left  { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .qq-right { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 14px; }
+
+    /* ── Card base ── */
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .card-h {
+      display:flex; align-items:center; gap:8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-2);
+      background: #fafbfc;
+    }
+    .card-h .step {
+      background: var(--primary); color:white;
+      width:20px; height:20px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size: 11px; font-weight: 800;
+    }
+    .card-h h3 { margin:0; font-size: 13px; font-weight: 700; color: var(--text-1); letter-spacing:.01em; }
+    .card-h .right { margin-left:auto; font-size:12px; color: var(--text-3); }
+    .card-h .toggle-btn {
+      margin-left:auto;
+      background:white; border:1px solid var(--border);
+      width:24px; height:24px; border-radius:6px;
+      cursor:pointer; font-size:14px; color:var(--text-2);
+      display:inline-flex; align-items:center; justify-content:center;
+      transition: all .15s;
+    }
+    .card-h .toggle-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .card-h .toggle-btn .arr { transition: transform .2s; display:inline-block; }
+    .card.collapsed .card-h .toggle-btn .arr { transform: rotate(-90deg); }
+    .card.collapsed .card-b { display:none; }
+    .card-b { padding: 12px 14px; }
+
+    /* ── Form labels & inputs ── */
+    .lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      display:block;
+    }
+    .inp {
+      width:100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      color: var(--text-1);
+      background: white;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: all .12s;
+    }
+    .inp:focus { outline:none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-100); }
+    .inp::placeholder { color: var(--text-3); }
+
+    /* ── Row utility ── */
+    .row { display:grid; gap:10px; }
+    .row.r2 { grid-template-columns: 1fr 1fr; }
+    .row.r3 { grid-template-columns: 1fr 1fr 1fr; }
+    .row.cust { grid-template-columns: 1.4fr 1fr 1.2fr; }
+    @media (max-width: 600px) { .row.r2, .row.r3, .row.cust { grid-template-columns: 1fr; } }
+
+    /* Cargo: 2 columns (weight | size) */
+    .cargo-2col {
+      display:grid;
+      grid-template-columns: 1fr 1.7fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .cargo-2col { grid-template-columns: 1fr; } }
+
+    .size-head {
+      display:flex; align-items:center;
+      margin-bottom: 5px;
+    }
+    .size-head .lbl { margin:0; flex:1; }
+    .mode-toggle {
+      display:inline-flex;
+      border:1px solid var(--border);
+      border-radius:6px;
+      overflow:hidden;
+    }
+    .mode-toggle button {
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      background: white;
+      border: none;
+      cursor: pointer;
+      color: var(--text-2);
+    }
+    .mode-toggle button.active { background: var(--primary); color: white; }
+
+    .size-grid { display:grid; gap:6px; }
+    .size-grid.dim { grid-template-columns: 1fr 1fr 1fr; }
+    .size-grid.cbm { grid-template-columns: 1fr; }
+
+    .num-wrap { position: relative; }
+    .num-wrap .suffix {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 600;
+      pointer-events: none;
+    }
+    .num-wrap input { padding-right: 28px; }
+
+    .cargo-hint {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 600;
+      display: none;
+    }
+
+    /* ── Route ── */
+    .route-grid {
+      display:grid;
+      grid-template-columns: 1fr 32px 1fr;
+      gap: 8px;
+      align-items: end;
+    }
+    .swap-btn {
+      width: 32px; height: 35px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 16px;
+      align-self: end;
+    }
+    .swap-btn:hover { background: var(--primary-50); border-color: var(--primary); color: var(--primary); }
+
+    .time-row { display:grid; grid-template-columns: 1.2fr 1fr; gap:10px; align-items:end; margin-top:10px; }
+    .qty-ctrl { display:flex; gap:4px; align-items:stretch; }
+    .qty-ctrl button { padding:0 12px; border:1px solid var(--border); background:white; border-radius:7px; cursor:pointer; font-weight:700; color:var(--text-2); font-size:14px; }
+    .qty-ctrl button:hover { border-color: var(--primary); color: var(--primary); }
+    .qty-ctrl input { flex:1; text-align:center; }
+
+    /* Per-vcard qty stepper */
+    .vcard .qrow { display:flex; align-items:center; gap:4px; margin-top:4px; padding-top:4px; border-top:1px dashed var(--border); }
+    .vcard .qrow .qbtn {
+      width:20px; height:20px; border-radius:4px;
+      border:1px solid var(--border); background:white;
+      cursor:pointer; font-weight:800; color:var(--text-2);
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:12px; line-height:1;
+    }
+    .vcard .qrow .qbtn:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-50); }
+    .vcard .qrow .qval { flex:1; text-align:center; font-size:11px; font-weight:800; color:var(--text-1); }
+    .vcard .qrow .qval.zero { color:var(--text-3); font-weight:600; }
+    .vcard.sel .qrow { border-top-color: var(--primary); }
+
+    .qq-nudge {
+      display:none; align-items:center; gap:8px;
+      background: var(--amber-50);
+      border: 1px solid #fcd34d;
+      border-radius: 7px;
+      padding: 7px 11px;
+      font-size: 12px;
+      color: #92400e;
+      margin-top: 10px;
+    }
+    .qq-nudge button {
+      background: var(--amber); color:white; border:none;
+      border-radius:5px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer;
+    }
+
+    /* ── Vehicle picker ── */
+    .vlist {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 6px;
+    }
+    .vcard {
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 8px;
+      cursor: pointer;
+      background: white;
+      transition: all .12s;
+      display:flex; flex-direction:column; gap:2px;
+      min-width: 0;
+    }
+    .vcard:hover { border-color: var(--primary); }
+    .vcard.sel { border-color: var(--primary); background: var(--primary-50); box-shadow: 0 0 0 2px var(--primary-100); }
+    .vcard.fit { border-color: var(--green); }
+    .vcard.fit.sel { border-color: var(--primary); }
+    .vcard.unfit { opacity: .4; }
+    .vcard .top { display:flex; align-items:center; gap:5px; }
+    .vcard .icon { font-size: 14px; line-height:1; }
+    .vcard .name { font-size: 12px; font-weight: 700; color: var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .vcard .badge-fit {
+      margin-left:auto;
+      background: var(--green-100);
+      color: var(--green);
+      font-size: 8px; font-weight: 800;
+      padding: 1px 4px; border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .vcard .specs { font-size: 10px; color: var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .vcard .price { font-size: 14px; font-weight: 800; color: var(--primary); margin-top: 2px; }
+    .vcard .price-lbl { font-size: 10px; font-weight: 600; color: var(--text-3); margin-right: 3px; }
+    .vcard .price-break { font-size: 10.5px; color: var(--text-3); margin-top: 1px; line-height: 1.3; }
+
+    /* ── VAT big toggle (separate) ── */
+    .vat-box {
+      display:flex; align-items:center; gap:12px;
+      padding: 11px 14px;
+      background: var(--primary-50);
+      border: 1px dashed var(--primary);
+      border-radius: 9px;
+    }
+    .vat-box .icon-big { font-size: 22px; }
+    .vat-box .info { flex:1; }
+    .vat-box .info .t { font-size: 13px; font-weight: 700; color: var(--text-1); }
+    .vat-box .info .s { font-size: 11px; color: var(--text-2); margin-top:2px; }
+    .vat-switch {
+      position: relative;
+      width: 46px; height: 26px;
+      flex-shrink: 0;
+    }
+    .vat-switch input { opacity:0; width:0; height:0; }
+    .vat-switch .slider {
+      position:absolute; inset:0;
+      background: #cbd5e1; border-radius: 13px;
+      cursor: pointer; transition: .2s;
+    }
+    .vat-switch .slider::before {
+      content:''; position:absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: white; border-radius: 50%;
+      transition: .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .vat-switch input:checked + .slider { background: var(--green); }
+    .vat-switch input:checked + .slider::before { transform: translateX(20px); }
+
+    /* ── Surcharge chips ── */
+    .chip-grid {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+    @media (max-width: 600px) { .chip-grid { grid-template-columns: 1fr; } }
+    .chip {
+      display:flex; align-items:center; gap:7px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 12px;
+      background: white;
+      transition: all .12s;
+    }
+    .chip:hover { border-color: var(--primary); }
+    .chip.on { background: var(--primary-50); border-color: var(--primary); }
+    .chip input[type="checkbox"] { accent-color: var(--primary); cursor:pointer; }
+    .chip .t { flex:1; color: var(--text-1); font-weight: 500; display:flex; align-items:center; gap:4px; }
+    .chip .p { font-size: 11px; color: var(--text-2); font-weight: 700; }
+    .chip .nin { width:60px; padding:0 6px; height:26px; border:1px solid var(--border); border-radius:5px; text-align:center; font-size:12.5px; font-weight:700; box-sizing:border-box; }
+    .chip .nin.w { width:90px; text-align:right; padding:0 22px 0 8px; }
+    .chip .nin-wrap { position:relative; display:inline-block; }
+    .chip .nin-wrap .k-suf { position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:700; color:var(--text-3); pointer-events:none; }
+
+    /* ── Price card (right) ── */
+    .qq-price-hero {
+      background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+      color: white;
+      padding: 14px 16px;
+    }
+    .qq-price-hero .lbl { font-size: 11px; font-weight:600; color:#c7d2fe; letter-spacing:.06em; text-transform:uppercase; }
+    .qq-price-hero .val { font-size: 30px; font-weight: 900; line-height: 1.05; margin-top: 3px; }
+    .qq-price-hero .sub { font-size: 11px; color:#c7d2fe; margin-top: 3px; }
+
+    .price-rows { padding: 9px 14px; }
+    .price-rows .r {
+      display:flex; justify-content:space-between; align-items:baseline;
+      padding: 4px 0;
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+    .price-rows .r .v { font-weight: 700; color: var(--text-1); }
+    .price-rows .r.disc, .price-rows .r.disc .v { color: var(--green); }
+    .price-rows .r.subt {
+      border-top: 1px dashed var(--border);
+      margin-top: 3px; padding-top: 6px;
+      font-weight: 700; color: var(--text-1);
+    }
+
+    .disc-row {
+      display:flex; gap:6px; align-items:center;
+      padding: 8px 14px;
+      border-top: 1px solid var(--border-2);
+    }
+    .disc-row .lbl { font-size: 12px; color: var(--text-1); font-weight:600; flex:1; margin:0; text-transform:none; letter-spacing:0; }
+    .disc-row .toggle { display:flex; border:1px solid var(--border); border-radius:5px; overflow:hidden; }
+    .disc-row .toggle button { padding: 3px 9px; font-size: 11px; font-weight:700; background:white; border:none; cursor:pointer; color: var(--text-2); }
+    .disc-row .toggle button.active { background: var(--primary); color:white; }
+    .disc-row input { width: 70px; padding: 4px 7px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px; font-weight: 700; text-align: right; color: var(--green); }
+    .disc-row input:focus { outline:none; border-color: var(--primary); }
+
+    .qq-actions {
+      padding: 11px 14px 14px;
+      display:flex; gap:6px;
+      border-top: 1px solid var(--border-2);
+    }
+    .qq-actions button {
+      flex: 1;
+      padding: 11px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .12s;
+    }
+    .qq-actions .primary { background: var(--green); color: white; }
+    .qq-actions .primary:hover { background: #15803d; }
+    .qq-actions .ghost { background: white; color: var(--primary); border: 1px solid var(--primary); }
+    .qq-actions .ghost:hover { background: var(--primary-50); }
+
+    /* Map (now on top of right column) */
+    .qq-map {
+      height: 170px;
+      position: relative;
+    }
+    .qq-map svg { width:100%; height:100%; display:block; }
+    .qq-map .badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: white;
+      padding: 4px 10px;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      display:flex; align-items:center; gap:6px;
+    }
+    .qq-map .stamp {
+      position: absolute;
+      bottom: 6px; right: 8px;
+      background: white;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 9px;
+      color: #5f6368;
+    }
+  </style>
+</head>
+<body>
+
+<!-- <aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-inner">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8l2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10h4l3 6H13V10z"/>
+        </svg>
+      </div>
+      <div class="sidebar-logo-text"><div class="name">VanChuyển Pro</div><div class="sub">Quản lý vận tải</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>Dashboard</a>
+    <div class="nav-group">Module 1 – Báo giá & Đơn hàng</div>
+    <a href="m1-tao-don-nhanh.html" class="nav-item"><span class="nav-icon">⚡</span>Tạo đơn nhanh</a>
+    <a href="m1-bao-gia.html" class="nav-item active"><span class="nav-icon">📋</span>Báo giá nhanh</a>
+    <a href="m1-don-hang.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+    <a href="m1-khach-hang.html" class="nav-item"><span class="nav-icon">👥</span>Khách hàng</a>
+    <div class="nav-group">Module 2 – Chuyến xe</div>
+    <a href="m2-dieu-phoi.html" class="nav-item"><span class="nav-icon">🎯</span>Điều phối chuyến</a>
+    <a href="m2-lich-xe.html" class="nav-item"><span class="nav-icon">🗓️</span>Lịch xe</a>
+    <div class="nav-group">Module 3 – Tài xế cơ hữu</div>
+    <a href="m3-tai-xe.html" class="nav-item"><span class="nav-icon">👤</span>Tài xế</a>
+    <div class="nav-group">Module 4 – Lương</div>
+    <a href="m4-luong.html" class="nav-item"><span class="nav-icon">💵</span>Bảng lương</a>
+    <div class="nav-group">Module 5 – Đối tác</div>
+    <a href="m5-doi-tac.html" class="nav-item"><span class="nav-icon">🤝</span>Xe & Tài xế đối tác</a>
+    <div class="nav-group">Module 6 – Tài chính</div>
+    <a href="m6-thu-chi.html" class="nav-item"><span class="nav-icon">💰</span>Thu chi & Công nợ</a>
+    <a href="m6-cong-no.html" class="nav-item"><span class="nav-icon">📒</span>Công nợ khách hàng</a>
+    <a href="m6-duyet-phi.html" class="nav-item"><span class="nav-icon">✅</span>Duyệt phí tài xế</a>
+    <div class="nav-group">Module 7 – GPS</div>
+    <a href="m7-gps.html" class="nav-item"><span class="nav-icon">📍</span>Theo dõi GPS</a>
+    <div class="nav-group">Module 8 – App tài xế</div>
+    <a href="m8-app-tai-xe.html" class="nav-item"><span class="nav-icon">📱</span>App tài xế</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin</div><div class="sidebar-user-role">Chủ doanh nghiệp</div></div>
+      <a href="login.html" class="sidebar-logout" title="Đăng xuất">⏻</a>
+    </div>
+  </div>
+</aside> -->
+
+<div class="main-wrapper">
+  <!-- <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-breadcrumb">
+      <span class="parent">Module 1 – Báo giá</span><span class="sep">›</span>
+      <span class="current">Báo giá nhanh</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>
+        <span class="notif-badge">4</span>
+      </button>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header> -->
+
+  <main class="page-content">
+
+    <!-- <div class="qq-head">
+      <div>
+        <h1>Báo giá nhanh</h1>
+        <div class="sub">Khách → Tuyến → Hàng hoá → Xe → Phụ phí → Chốt</div>
+      </div>
+      <div class="actions">
+        <button class="qq-btn" onclick="clearForm()">Làm mới</button>
+        <button class="qq-btn primary" onclick="createOrder()">Tạo đơn →</button>
+      </div>
+    </div> -->
+
+    <div class="qq-wrap">
+
+      <!-- ───────── LEFT (form) ───────── -->
+      <div class="qq-left">
+
+        <!-- 1. KHÁCH HÀNG -->
+        <!-- <section class="card" id="cardCust">
+          <div class="card-h">
+            <span class="step">1</span>
+            <h3>Khách</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardCust')" title="Ẩn/Hiện"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="row cust">
+              <div>
+                <label class="lbl">Tên khách</label>
+                <input class="inp" id="custName" type="text" placeholder="VD: Anh Tuấn, Cty ABC...">
+              </div>
+              <div>
+                <label class="lbl">Số điện thoại</label>
+                <input class="inp" id="custPhone" type="tel" placeholder="0901 234 567">
+              </div>
+              <div>
+                <label class="lbl">Hình thức thanh toán</label>
+                <select class="inp" id="paymentTerm">
+                  <option>Thanh toán ngay</option>
+                  <option>Cọc 30%</option>
+                  <option selected>Sau 30 ngày (công nợ)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section> -->
+
+        <!-- 2. TUYẾN ĐƯỜNG -->
+        <section class="card" id="cardRoute">
+          <div class="card-h">
+            <span class="step">2</span>
+            <h3>Tuyến & giờ</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardRoute')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="route-grid">
+              <div>
+                <label class="lbl">📍 Điểm đi</label>
+                <input class="inp" id="origin" type="text" placeholder="VD: Quận 1, TP.HCM" value="" oninput="onRouteChange()">
+              </div>
+              <button class="swap-btn" type="button" onclick="swapRoute()" title="Đổi điểm đi/đến">⇄</button>
+              <div>
+                <label class="lbl">🏁 Điểm đến</label>
+                <input class="inp" id="dest" type="text" placeholder="VD: Biên Hoà, Đồng Nai" value="" oninput="onRouteChange()">
+              </div>
+            </div>
+            <div>
+              <label class="lbl">⏰ Giờ xuất phát</label>
+              <input class="inp" type="datetime-local" id="depTime" style="max-width:300px;">
+            </div>
+          </div>
+        </section>
+        
+        <!-- 3. HÀNG HOÁ -->
+        <section class="card" id="cardCargo">
+          <div class="card-h">
+            <span class="step">3</span>
+            <h3>Hàng hoá</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardCargo')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="cargo-2col">
+              <!-- Cột trái: Trọng lượng -->
+              <div>
+                <label class="lbl">Trọng lượng</label>
+                <div class="num-wrap">
+                  <input class="inp" type="number" min="0" step="50" id="weight" placeholder="VD: 1500" oninput="calcCargo()">
+                  <span class="suffix">kg</span>
+                </div>
+              </div>
+
+              <!-- Cột phải: Kích thước -->
+              <div>
+                <div class="size-head">
+                  <span class="lbl">Kích thước</span>
+                  <div class="mode-toggle">
+                    <button id="modeDimBtn" class="active" onclick="setCargoMode('dim')">D × R × C</button>
+                    <button id="modeCbmBtn" onclick="setCargoMode('cbm')">m³</button>
+                  </div>
+                </div>
+                <div id="cargoDim" class="size-grid dim">
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargL" placeholder="Dài" oninput="calcCargo()">
+                    <span class="suffix">m</span>
+                  </div>
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargW" placeholder="Rộng" oninput="calcCargo()">
+                    <span class="suffix">m</span>
+                  </div>
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargH" placeholder="Cao" oninput="calcCargo()">
+                    <span class="suffix">m</span>
+                  </div>
+                </div>
+                <div id="cargoCbm" class="size-grid cbm" style="display:none;">
+                  <div class="num-wrap">
+                    <input class="inp" type="number" min="0" step="0.1" id="cargCBM" placeholder="VD: 12.5" oninput="calcCargo()">
+                    <span class="suffix">m³</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="cargo-hint" id="cargoHint">📐 Thể tích: <span id="cargoVolVal">0</span> m³ · gợi ý <span id="suggestCount">0</span> loại xe phù hợp</div>
+          </div>
+        </section>
+
+        <!-- 4. CHỌN XE -->
+        <section class="card" id="cardVeh">
+          <div class="card-h">
+            <span class="step">4</span>
+            <h3>Chọn xe <span style="font-size:11px;font-weight:500;color:var(--text-3);text-transform:none;">(nhiều loại)</span></h3>
+            <span class="right" id="suggestHint">Nhập hàng để có gợi ý</span>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardVeh')" style="margin-left:8px;"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="vlist" id="vehicleGrid"></div>
+          </div>
+        </section>
+
+        <!-- 5. PHỤ PHÍ (collapsible) -->
+        <section class="card collapsed" id="cardSurcharge">
+          <div class="card-h">
+            <span class="step">5</span>
+            <h3>Phụ phí <span id="scCountBadge" style="display:none;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:4px;">0</span></h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardSurcharge')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <div class="chip-grid">
+              <label class="chip">
+                <input type="checkbox" id="sc_toll" onchange="updatePrice();syncRow(this)">
+                <span class="t">🛣️ Phí cầu đường</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_toll_v" value="0" min="0" step="10" oninput="autoTick('sc_toll',this);updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_port" onchange="updatePrice();syncRow(this)">
+                <span class="t">⚓ Phí cảng/bến</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_port_v" value="0" min="0" step="10" oninput="autoTick('sc_port',this);updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_peak" onchange="updatePrice();syncRow(this)">
+                <span class="t">🚦 Giờ cao điểm</span>
+                <span class="p">+15%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_night" onchange="updatePrice();syncRow(this)">
+                <span class="t">🌙 Ban đêm (22h–6h)</span>
+                <span class="p">+20%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_bulky" onchange="updatePrice();syncRow(this)">
+                <span class="t">📦 Hàng cồng kềnh</span>
+                <span class="p">+20%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_return" onchange="updatePrice();syncRow(this)">
+                <span class="t">↩️ Chở thêm chiều về</span>
+                <span class="p">+40%</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_carry" onchange="updatePrice();syncRow(this)">
+                <span class="t">💪 Khiêng <input type="number" class="nin" id="sc_carry_n" value="0" min="0" oninput="autoTick('sc_carry',this);updatePrice()" onclick="event.preventDefault()"> ng</span>
+                <span class="p">×200K</span>
+                <input type="hidden" id="sc_carry_v" value="200000">
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_floor" onchange="updatePrice();syncRow(this)">
+                <span class="t">🏢 Lên <input type="number" class="nin" id="sc_floor_n" value="0" min="0" oninput="autoTick('sc_floor',this);updatePrice()" onclick="event.preventDefault()"> tầng</span>
+                <span class="p">×50K</span>
+                <input type="hidden" id="sc_floor_v" value="50000">
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_dis" onchange="updatePrice();syncRow(this)">
+                <span class="t">🔧 Tháo gỡ</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_dis_v" value="0" min="0" step="10" oninput="autoTick('sc_dis',this);updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" id="sc_asm" onchange="updatePrice();syncRow(this)">
+                <span class="t">🔨 Lắp ráp</span>
+                <span class="nin-wrap"><input type="number" class="nin w" id="sc_asm_v" value="0" min="0" step="10" oninput="autoTick('sc_asm',this);updatePrice()" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+              </label>
+            </div>
+
+            <!-- Custom surcharges (user-defined) -->
+            <div id="customScList" class="chip-grid" style="margin-top:7px;"></div>
+            <button type="button" class="qq-btn" style="margin-top:8px;width:100%;border-style:dashed;color:var(--primary);border-color:var(--primary);background:var(--primary-50);font-weight:700;" onclick="addCustomSc()">+ Thêm phụ phí khác</button>
+          </div>
+        </section>
+
+        <!-- Ghi chú (tách riêng) -->
+        <section class="card" id="cardNote">
+          <div class="card-h">
+            <h3>📝 Ghi chú</h3>
+            <button class="toggle-btn" type="button" onclick="toggleCard('cardNote')"><span class="arr">▾</span></button>
+          </div>
+          <div class="card-b">
+            <input class="inp" id="note" type="text" placeholder="VD: Khách yêu cầu giao trước 17h, có hàng dễ vỡ...">
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ───────── RIGHT: Map (TOP) → Price ───────── -->
+      <div class="qq-right">
+
+        <!-- Bản đồ lên trên -->
+        <section class="card">
+          <div id="map" style="width:100%; height:220px; border-radius:10px; background:#e8eaed;"></div>
+          <div style="padding:10px 14px; display:flex; gap:8px; align-items:center; font-size:13px; color:var(--text-2);">
+            🗺️ <span id="mapKm">48 km</span> · <span id="mapTime">67 ph</span>
+          </div>
+        </section>
+
+        <!-- Card báo giá -->
+        <section class="card">
+          <div class="qq-price-hero">
+            <div class="lbl">💰 Tổng báo giá</div>
+            <div class="val" id="grandTotal">–</div>
+            <div class="sub" id="grandSub">1 xe · đã gồm cầu đường</div>
+          </div>
+
+          <div class="price-rows">
+            <div class="r"><span>Giá cơ bản (10km đầu)</span><span class="v" id="baseFareFlat">–</span></div>
+            <div class="r"><span>+ <span id="kmExtra">38</span> km × <span id="perKmRate">26K</span></span><span class="v" id="baseFareKm">–</span></div>
+            <div class="r" id="multiRow" style="display:none;"><span>× <span id="qtyLabel">1</span> xe</span><span class="v" id="multiFare">–</span></div>
+            <div class="r" id="scTotalRow" style="display:none;"><span>Phụ phí</span><span class="v" id="scTotalAmt">–</span></div>
+            <div class="r subt"><span>Tạm tính</span><span class="v" id="subTotal">–</span></div>
+            <div class="r" id="vatRow" style="display:none;"><span>VAT 15%</span><span class="v" id="vatAmt">–</span></div>
+            <div class="r disc" id="discRow" style="display:none;"><span>Giảm giá</span><span class="v" id="discAmtDisp">–</span></div>
+          </div>
+
+          <div style="padding:8px 14px;border-top:1px solid var(--border-2);">
+            <div class="vat-box" style="padding:8px 11px;gap:10px;">
+              <span class="icon-big" style="font-size:18px;">🧾</span>
+              <div class="info">
+                <div class="t" style="font-size:12.5px;">Xuất hoá đơn VAT</div>
+                <div class="s" style="font-size:10.5px;">Thêm 15% vào tổng báo giá</div>
+              </div>
+              <label class="vat-switch">
+                <input type="checkbox" id="vatToggle" onchange="updatePrice()">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="disc-row">
+            <span class="lbl">🏷️ Bớt cho khách</span>
+            <div class="toggle">
+              <button id="discPctBtn" class="active" onclick="setDiscMode('pct')">%</button>
+              <button id="discAmtBtn" onclick="setDiscMode('amt')">₫</button>
+            </div>
+            <input type="number" id="discValue" min="0" step="1" placeholder="0" oninput="updatePrice()">
+            <span id="discUnit" style="font-size:12px;font-weight:700;color:var(--green);">%</span>
+          </div>
+
+          <div class="qq-actions">
+            <button class="primary" onclick="createOrderAndDispatch()">🚛 Tạo đơn & điều phối xe</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+// ═════════════════════════════════════════════════════════════════════════
+// Load config từ config.json
+// ═════════════════════════════════════════════════════════════════════════
+let VEHICLES = [];
+let CONFIG = {};
+const ICONS = { v1t:'🚐', v15t:'🚐', v2ta:'🚛', v2tb:'🚛', v25t:'🚛', v35ta:'🚚', v35tb:'🚚', v5t:'🚚', v8t:'🏗️', v10t:'🏗️', v15t2:'🏗️' };
+
+async function initConfig() {
+  try {
+    const res = await fetch('config.json');
+    CONFIG = await res.json();
+    VEHICLES = CONFIG.vehicles.map(v => ({ ...v, icon: ICONS[v.id] || '🚗' }));
+    console.log('✓ Config loaded:', VEHICLES.length, 'vehicles', 'VAT:', CONFIG.vat);
+  } catch (e) {
+    console.warn('Cannot load config.json, using defaults:', e);
+    // Fallback: hardcoded vehicles
+    VEHICLES = [
+      { id:'v1t',   label:'1 Tấn',     tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
+      { id:'v15t',  label:'1.5 Tấn',   tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
+      { id:'v2ta',  label:'2T (4.2m)', tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
+      { id:'v2tb',  label:'2T (6.0m)', tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
+      { id:'v25t',  label:'2.5 Tấn',   tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
+      { id:'v35ta', label:'3.5T 4.5m', tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
+      { id:'v35tb', label:'3.5T 6.0m', tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
+      { id:'v5t',   label:'5 Tấn',     tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
+      { id:'v8t',   label:'8 Tấn',     tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
+      { id:'v10t',  label:'10 Tấn',    tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
+      { id:'v15t2', label:'15 Tấn',    tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
+    ];
+    CONFIG = { vat: 0.15, surcharges: [] };
+  }
+}
+
+let cart = {};        // { vehId: qty }
+let primaryId = null; // id used for default 'sel' when nothing picked
+let fitIds = [];
+let simKm = 48;
+let cargoMode = 'dim';
+let customScs = [];   // { id, name, amount, on }
+let _csSeq = 0;
+
+function cartEntries() { return Object.entries(cart).filter(([id,q]) => q > 0); }
+function cartTotalQty() { return cartEntries().reduce((s,[,q])=>s+q,0); }
+
+function fmt(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+
+function calcVehiclePrice(v, km) {
+  return v.priceBase + Math.max(0, km - 10) * v.pricePerKm;
+}
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+function setCargoMode(m) {
+  cargoMode = m;
+  document.getElementById('modeDimBtn').classList.toggle('active', m==='dim');
+  document.getElementById('modeCbmBtn').classList.toggle('active', m==='cbm');
+  document.getElementById('cargoDim').style.display = m==='dim' ? 'grid' : 'none';
+  document.getElementById('cargoCbm').style.display = m==='cbm' ? 'grid' : 'none';
+  calcCargo();
+}
+
+function getCargoVol() {
+  if (cargoMode === 'cbm') {
+    return parseFloat(document.getElementById('cargCBM').value) || 0;
+  }
+  const l = parseFloat(document.getElementById('cargL').value) || 0;
+  const w = parseFloat(document.getElementById('cargW').value) || 0;
+  const h = parseFloat(document.getElementById('cargH').value) || 0;
+  return l * w * h;
+}
+
+function renderVehicles() {
+  const g = document.getElementById('vehicleGrid');
+  const wt = (parseFloat(document.getElementById('weight').value) || 0) / 1000;
+  const vol = getCargoVol();
+  const hasInput = wt > 0 || vol > 0;
+  const km10 = Math.max(0, simKm - 10);
+  g.innerHTML = VEHICLES.map(v => {
+    const isFit = fitIds.includes(v.id);
+    const qty = cart[v.id] || 0;
+    const isSel = qty > 0;
+    const isUnfit = hasInput && !isFit;
+    const tot = calcVehiclePrice(v, simKm);
+    return `<div class="vcard${isSel?' sel':''}${isFit?' fit':''}${isUnfit?' unfit':''}" onclick="addVehicle(event,'${v.id}')">
+      <div class="top">
+        <span class="icon">${v.icon}</span>
+        <span class="name">${v.label}</span>
+        ${isFit ? '<span class="badge-fit">Phù hợp</span>' : ''}
+      </div>
+      <div class="specs">${v.dim} · ${v.vol}m³ · ${v.tons}T</div>
+      <div class="qrow" onclick="event.stopPropagation()">
+        <button class="qbtn" type="button" onclick="changeVehQty('${v.id}',-1)">−</button>
+        <span class="qval${qty===0?' zero':''}">${qty}</span>
+        <button class="qbtn" type="button" onclick="changeVehQty('${v.id}',1)">+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addVehicle(e, id) { changeVehQty(id, (cart[id]||0)===0 ? 1 : 0); }
+function changeVehQty(id, d) {
+  if (d === 0) return;
+  const cur = cart[id] || 0;
+  const nxt = Math.max(0, Math.min(20, cur + d));
+  if (nxt === 0) delete cart[id]; else cart[id] = nxt;
+  renderVehicles();
+  updatePrice();
+}
+
+// ===== Custom surcharges =====
+function renderCustomScs() {
+  const wrap = document.getElementById('customScList');
+  if (!wrap) return;
+  wrap.innerHTML = customScs.map(c => `
+    <label class="chip${c.on?' on':''}" style="position:relative;">
+      <input type="checkbox" ${c.on?'checked':''} onchange="toggleCustomSc('${c.id}', this.checked)">
+      <input type="text" class="inp" style="flex:1;height:26px;padding:2px 8px;font-size:12px;" value="${c.name.replace(/"/g,'&quot;')}" placeholder="Tên phụ phí" oninput="setCustomScName('${c.id}', this.value)" onclick="event.preventDefault()">
+      <span class="nin-wrap"><input type="number" class="nin w" min="0" step="10" value="${c.amount}" placeholder="Số" oninput="setCustomScAmount('${c.id}', this.value)" onclick="event.preventDefault()"><span class="k-suf">K</span></span>
+      <button type="button" title="Xoá" onclick="removeCustomSc(event,'${c.id}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;font-weight:800;padding:0 2px;">×</button>
+    </label>
+  `).join('');
+}
+function addCustomSc() {
+  customScs.push({ id: 'cs' + (++_csSeq), name: '', amount: 0, on: false });
+  document.getElementById('cardSurcharge').classList.remove('collapsed');
+  renderCustomScs();
+  updateScBadge();
+  updatePrice();
+}
+function removeCustomSc(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  customScs = customScs.filter(c => c.id !== id);
+  renderCustomScs();
+  updateScBadge();
+  updatePrice();
+}
+function toggleCustomSc(id, on) {
+  const c = customScs.find(x => x.id === id); if (!c) return;
+  c.on = on;
+  renderCustomScs();
+  updateScBadge();
+  updatePrice();
+}
+function setCustomScAmount(id, v) {
+  const c = customScs.find(x => x.id === id); if (!c) return;
+  c.amount = parseFloat(v) || 0;
+  c.on = c.amount > 0;
+  // Update chip UI in-place (avoid re-render to keep input focus)
+  const inp = document.querySelector(`#customScList input[oninput*="'${id}'"]`);
+  const chip = inp && inp.closest('.chip');
+  if (chip) {
+    chip.classList.toggle('on', c.on);
+    const cb = chip.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = c.on;
+  }
+  updateScBadge();
+  updatePrice();
+}
+function setCustomScName(id, v) {
+  const c = customScs.find(x => x.id === id); if (!c) return;
+  c.name = v;
+}
+
+function calcCargo() {
+  const vol = getCargoVol();
+  const wt = (parseFloat(document.getElementById('weight').value) || 0) / 1000;
+
+  fitIds = VEHICLES
+    .filter(v => (vol <= 0 || v.vol >= vol) && (wt <= 0 || v.tons >= wt))
+    .map(v => v.id);
+
+  const hint = document.getElementById('cargoHint');
+  const hintEl = document.getElementById('suggestHint');
+  if (vol > 0 || wt > 0) {
+    hint.style.display = 'block';
+    document.getElementById('cargoVolVal').textContent = vol.toFixed(2);
+    document.getElementById('suggestCount').textContent = fitIds.length;
+    if (fitIds.length) {
+      hintEl.textContent = `✅ ${fitIds.length} xe phù hợp`;
+      hintEl.style.color = 'var(--green)';
+    } else {
+      hintEl.textContent = '⚠️ Không có xe phù hợp';
+      hintEl.style.color = 'var(--amber)';
+    }
+  } else {
+    hint.style.display = 'none';
+    hintEl.textContent = 'Nhập hàng để có gợi ý';
+    hintEl.style.color = 'var(--text-3)';
+  }
+  renderVehicles();
+  updatePrice();
+}
+
+function onRouteChange() {
+  const o = document.getElementById('origin').value.trim();
+  const d = document.getElementById('dest').value.trim();
+  let h = 0;
+  const s = (o + '|' + d).toLowerCase();
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  simKm = !o || !d ? 0 : Math.abs(h % 250) + 8;
+  const dk2 = document.getElementById('distKm2'); if (dk2) dk2.textContent = simKm;
+  document.getElementById('mapKm').textContent = simKm + ' km';
+  document.getElementById('mapTime').textContent = Math.round(simKm * 1.4) + ' ph';
+  renderVehicles();
+  updatePrice();
+}
+
+function swapRoute() {
+  const o = document.getElementById('origin');
+  const d = document.getElementById('dest');
+  const tmp = o.value; o.value = d.value; d.value = tmp;
+  onRouteChange();
+}
+
+function syncRow(cb) {
+  const row = cb.closest('.chip');
+  if (row) row.classList.toggle('on', cb.checked);
+  updateScBadge();
+}
+
+function autoTick(cbId, inp) {
+  const cb = document.getElementById(cbId);
+  if (!cb) return;
+  const v = parseFloat(inp.value) || 0;
+  cb.checked = v > 0;
+  syncRow(cb);
+}
+
+function updateScBadge() {
+  const ids = ['sc_night','sc_peak','sc_return','sc_bulky','sc_port','sc_toll','sc_carry','sc_floor','sc_dis','sc_asm'];
+  let n = ids.filter(i => { const el=document.getElementById(i); return el && el.checked; }).length;
+  n += customScs.filter(c => c.on && c.amount > 0).length;
+  const b = document.getElementById('scCountBadge');
+  b.textContent = n;
+  b.style.display = n > 0 ? 'inline-block' : 'none';
+}
+
+function getSurcharges(base) {
+  let total = 0;
+  const get = id => document.getElementById(id);
+  const on  = id => get(id) && get(id).checked;
+  const val = id => parseFloat((get(id)||{}).value || 0) || 0;
+  if (on('sc_night'))  total += base * 0.20;
+  if (on('sc_peak'))   total += base * 0.15;
+  if (on('sc_port'))   total += val('sc_port_v') * 1000;
+  if (on('sc_toll'))   total += val('sc_toll_v') * 1000;
+  if (on('sc_return')) total += base * 0.40;
+  if (on('sc_bulky'))  total += base * 0.20;
+  if (on('sc_carry'))  total += val('sc_carry_v') * val('sc_carry_n');
+  if (on('sc_dis'))    total += val('sc_dis_v') * 1000;
+  if (on('sc_asm'))    total += val('sc_asm_v') * 1000;
+  if (on('sc_floor'))  total += val('sc_floor_v') * val('sc_floor_n');
+  for (const c of customScs) { if (c.on) total += (c.amount || 0) * 1000; }
+  return Math.round(total);
+}
+function setDiscMode(mode) {
+  const isPct = mode === 'pct';
+  document.getElementById('discPctBtn').classList.toggle('active', isPct);
+  document.getElementById('discAmtBtn').classList.toggle('active', !isPct);
+  document.getElementById('discUnit').textContent = isPct ? '%' : 'K';
+  const inp = document.getElementById('discValue');
+  inp.max = isPct ? 100 : '';
+  inp.step = isPct ? 1 : 10;
+  inp.value = '';
+  updatePrice();
+}
+
+function updateTollInfo() {
+  const stations = parseInt(document.getElementById('tollStations')?.value || 0);
+  const tollAmt = parseInt(document.getElementById('tollAmount')?.value || 0) * 1000;
+  const hasFerry = document.querySelector('input[name="hasFerry"]:checked')?.value === 'yes';
+  const ferryFee = parseInt(document.getElementById('ferryFee')?.value || 0) * 1000;
+  
+  tolls.stations = stations;
+  tolls.hasFerry = hasFerry;
+  tolls.totalFee = tollAmt + ferryFee;
+  
+  document.getElementById('totalTollDisplay').textContent = fmt(tolls.totalFee);
+  console.log(`📊 Tolls: ${stations} stations, Ferry: ${hasFerry}, Total: ${fmt(tolls.totalFee)}`);
+}
+
+function suggestTollFeeByDistance(km) {
+  // Auto-suggest toll based on distance (Vietnam highway approximate)
+  let suggested = 0;
+  let stations = 0;
+  
+  if (km > 100) {
+    // Long distance: typically 150-200k per 100km
+    suggested = Math.round(km / 100 * 175); // 175k per 100km avg
+    stations = Math.round(km / 50); // ~1 station per 50km
+  } else if (km > 50) {
+    suggested = Math.round(km / 100 * 150);
+    stations = Math.round(km / 60);
+  } else if (km > 20) {
+    suggested = Math.round(km / 100 * 120);
+    stations = Math.round(km / 80);
+  }
+  
+  if (suggested > 0) {
+    document.getElementById('tollAmount').value = suggested;
+    document.getElementById('tollStations').value = Math.max(1, stations);
+    updateTollInfo();
+  }
+}
+
+function updatePrice() {
+  const km = simKm;
+  const km10 = Math.max(0, km - 10);
+  const entries = cartEntries();
+
+  let baseFlatTotal = 0, baseKmTotal = 0, baseTotal = 0, scTotal = 0, subT = 0, totalQty = 0;
+  const lines = [];
+
+  // Use the first picked vehicle (or first VEHICLES) for the displayed per-km rate
+  const refV = entries.length ? VEHICLES.find(x=>x.id===entries[0][0]) : VEHICLES[5];
+  document.getElementById('kmExtra').textContent = km10;
+  document.getElementById('perKmRate').textContent = refV ? (refV.pricePerKm/1000).toFixed(0)+'K' : '–';
+
+  if (entries.length === 0) {
+    document.getElementById('baseFareFlat').textContent = '–';
+    document.getElementById('baseFareKm').textContent  = '–';
+    document.getElementById('multiRow').style.display = 'none';
+    document.getElementById('scTotalRow').style.display = 'none';
+    document.getElementById('subTotal').textContent   = '–';
+    document.getElementById('vatRow').style.display   = 'none';
+    document.getElementById('discRow').style.display  = 'none';
+    document.getElementById('grandTotal').textContent = 'Chọn xe';
+    document.getElementById('grandSub').textContent   = `${km} km · chưa chọn xe`;
+    return;
+  }
+
+  for (const [id, qty] of entries) {
+    const v = VEHICLES.find(x => x.id === id);
+    if (!v) continue;
+    const baseFlat = v.priceBase;
+    const baseKm   = km10 * v.pricePerKm;
+    const base     = baseFlat + baseKm;
+    const scV      = getSurcharges(base);
+    const perV     = base + scV;
+    baseFlatTotal += baseFlat * qty;
+    baseKmTotal   += baseKm   * qty;
+    baseTotal     += base * qty;
+    scTotal       += scV  * qty;
+    subT          += perV * qty;
+    totalQty      += qty;
+    lines.push(`${qty}× ${v.label}`);
+  }
+
+  // Add toll fee (calculated once for the trip, not per vehicle)
+  scTotal += tolls.totalFee;
+  subT += tolls.totalFee;
+
+  const hasVAT  = document.getElementById('vatToggle').checked;
+  const vatAmt  = hasVAT ? Math.round(subT * (CONFIG.vat || 0.15)) : 0;
+  const afterVAT= subT + vatAmt;
+  const discV   = parseFloat(document.getElementById('discValue').value) || 0;
+  const isPctDisc = document.getElementById('discPctBtn').classList.contains('active');
+  const discAmt = discV > 0 ? (isPctDisc ? Math.round(afterVAT * Math.min(discV,100) / 100) : Math.min(discV * 1000, afterVAT)) : 0;
+  const grand   = afterVAT - discAmt;
+
+  document.getElementById('baseFareFlat').textContent  = fmt(baseFlatTotal);
+  document.getElementById('baseFareKm').textContent    = fmt(baseKmTotal);
+  document.getElementById('multiRow').style.display = totalQty > 1 || entries.length > 1 ? '' : 'none';
+  document.getElementById('qtyLabel').textContent   = totalQty;
+  document.getElementById('multiFare').textContent  = entries.length > 1 ? `${entries.length} loại` : `${totalQty} xe`;
+  document.getElementById('scTotalRow').style.display = scTotal > 0 ? '' : 'none';
+  document.getElementById('scTotalAmt').textContent  = fmt(scTotal);
+  document.getElementById('subTotal').textContent   = fmt(subT);
+  document.getElementById('vatRow').style.display   = hasVAT ? '' : 'none';
+  document.getElementById('vatAmt').textContent     = fmt(vatAmt);
+  document.getElementById('discRow').style.display  = discAmt > 0 ? '' : 'none';
+  document.getElementById('discAmtDisp').textContent= discAmt > 0 ? '- ' + fmt(discAmt) : '–';
+  document.getElementById('grandTotal').textContent = fmt(grand);
+  document.getElementById('grandSub').textContent   = `${lines.join(' + ')} · ${km} km`;
+}
+
+function vehSummary() {
+  const e = cartEntries();
+  if (!e.length) return 'Chưa chọn xe';
+  return e.map(([id,q]) => {
+    const v = VEHICLES.find(x => x.id === id);
+    return `${q}× ${v ? v.label : id}`;
+  }).join(' + ');
+}
+function copyQuote() {
+  const g = document.getElementById('grandTotal').textContent;
+  const o = document.getElementById('origin').value;
+  const de= document.getElementById('dest').value;
+  const txt = `Báo giá VanChuyển Pro\n${o} → ${de} (${simKm} km)\nXe: ${vehSummary()}\nTổng: ${g}`;
+  navigator.clipboard.writeText(txt).then(()=>alert('Đã sao chép!')).catch(()=>alert(txt));
+}
+function clearForm() { if(confirm('Xoá toàn bộ form?')) location.reload(); }
+function createOrder() { saveOrderForDispatch(); window.location.href = 'm1-don-hang.html'; }
+function dispatchVehicle() { saveOrderForDispatch(); window.location.href = 'm2-dieu-phoi.html'; }
+function createOrderAndDispatch() { saveOrderForDispatch(); window.location.href = 'm2-dieu-phoi.html'; }
+
+function saveOrderForDispatch() {
+  try {
+    const cargoVol = getCargoVol ? getCargoVol() : (parseFloat(document.getElementById('cargCBM')?.value)||0);
+    const cargoTons = (parseFloat(document.getElementById('weight')?.value)||0)/1000;
+    const e = cartEntries();
+    const vehReq = e.map(([id,q])=>{ const v=VEHICLES.find(x=>x.id===id); return { id, qty:q, label:v?.label, tons:v?.tons, vol:v?.vol, dim:v?.dim }; });
+    const order = {
+      id: 'CX-' + String(Math.floor(Math.random()*900)+100),
+      createdAt: Date.now(),
+      customer: document.getElementById('custName')?.value || 'Khách lẻ',
+      phone:    document.getElementById('custPhone')?.value || '',
+      origin:   document.getElementById('origin')?.value || '',
+      dest:     document.getElementById('dest')?.value || '',
+      depTime:  document.getElementById('depTime')?.value || '',
+      km: simKm,
+      cargoTons, cargoVol,
+      vehReq,
+      total: document.getElementById('grandTotal')?.textContent || '',
+      note: document.getElementById('note')?.value || ''
+    };
+    localStorage.setItem('vc_pending_order', JSON.stringify(order));
+  } catch(e) { console.warn('save order fail', e); }
+}
+function sendQuote() {
+  const g  = document.getElementById('grandTotal').textContent;
+  const o  = document.getElementById('origin').value  || 'Điểm đi';
+  const de = document.getElementById('dest').value    || 'Điểm đến';
+  const txt = `🚚 *Báo giá – VanChuyển Pro*\n📍 ${o} → ${de}\n📏 ${simKm} km · 🚛 ${vehSummary()}\n💰 *Tổng: ${g}*\n_Hiệu lực 24h. LH xác nhận._`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// NOMINATIM + OSRM INTEGRATION (Autocomplete + Distance Calculation)
+// ═════════════════════════════════════════════════════════════════════════
+
+let addressSuggestions = { origin: [], dest: [] };
+let routeCoords = { origin_lat: null, origin_lon: null, dest_lat: null, dest_lon: null };
+let lastCalculatedKm = 0;
+let searchTimeouts = { origin: null, dest: null }; // Debounce
+
+async function searchNominatim(query, fieldType) {
+  if (query.length < 2) {
+    hideSuggestions(fieldType);
+    return;
+  }
+  
+  // Show loading state
+  showLoadingSuggestions(fieldType);
+  
+  try {
+    // Nominatim API URL
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=10&countrycodes=vn&addressdetails=1`;
+    
+    // Try alternative CORS proxies
+    const corsProxies = [
+      `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(nominatimUrl)}`,
+      nominatimUrl // Fallback to direct (may not work due to CORS)
+    ];
+    
+    let results = null;
+    let lastError = null;
+    
+    for (const corsUrl of corsProxies) {
+      try {
+        // Set timeout using Promise.race
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000) // 10s timeout per proxy
+        );
+        
+        const fetchPromise = fetch(corsUrl, {
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        results = await response.json();
+        
+        if (Array.isArray(results) && results.length > 0) {
+          console.log(`✓ Search succeeded via: ${corsUrl.substring(0, 40)}...`);
+          break; // Success
+        }
+      } catch (e) {
+        lastError = e;
+        console.log(`⚠️ Proxy failed: ${corsUrl.substring(0, 40)}..., trying next...`);
+        continue; // Try next proxy
+      }
+    }
+    
+    if (!Array.isArray(results) || results.length === 0) {
+      addressSuggestions[fieldType] = [];
+      showSuggestions([], fieldType);
+      console.warn('⚠️ No results found for:', query);
+      return;
+    }
+    
+    addressSuggestions[fieldType] = results;
+    showSuggestions(results, fieldType);
+    console.log(`✓ Found ${results.length} addresses for "${query}"`);
+  } catch (e) {
+    console.warn('❌ Search failed:', e.message);
+    addressSuggestions[fieldType] = [];
+    showSuggestions([], fieldType);
+  }
+}
+
+function showLoadingSuggestions(fieldType) {
+  const field = document.getElementById(fieldType);
+  if (!field) return;
+  
+  let suggestDiv = document.getElementById(`suggest_${fieldType}`);
+  if (!suggestDiv) {
+    suggestDiv = document.createElement('div');
+    suggestDiv.id = `suggest_${fieldType}`;
+    suggestDiv.style.cssText = `
+      position: fixed;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      z-index: 99999;
+      max-height: 250px;
+      overflow-y: auto;
+      min-width: 300px;
+      font-size: 12px;
+    `;
+    document.body.appendChild(suggestDiv);
+  }
+  
+  const rect = field.getBoundingClientRect();
+  suggestDiv.style.left = rect.left + 'px';
+  suggestDiv.style.top = (rect.bottom + 4) + 'px';
+  suggestDiv.style.width = rect.width + 'px';
+  suggestDiv.innerHTML = '<div style="padding:12px;color:#999;text-align:center;">⏳ Đang tìm kiếm...</div>';
+  suggestDiv.style.display = 'block';
+}
+
+function debouncedSearch(query, fieldType, delayMs = 200) {
+  // Clear previous timeout
+  if (searchTimeouts[fieldType]) {
+    clearTimeout(searchTimeouts[fieldType]);
+  }
+  
+  // Set new timeout with faster delay
+  searchTimeouts[fieldType] = setTimeout(() => {
+    searchNominatim(query, fieldType);
+  }, delayMs);
+}
+
+function showSuggestions(results, fieldType) {
+  const field = document.getElementById(fieldType);
+  if (!field) return;
+  
+  let suggestDiv = document.getElementById(`suggest_${fieldType}`);
+  
+  if (!suggestDiv) {
+    suggestDiv = document.createElement('div');
+    suggestDiv.id = `suggest_${fieldType}`;
+    suggestDiv.style.cssText = `
+      position: fixed;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      z-index: 99999;
+      max-height: 280px;
+      overflow-y: auto;
+      min-width: 300px;
+      font-size: 13px;
+    `;
+    document.body.appendChild(suggestDiv);
+  }
+  
+  // Position dropdown below input field
+  const rect = field.getBoundingClientRect();
+  suggestDiv.style.left = rect.left + 'px';
+  suggestDiv.style.top = (rect.bottom + 4) + 'px';
+  suggestDiv.style.width = rect.width + 'px';
+  
+  if (results.length === 0) {
+    suggestDiv.innerHTML = '<div style="padding:12px;color:#999;text-align:center;">Không tìm thấy kết quả</div>';
+  } else {
+    suggestDiv.innerHTML = results.map((r, i) => {
+      const displayName = r.display_name || '';
+      const parts = displayName.split(',');
+      const main = parts[0]?.trim() || '';
+      const sub = parts.slice(1).join(',').trim();
+      return `
+        <div onclick="selectAddress('${fieldType}', ${i})" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;background:white;transition:background 0.15s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+          <div style="font-weight:600;color:#0f172a;margin-bottom:2px;">${main}</div>
+          <div style="color:#94a3b8;font-size:11px;">${sub}</div>
+        </div>
+      `;
+    }).join('');
+  }
+  suggestDiv.style.display = 'block';
+}
+
+function hideSuggestions(fieldType) {
+  const suggestDiv = document.getElementById(`suggest_${fieldType}`);
+  if (suggestDiv) suggestDiv.style.display = 'none';
+}
+
+function selectAddress(fieldType, index) {
+  const result = addressSuggestions[fieldType][index];
+  if (!result) return;
+  
+  const field = document.getElementById(fieldType);
+  field.value = result.display_name;
+  routeCoords[`${fieldType}_lat`] = parseFloat(result.lat);
+  routeCoords[`${fieldType}_lon`] = parseFloat(result.lon);
+  
+  hideSuggestions(fieldType);
+  
+  // Load single marker immediately for visual feedback
+  if (fieldType === 'origin' && routeCoords.origin_lat) {
+    updateSingleMarker(routeCoords.origin_lat, routeCoords.origin_lon, 'origin');
+  } else if (fieldType === 'dest' && routeCoords.dest_lat) {
+    updateSingleMarker(routeCoords.dest_lat, routeCoords.dest_lon, 'dest');
+  }
+  
+  // If both origin & dest have coordinates → calculate distance
+  if (routeCoords.origin_lat && routeCoords.dest_lat) {
+    calculateDistanceOSRM();
+  }
+}
+
+async function calculateDistanceOSRM() {
+  const { origin_lon: lon1, origin_lat: lat1, dest_lon: lon2, dest_lat: lat2 } = routeCoords;
+  
+  if (!lon1 || !lat1 || !lon2 || !lat2) return;
+
+  try {
+    // OSRM public server (no API key needed)
+    const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+    const response = await fetch(url);
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      lastCalculatedKm = Math.round(route.distance / 1000);
+      const minutes = Math.round(route.duration / 60);
+      
+      // Update display
+      simKm = lastCalculatedKm;
+      document.getElementById('mapKm').textContent = lastCalculatedKm + ' km';
+      document.getElementById('mapTime').textContent = minutes + ' phút';
+      
+      // Draw route on map
+      updateMapRoute(lat1, lon1, lat2, lon2, route.geometry);
+      
+      // Auto-suggest toll fee based on distance
+      suggestTollFeeByDistance(lastCalculatedKm);
+      
+      renderVehicles();
+      updatePrice();
+      
+      console.log(`✓ Route: ${lastCalculatedKm} km, ${minutes} min`);
+    }
+  } catch (e) {
+    console.warn('OSRM error:', e.message);
+    // Fallback to hash-based calculation
+    onRouteChange();
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// LEAFLET MAP FUNCTIONS
+// ═════════════════════════════════════════════════════════════════════════
+
+let mapInstance = null;
+let originMarker = null, destMarker = null, routePolyline = null;
+let tolls = { stations: 0, hasFerry: false, totalFee: 0 };
+
+function initMap() {
+  if (mapInstance) return; // Already initialized
+  
+  const mapEl = document.getElementById('map');
+  if (!mapEl) {
+    console.warn('Map element not found, retrying...');
+    setTimeout(initMap, 200);
+    return;
+  }
+  
+  try {
+    // Default center (Hà Nội, Việt Nam) with reasonable zoom
+    mapInstance = L.map(mapEl).setView([21.0285, 105.8542], 10);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19,
+      minZoom: 5
+    }).addTo(mapInstance);
+    
+    console.log('✓ Map initialized successfully');
+  } catch (e) {
+    console.error('Map init error:', e.message);
+    setTimeout(initMap, 500);
+  }
+}
+
+function updateSingleMarker(lat, lon, type) {
+  // Wait for map to initialize
+  if (!mapInstance) {
+    setTimeout(() => updateSingleMarker(lat, lon, type), 300);
+    return;
+  }
+  
+  const createMarkerIcon = (color, label) => {
+    return L.divIcon({
+      html: `<div style="background:${color};color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);">${label}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -16]
+    });
+  };
+  
+  if (type === 'origin') {
+    if (originMarker) mapInstance.removeLayer(originMarker);
+    originMarker = L.marker([lat, lon], {
+      icon: createMarkerIcon('#4f46e5', '📍')
+    }).addTo(mapInstance).bindPopup('<b>Điểm đi</b>', { offset: [0, -16] });
+    mapInstance.flyTo([lat, lon], 12, { duration: 0.8 });
+    console.log(`✓ Origin marker loaded: ${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+  } else if (type === 'dest') {
+    if (destMarker) mapInstance.removeLayer(destMarker);
+    destMarker = L.marker([lat, lon], {
+      icon: createMarkerIcon('#ea4335', '🏁')
+    }).addTo(mapInstance).bindPopup('<b>Điểm đến</b>', { offset: [0, -16] });
+    mapInstance.flyTo([lat, lon], 12, { duration: 0.8 });
+    console.log(`✓ Destination marker loaded: ${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+  }
+}
+
+function updateMapRoute(lat1, lon1, lat2, lon2, geometry) {
+  // Wait for map to initialize
+  if (!mapInstance) {
+    console.log('⏳ Map not ready, retrying...');
+    setTimeout(() => updateMapRoute(lat1, lon1, lat2, lon2, geometry), 500);
+    return;
+  }
+  
+  // Remove old markers & route
+  if (originMarker) mapInstance.removeLayer(originMarker);
+  if (destMarker) mapInstance.removeLayer(destMarker);
+  if (routePolyline) mapInstance.removeLayer(routePolyline);
+  
+  // Create custom SVG icons
+  const createMarkerIcon = (color, label) => {
+    return L.divIcon({
+      html: `<div style="background:${color};color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);">${label}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -16]
+    });
+  };
+  
+  // Add markers
+  originMarker = L.marker([lat1, lon1], {
+    icon: createMarkerIcon('#4f46e5', '📍')
+  }).addTo(mapInstance).bindPopup('<b>Điểm đi</b>', { offset: [0, -16] });
+  
+  destMarker = L.marker([lat2, lon2], {
+    icon: createMarkerIcon('#ea4335', '🏁')
+  }).addTo(mapInstance).bindPopup('<b>Điểm đến</b>', { offset: [0, -16] });
+  
+  // Draw route polyline from geometry (GeoJSON format)
+  if (geometry && geometry.coordinates && geometry.coordinates.length > 0) {
+    const coords = geometry.coordinates.map(c => [c[1], c[0]]); // GeoJSON [lon,lat] → Leaflet [lat,lon]
+    routePolyline = L.polyline(coords, {
+      color: '#4f46e5',
+      weight: 3,
+      opacity: 0.8,
+      lineCap: 'round',
+      lineJoin: 'round',
+      dashArray: '5,5'
+    }).addTo(mapInstance);
+  }
+  
+  // Auto-fit map bounds with padding
+  const group = new L.featureGroup([originMarker, destMarker]);
+  mapInstance.fitBounds(group.getBounds(), { padding: [60, 60] });
+  
+  console.log('✓ Route drawn on map');
+}
+
+// Setup address autocomplete listeners & init form
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize map first
+  initMap();
+  
+  // Load config from JSON
+  await initConfig();
+  
+  // Initialize form
+  cart = { 'v35ta': 1 };
+  renderVehicles();
+  onRouteChange();
+  
+  const _dt = document.getElementById('depTime');
+  if (_dt) {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    _dt.value = d.toISOString().slice(0,16);
+  }
+  
+  // Setup address autocomplete with optimized debounce
+  const originInput = document.getElementById('origin');
+  const destInput = document.getElementById('dest');
+  
+  if (originInput) {
+    originInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      if (query.length < 2) {
+        hideSuggestions('origin');
+      } else {
+        debouncedSearch(query, 'origin', 150); // Faster debounce
+      }
+    });
+    
+    originInput.addEventListener('blur', () => {
+      setTimeout(() => hideSuggestions('origin'), 200);
+    });
+    
+    originInput.addEventListener('focus', (e) => {
+      const query = e.target.value.trim();
+      if (query.length >= 2 && addressSuggestions.origin.length > 0) {
+        showSuggestions(addressSuggestions.origin, 'origin');
+      }
+    });
+    
+    // Keyboard navigation support
+    originInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideSuggestions('origin');
+    });
+  }
+  
+  if (destInput) {
+    destInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      if (query.length < 2) {
+        hideSuggestions('dest');
+      } else {
+        debouncedSearch(query, 'dest', 150); // Faster debounce
+      }
+    });
+    
+    destInput.addEventListener('blur', () => {
+      setTimeout(() => hideSuggestions('dest'), 200);
+    });
+    
+    destInput.addEventListener('focus', (e) => {
+      const query = e.target.value.trim();
+      if (query.length >= 2 && addressSuggestions.dest.length > 0) {
+        showSuggestions(addressSuggestions.dest, 'dest');
+      }
+    });
+    
+    // Keyboard navigation support
+    destInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideSuggestions('dest');
+    });
+  }
+  
+  console.log('✓ App initialized');
+});
+</script>
+</body>
+</html>

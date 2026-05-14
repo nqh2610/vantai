@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Báo giá nhanh – VanChuyển Pro</title>
-  <link rel="stylesheet" href="assets/style.css">
   <style>
     :root {
       --bg: #f8fafc;
@@ -231,7 +230,7 @@
     <main class="page-content">
       <div class="qq-head">
         <div>
-          <h1>Tool báo giá nhanh</h1>        
+          <h1 style="color:#3b2ad3; font-size: 28px;">Tool báo giá nhanh phí vận tải</h1>        
         </div>
         <div class="actions">
           <button class="qq-btn" onclick="resetForm()">Làm mới</button>         
@@ -439,7 +438,6 @@
     </main>
   </div>
 
-<script src="assets/app.js"></script>
 <script>
 // ═════════════════════════════════════════════════════════════════════════
 // CONFIGURATION & GLOBAL STATE
@@ -451,29 +449,38 @@ let customScs = [];
 let _csSeq = 0;
 const ICONS = { v1t:'🚐', v15t:'🚐', v2ta:'🚛', v2tb:'🚛', v25t:'🚛', v35ta:'🚚', v35tb:'🚚', v5t:'🚚', v8t:'🏗️', v10t:'🏗️', v15t2:'🏗️' };
 
-async function initConfig() {
-  try {
-    const res = await fetch('config.json');
-    CONFIG = await res.json();
-    VEHICLES = CONFIG.vehicles.map(v => ({ ...v, icon: ICONS[v.id] || '🚗' }));
-    console.log('✓ Config loaded:', VEHICLES.length, 'vehicles');
-  } catch (e) {
-    console.warn('Config load failed:', e);
-    VEHICLES = [
-      { id:'v1t',   label:'1 Tấn',     tons:1,   dim:'2.6×1.4×1.4', vol:5.1,  priceBase:180000, pricePerKm:17000, icon:'🚐',  toll:60000  },
-      { id:'v15t',  label:'1.5 Tấn',   tons:1.5, dim:'3.2×1.5×1.6', vol:7.7,  priceBase:210000, pricePerKm:19000, icon:'🚐',  toll:60000  },
-      { id:'v2ta',  label:'2T (4.2m)', tons:2,   dim:'4.2×1.85×1.85',vol:14.4,priceBase:250000, pricePerKm:21000, icon:'🚛',  toll:80000  },
-      { id:'v2tb',  label:'2T (6.0m)', tons:2,   dim:'6.0×1.9×1.9', vol:21.7, priceBase:280000, pricePerKm:22000, icon:'🚛',  toll:80000  },
-      { id:'v25t',  label:'2.5 Tấn',   tons:2.5, dim:'4.2×1.85×1.85',vol:14.4,priceBase:300000, pricePerKm:24000, icon:'🚛',  toll:80000  },
-      { id:'v35ta', label:'3.5T 4.5m', tons:3.5, dim:'4.5×1.9×1.9', vol:16.2, priceBase:320000, pricePerKm:26000, icon:'🚚',  toll:90000  },
-      { id:'v35tb', label:'3.5T 6.0m', tons:3.5, dim:'6.0×2.0×2.0', vol:24.0, priceBase:340000, pricePerKm:28000, icon:'🚚',  toll:90000  },
-      { id:'v5t',   label:'5 Tấn',     tons:5,   dim:'6.2×2.2×2.1', vol:28.6, priceBase:350000, pricePerKm:32000, icon:'🚚',  toll:90000  },
-      { id:'v8t',   label:'8 Tấn',     tons:8,   dim:'7.4×2.3×2.2', vol:37.4, priceBase:400000, pricePerKm:38000, icon:'🏗️', toll:120000 },
-      { id:'v10t',  label:'10 Tấn',    tons:10,  dim:'7.4×2.3×2.2', vol:37.4, priceBase:450000, pricePerKm:44000, icon:'🏗️', toll:120000 },
-      { id:'v15t2', label:'15 Tấn',    tons:15,  dim:'9.5×2.38×2.4',vol:54.3, priceBase:550000, pricePerKm:52000, icon:'🏗️', toll:150000 },
-    ];
-    CONFIG = { vat: 0.15 };
-  }
+function initConfig() {
+  // Embed config directly - works anywhere (laptop, GitHub Pages, etc.)
+  CONFIG = {
+    "vehicles": [
+      {"id":"v1t","label":"1T","dim":"2.6×1.4×1.4","tons":1,"vol":5.1,"priceBase":180000,"pricePerKm":17000,"toll":60000},
+      {"id":"v15t","label":"1.5T","dim":"3.2×1.5×1.6","tons":1.5,"vol":7.7,"priceBase":210000,"pricePerKm":19000,"toll":60000},
+      {"id":"v2ta","label":"2T (4.2m)","dim":"4.2×1.85×1.85","tons":2,"vol":14.4,"priceBase":250000,"pricePerKm":21000,"toll":80000},
+      {"id":"v2tb","label":"2T (6.0m)","dim":"6.0×1.9×1.9","tons":2,"vol":21.7,"priceBase":280000,"pricePerKm":22000,"toll":80000},
+      {"id":"v25t","label":"2.5T","dim":"4.2×1.85×1.85","tons":2.5,"vol":14.4,"priceBase":300000,"pricePerKm":24000,"toll":80000},
+      {"id":"v35ta","label":"3.5T 4.5m","dim":"4.5×1.9×1.9","tons":3.5,"vol":16.2,"priceBase":320000,"pricePerKm":26000,"toll":90000},
+      {"id":"v35tb","label":"3.5T 6.0m","dim":"6.0×2.0×2.0","tons":3.5,"vol":24,"priceBase":340000,"pricePerKm":28000,"toll":90000},
+      {"id":"v5t","label":"5T","dim":"6.2×2.2×2.1","tons":5,"vol":28.6,"priceBase":350000,"pricePerKm":32000,"toll":90000},
+      {"id":"v8t","label":"8T","dim":"7.4×2.3×2.2","tons":8,"vol":37.4,"priceBase":400000,"pricePerKm":38000,"toll":120000},
+      {"id":"v10t","label":"10T","dim":"7.4×2.3×2.2","tons":10,"vol":37.4,"priceBase":450000,"pricePerKm":44000,"toll":120000},
+      {"id":"v15t2","label":"15T","dim":"9.5×2.38×2.4","tons":15,"vol":54.3,"priceBase":550000,"pricePerKm":52000,"toll":150000}
+    ],
+    "vat":0.15,
+    "surcharges":[
+      {"id":"toll","name":"🛣️ Phí cầu đường","type":"custom_input","unit":"K","default":0},
+      {"id":"port","name":"🏭 Phí cảng/bến","type":"custom_input","unit":"K","default":0},
+      {"id":"peak","name":"⏰ Giờ cao điểm","type":"percent","value":15,"default":false},
+      {"id":"night","name":"🌙 Ban đêm","type":"percent","value":20,"default":false},
+      {"id":"bulky","name":"📦 Hàng cồng kềnh","type":"percent","value":20,"default":false},
+      {"id":"return","name":"🔄 Chở thêm chiều về","type":"percent","value":40,"default":false},
+      {"id":"carry","name":"🚶 Khiêng","type":"per_unit","unit":"người","price":200000,"default":0},
+      {"id":"floor","name":"🏢 Lên tầng","type":"per_unit","unit":"tầng","price":50000,"default":0},
+      {"id":"uninstall","name":"🔧 Tháo gỡ","type":"custom_input","unit":"K","default":0},
+      {"id":"install","name":"⚙️ Lắp ráp","type":"custom_input","unit":"K","default":0}
+    ]
+  };
+  VEHICLES = CONFIG.vehicles.map(v => ({ ...v, icon: ICONS[v.id] || '🚗' }));
+  console.log('✓ Config loaded:', VEHICLES.length, 'vehicles');
 }
 
 let cart = {};
@@ -919,8 +926,8 @@ function createOrder() {
   alert('📦 Đơn hàng:\n' + document.getElementById('grandTotal').textContent);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await initConfig();
+document.addEventListener('DOMContentLoaded', () => {
+  initConfig();
   cart = { 'v35ta': 1 };
   renderVehicles();
   updatePrice();

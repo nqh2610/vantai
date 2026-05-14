@@ -21,7 +21,7 @@
       --amber: #f59e0b;
       --amber-50: #fffbeb;
     }
-    body { background: var(--bg); }
+    body { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 1.5; }
     .page-content { padding: 0 !important; background: var(--bg); }
 
     .qq-head {
@@ -30,10 +30,10 @@
       background: white;
       border-bottom: 1px solid var(--border);
     }
-    .qq-head h1 { font-size:16px; font-weight:700; color:var(--text-1); margin:0; }
+    .qq-head h1 { font-size:18px; font-weight:700; color:var(--text-1); margin:0; }
     .qq-head .sub { font-size:12px; color:var(--text-3); margin-top:2px; }
     .qq-head .actions { margin-left:auto; display:flex; gap:8px; }
-    .qq-btn { padding:7px 14px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-2); transition:all .15s; }
+    .qq-btn { padding:8px 15px; border-radius:7px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:white; color:var(--text-2); transition:all .15s; }
     .qq-btn:hover { background:#f8fafc; border-color:#cbd5e1; }
     .qq-btn.primary { background:var(--primary); color:white; border-color:var(--primary); }
     .qq-btn.primary:hover { background:#4338ca; }
@@ -51,11 +51,11 @@
       .qq-left { gap: 10px; }
       .qq-right { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: auto; max-height: 380px; border-radius: 12px 12px 0 0; border: 1px solid var(--border); box-shadow: 0 -2px 8px rgba(0,0,0,.1); z-index: 100; padding: 12px 14px; overflow-y: auto; }
       .card { border-radius: 8px; }
-      .card-h { padding: 8px 12px; font-size: 12px; }
-      .card-h h3 { font-size: 12px; }
-      .card-b { padding: 10px 12px; font-size: 12px; }
-      .inp, .nin { font-size: 12px; padding: 7px 9px; }
-      .chip { font-size: 11px; padding: 6px 8px; }
+      .card-h { padding: 8px 12px; font-size: 13px; }
+      .card-h h3 { font-size: 13px; }
+      .card-b { padding: 10px 12px; font-size: 13px; }
+      .inp, .nin { font-size: 13px; padding: 8px 10px; }
+      .chip { font-size: 12px; padding: 7px 9px; }
     }
 
     .qq-left  { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
@@ -79,7 +79,7 @@
       display:inline-flex; align-items:center; justify-content:center;
       font-size: 11px; font-weight: 800;
     }
-    .card-h h3 { margin:0; font-size: 13px; font-weight: 700; color: var(--text-1); letter-spacing:.01em; }
+    .card-h h3 { margin:0; font-size: 14px; font-weight: 700; color: var(--text-1); letter-spacing:.01em; }
     .card-h .right { margin-left:auto; font-size:12px; color: var(--text-3); }
     .card-h .toggle-btn {
       margin-left:auto;
@@ -96,7 +96,7 @@
     .card-b { padding: 12px 14px; }
 
     .lbl {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-3);
       letter-spacing: .06em;
@@ -106,10 +106,10 @@
     }
     .inp {
       width:100%;
-      padding: 9px 11px;
+      padding: 10px 12px;
       border: 1px solid var(--border);
       border-radius: 7px;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-1);
       background: white;
       box-sizing: border-box;
@@ -162,8 +162,8 @@
     .vat-box { display:flex; align-items:center; gap:12px; padding: 11px 14px; background: var(--primary-50); border: 1px dashed var(--primary); border-radius: 9px; }
     .vat-box .icon-big { font-size: 22px; }
     .vat-box .info { flex:1; }
-    .vat-box .info .t { font-size: 13px; font-weight: 700; color: var(--text-1); }
-    .vat-box .info .s { font-size: 11px; color: var(--text-2); margin-top:2px; }
+    .vat-box .info .t { font-size: 14px; font-weight: 700; color: var(--text-1); }
+    .vat-box .info .s { font-size: 12px; color: var(--text-2); margin-top:2px; }
     .vat-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
     .vat-switch input { opacity:0; width:0; height:0; }
     .vat-switch .slider { position:absolute; inset:0; background: #cbd5e1; border-radius: 13px; cursor: pointer; transition: .2s; }
@@ -173,7 +173,7 @@
 
     .chip-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 7px; }
     @media (max-width: 600px) { .chip-grid { grid-template-columns: 1fr; } }
-    .chip { display:flex; align-items:center; gap:7px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 12px; background: white; transition: all .12s; }
+    .chip { display:flex; align-items:center; gap:7px; padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 13px; background: white; transition: all .12s; }
     .chip:hover { border-color: var(--primary); }
     .chip.on { background: var(--primary-50); border-color: var(--primary); }
     .chip input[type="checkbox"] { accent-color: var(--primary); cursor:pointer; }
@@ -186,7 +186,7 @@
 
     .qq-price-hero { background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); color: white; padding: 14px 16px; }
     .qq-price-hero .lbl { font-size: 11px; font-weight:600; color:#c7d2fe; letter-spacing:.06em; text-transform:uppercase; }
-    .qq-price-hero .val { font-size: 30px; font-weight: 900; line-height: 1.05; margin-top: 3px; }
+    .qq-price-hero .val { font-size: 32px; font-weight: 900; line-height: 1.05; margin-top: 3px; }
     .qq-price-hero .sub { font-size: 11px; color:#c7d2fe; margin-top: 3px; }
     @media (max-width: 768px) {
       .qq-price-hero { padding: 10px 12px; }
@@ -196,7 +196,7 @@
     }
 
     .price-rows { padding: 9px 14px; }
-    .price-rows .r { display:flex; justify-content:space-between; align-items:baseline; padding: 4px 0; font-size: 12.5px; color: var(--text-2); }
+    .price-rows .r { display:flex; justify-content:space-between; align-items:baseline; padding: 5px 0; font-size: 13px; color: var(--text-2); }
     .price-rows .r .v { font-weight: 700; color: var(--text-1); }
     .price-rows .r.disc, .price-rows .r.disc .v { color: var(--green); }
     .price-rows .r.subt { border-top: 1px dashed var(--border); margin-top: 3px; padding-top: 6px; font-weight: 700; color: var(--text-1); }
